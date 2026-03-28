@@ -1,0 +1,29 @@
+{
+  "run_name": "schema-gen-run-001",
+  "schemas_per_run": 30,
+
+  "schema_defaults": {
+    "schema_version": "v1",
+    "dialect": "sqlite"
+  },
+
+  "dataset_service": {
+    "base_url": "https://nl2sql-dataset-service.adv-dep-test.workers.dev",
+    "admin_api_key_env": "71hLH6Zse7e_83ncSqBk9s1c9_6KhvPm_WBUQeOJsoc"
+  },
+
+  "cloudflare": {
+    "wrangler_project_dir": "nl2sql-dataset-service",
+    "wrangler_toml_path": "nl2sql-dataset-service/wrangler.toml",
+    "deploy_command": "npx wrangler deploy",
+
+    "d1_db_name_prefix": "nl2sql_dynamic_",
+    "cloudflare_api_token_env": "raise a clarification if you need this"
+  },
+
+  "state": {
+    "schema_registry_path": "schema_registry.json",
+    "runs_dir": "runs/nl2sql-schema-gen"
+  }
+}
+

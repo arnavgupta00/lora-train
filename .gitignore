@@ -11,6 +11,9 @@ finetune_nl2sql/outputs/
 finetune_nl2sql/private_key.py
 finetune_nl2sql/__pycache__/
 
+# Copilot workflow artifacts
+runs/
+
 # Not needed for training repo
 .DS_Store
 nl2sql-dataset-service/node_modules/

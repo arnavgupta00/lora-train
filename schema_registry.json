@@ -1,0 +1,100 @@
+{
+  "schemas": [
+    {
+      "schema_id": "b2b_saas",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "B2B_SAAS_V1_DB",
+      "description": "Canonical B2B SaaS benchmark schema",
+      "source": "remote"
+    },
+    {
+      "schema_id": "cybersecurity_siem",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "CYBERSECURITY_SIEM_V1_DB",
+      "description": "Large security operations schema with assets, detections, alerts, incidents, auth events, vulnerabilities, and patching.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "ecommerce_marketplace",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "ECOMMERCE_MARKETPLACE_V1_DB",
+      "description": "Marketplace commerce schema with sellers, products, orders, payments, shipments, and returns.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "edtech_platform",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "EDTECH_PLATFORM_V1_DB",
+      "description": "Edtech platform schema with organizations, courses, enrollments, lessons, assessments, and attempts.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "fintech_lending",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "FINTECH_LENDING_V1_DB",
+      "description": "Consumer lending schema with borrowers, applications, loans, repayments, and card transactions.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "healthcare_clinic_network",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "HEALTHCARE_CLINIC_NETWORK_V1_DB",
+      "description": "Clinic network schema with patients, providers, appointments, claims, diagnoses, prescriptions, and labs.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "hospitality_chain",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "HOSPITALITY_CHAIN_V1_DB",
+      "description": "Hotel operations schema with properties, rooms, reservations, folios, and housekeeping.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "hr_ats_enterprise",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "HR_ATS_ENTERPRISE_V1_DB",
+      "description": "Hiring and people operations schema with openings, candidates, interviews, offers, and hires.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "logistics_fleet",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "LOGISTICS_FLEET_V1_DB",
+      "description": "Warehouse and fleet operations schema with routes, shipments, packages, carriers, and delivery events.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "manufacturing_supply_chain",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "MANUFACTURING_SUPPLY_CHAIN_V1_DB",
+      "description": "Large manufacturing schema with plants, work orders, BOMs, suppliers, purchase orders, inventory, shipments, and quality checks.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "martech_campaigns",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "MARTECH_CAMPAIGNS_V1_DB",
+      "description": "Marketing performance schema with campaigns, ad groups, spend, leads, and conversions.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "real_estate_brokerage",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "REAL_ESTATE_BROKERAGE_V1_DB",
+      "description": "Brokerage schema with agents, clients, properties, listings, showings, offers, and closings.",
+      "source": "remote"
+    }
+  ]
+}
