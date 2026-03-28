@@ -14,14 +14,19 @@ BASE_URL = "https://nl2sql-dataset-service.adv-dep-test.workers.dev"
 
 
 def _load_admin_key() -> str:
-    try:
-        from finetune_nl2sql.private_key import ADMIN_API_KEY  # type: ignore
-    except Exception as e:  # noqa: BLE001
+    # Load from a local file next to this script to avoid Python import-path ambiguity
+    # when running as `python finetune_nl2sql/eval_exec.py`.
+    key_path = os.path.join(os.path.dirname(__file__), "private_key.py")
+    if not os.path.exists(key_path):
         raise SystemExit(
             "Missing finetune_nl2sql/private_key.py. Create it from private_key.py.example "
             "or set NL2SQL_ADMIN_API_KEY and rerun the runner script."
-        ) from e
-    key = str(ADMIN_API_KEY).strip()
+        )
+    ns: Dict[str, Any] = {}
+    with open(key_path, "r", encoding="utf-8") as f:
+        code = f.read()
+    exec(compile(code, key_path, "exec"), ns, ns)  # noqa: S102
+    key = str(ns.get("ADMIN_API_KEY", "")).strip()
     if not key or "PASTE_KEY_HERE" in key:
         raise SystemExit("finetune_nl2sql/private_key.py has no valid ADMIN_API_KEY")
     return key
