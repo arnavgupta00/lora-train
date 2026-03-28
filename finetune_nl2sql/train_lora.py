@@ -2,6 +2,7 @@ import argparse
 import json
 import math
 import os
+import inspect
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -253,29 +254,40 @@ def main() -> None:
     total_train_steps = math.ceil(total_train_steps / max(args.gradient_accumulation_steps, 1))
     total_train_steps = int(total_train_steps * args.num_train_epochs)
 
-    training_args = TrainingArguments(
-        output_dir=args.output_dir,
-        per_device_train_batch_size=args.per_device_train_batch_size,
-        per_device_eval_batch_size=args.per_device_eval_batch_size,
-        gradient_accumulation_steps=args.gradient_accumulation_steps,
-        learning_rate=args.learning_rate,
-        num_train_epochs=args.num_train_epochs,
-        warmup_ratio=args.warmup_ratio,
-        logging_steps=args.logging_steps,
-        evaluation_strategy="steps",
-        eval_steps=args.eval_steps,
-        save_strategy="steps",
-        save_steps=args.save_steps,
-        save_total_limit=2,
-        bf16=True,
-        report_to=[],
-        remove_unused_columns=False,
-        dataloader_num_workers=2,
-        lr_scheduler_type="cosine",
-        optim="adamw_torch",
-        weight_decay=0.0,
-        run_name=os.path.basename(args.output_dir),
-    )
+    # HF has renamed some TrainingArguments fields across versions (notably evaluation_strategy -> eval_strategy).
+    ta_kwargs: Dict[str, Any] = {
+        "output_dir": args.output_dir,
+        "per_device_train_batch_size": args.per_device_train_batch_size,
+        "per_device_eval_batch_size": args.per_device_eval_batch_size,
+        "gradient_accumulation_steps": args.gradient_accumulation_steps,
+        "learning_rate": args.learning_rate,
+        "num_train_epochs": args.num_train_epochs,
+        "warmup_ratio": args.warmup_ratio,
+        "logging_steps": args.logging_steps,
+        "eval_steps": args.eval_steps,
+        "save_strategy": "steps",
+        "save_steps": args.save_steps,
+        "save_total_limit": 2,
+        "bf16": True,
+        "report_to": [],
+        "remove_unused_columns": False,
+        "dataloader_num_workers": 2,
+        "lr_scheduler_type": "cosine",
+        "optim": "adamw_torch",
+        "weight_decay": 0.0,
+        "run_name": os.path.basename(args.output_dir),
+    }
+
+    sig = inspect.signature(TrainingArguments.__init__)
+    if "evaluation_strategy" in sig.parameters:
+        ta_kwargs["evaluation_strategy"] = "steps"
+    elif "eval_strategy" in sig.parameters:
+        ta_kwargs["eval_strategy"] = "steps"
+    else:
+        # Fall back to no periodic eval if the arg name is unknown.
+        pass
+
+    training_args = TrainingArguments(**ta_kwargs)
 
     collator = CausalLMCollator(pad_token_id=tokenizer.pad_token_id)
 
