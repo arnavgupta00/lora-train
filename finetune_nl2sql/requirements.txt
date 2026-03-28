@@ -3,4 +3,6 @@ datasets>=2.20.0
 peft>=0.12.0
 requests>=2.31.0
 safetensors>=0.4.3
-transformers>=4.45.0
+
+# Pin transformers <5 to keep TrainingArguments API stable (v5 renamed args).
+transformers>=4.45.0,<5
