@@ -1,0 +1,9 @@
+# Copy to `private_key.py` (gitignored) and set the key.
+#
+# IMPORTANT:
+# - Do not commit `private_key.py`.
+# - The runner scripts can also write this file automatically from the
+#   `NL2SQL_ADMIN_API_KEY` environment variable.
+
+ADMIN_API_KEY = "PASTE_KEY_HERE"
+

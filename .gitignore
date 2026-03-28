@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+
+# Runpod / finetune outputs + caches
+outputs/
+finetune_nl2sql/private_key.py
+finetune_nl2sql/__pycache__/
+
+# Not needed for training repo
+.DS_Store
+nl2sql-dataset-service/node_modules/
+fireworks/
+gemma-3-12b/
+lora/
+together-ai/
+dataset.jsonl
