@@ -210,7 +210,7 @@ def _generate_sql(
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base_model_id", required=True)
-    ap.add_argument("--adapter_dir", required=True)
+    ap.add_argument("--adapter_dir", default=None, help="Optional PEFT adapter dir. Omit to eval the base model.")
     ap.add_argument("--test_jsonl", required=True)
     ap.add_argument("--out_dir", required=True)
     ap.add_argument("--max_new_tokens", type=int, default=256)
@@ -230,14 +230,19 @@ def main() -> None:
         attn_implementation="sdpa",
         low_cpu_mem_usage=True,
     )
-    model = PeftModel.from_pretrained(base, args.adapter_dir)
+    if args.adapter_dir:
+        model = PeftModel.from_pretrained(base, args.adapter_dir)
+        variant = "lora"
+    else:
+        model = base
+        variant = "base"
     model = model.to("cuda" if torch.cuda.is_available() else "cpu")
     model.eval()
 
     rows = _read_jsonl(args.test_jsonl)
 
-    pred_path = os.path.join(args.out_dir, "predictions.test.jsonl")
-    report_path = os.path.join(args.out_dir, "eval_report.json")
+    pred_path = os.path.join(args.out_dir, f"predictions.test.{variant}.jsonl")
+    report_path = os.path.join(args.out_dir, f"eval_report.{variant}.json")
 
     total = 0
     exact_match = 0
@@ -307,6 +312,7 @@ def main() -> None:
             )
 
     report = {
+        "variant": variant,
         "total": total,
         "exact_match": exact_match,
         "exact_match_accuracy": (exact_match / total) if total else 0.0,
