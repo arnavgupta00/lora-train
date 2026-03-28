@@ -7,6 +7,7 @@ __pycache__/
 
 # Runpod / finetune outputs + caches
 outputs/
+finetune_nl2sql/outputs/
 finetune_nl2sql/private_key.py
 finetune_nl2sql/__pycache__/
 
@@ -18,3 +19,5 @@ gemma-3-12b/
 lora/
 together-ai/
 dataset.jsonl
+dataset/t1/
+nl2sql-dataset-service/
