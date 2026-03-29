@@ -203,6 +203,8 @@ def main() -> None:
     ap.add_argument("--eval_steps", type=int, default=100)
     ap.add_argument("--save_steps", type=int, default=100)
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--dataloader_num_workers", type=int, default=4)
+    ap.add_argument("--tf32", action="store_true", help="Enable TF32 matmul (speed on Ampere+)")
 
     ap.add_argument("--lora_r", type=int, default=8)
     ap.add_argument("--lora_alpha", type=int, default=32)
@@ -220,6 +222,14 @@ def main() -> None:
 
     os.makedirs(args.output_dir, exist_ok=True)
     set_seed(args.seed)
+
+    if args.tf32:
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
+        try:
+            torch.set_float32_matmul_precision("high")
+        except Exception:
+            pass
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_id, use_fast=True, trust_remote_code=True)
     if tokenizer.pad_token_id is None:
@@ -271,7 +281,7 @@ def main() -> None:
         "bf16": True,
         "report_to": [],
         "remove_unused_columns": False,
-        "dataloader_num_workers": 2,
+        "dataloader_num_workers": int(args.dataloader_num_workers),
         "lr_scheduler_type": "cosine",
         "optim": "adamw_torch",
         "weight_decay": 0.0,

@@ -14,8 +14,20 @@ finetune_nl2sql/__pycache__/
 # Copilot workflow artifacts
 runs/
 
+# Large local datasets (keep out of git)
+dataset/t3/
+dataset/t3_*/
+
 # Never commit one-off scripts containing secrets
 scripts/nl2sql_schema_gen/register_remaining_schemas.py
+
+# Copilot scratch / one-off generators (keep out of git)
+.github/skills/**/config/config.run*.json
+generate_*.py
+scripts/nl2sql_example_gen/*.py
+!scripts/nl2sql_example_gen/plan_run.py
+!scripts/nl2sql_example_gen/ingest_examples.py
+scripts/nl2sql_schema_gen/generate_*.py
 
 # Not needed for training repo
 .DS_Store

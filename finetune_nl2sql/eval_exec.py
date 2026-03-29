@@ -2,6 +2,8 @@ import argparse
 import json
 import os
 import re
+import time
+import concurrent.futures
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import requests
@@ -51,6 +53,32 @@ def _extract_schema_text(user_content: str) -> str:
         m2 = re.search(r"Schema:\s*(.*)$", user_content, re.S)
         return (m2.group(1) if m2 else user_content).strip()
     return m.group(1).strip()
+
+
+def _schema_signature(schema_block: str) -> str:
+    lines = [ln.strip() for ln in (schema_block or "").splitlines() if ln.strip()]
+    lines.sort()
+    return "\n".join(lines)
+
+
+def _fetch_schema_signature_map() -> Dict[str, str]:
+    # /v1/schemas in this service includes schema_context.
+    r = requests.get(f"{BASE_URL}/v1/schemas", headers={"User-Agent": "curl/8.0"}, timeout=60)
+    r.raise_for_status()
+    data = r.json()
+    schemas = data.get("schemas", data)
+    if not isinstance(schemas, list):
+        return {}
+    out: Dict[str, str] = {}
+    for s in schemas:
+        if not isinstance(s, dict):
+            continue
+        sid = s.get("id") or s.get("schema_id")
+        ctx = s.get("schema_context")
+        if not isinstance(sid, str) or not isinstance(ctx, str):
+            continue
+        out.setdefault(_schema_signature(ctx), sid)
+    return out
 
 
 def _parse_table_names(schema_block: str) -> Set[str]:
@@ -168,6 +196,55 @@ def _validator_validate(
     return r.json()
 
 
+def _validator_validate_batch(admin_key: str, examples: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    url = f"{BASE_URL}/v1/validate/batch"
+    headers = {"Authorization": f"Bearer {admin_key}", "Content-Type": "application/json"}
+    r = requests.post(url, headers=headers, json={"examples": examples}, timeout=120)
+    r.raise_for_status()
+    data = r.json()
+    res = data.get("results", [])
+    if not isinstance(res, list):
+        raise RuntimeError(f"Unexpected /v1/validate/batch response: {data}")
+    return res
+
+
+def _validate_in_batches(
+    admin_key: str,
+    examples: List[Dict[str, Any]],
+    batch_size: int,
+    parallelism: int,
+) -> List[Dict[str, Any]]:
+    bs = max(1, int(batch_size))
+    par = max(1, int(parallelism))
+    chunks: List[List[Dict[str, Any]]] = [examples[i : i + bs] for i in range(0, len(examples), bs)]
+    if not chunks:
+        return []
+
+    out: List[Optional[List[Dict[str, Any]]]] = [None] * len(chunks)
+
+    def worker(ix: int) -> List[Dict[str, Any]]:
+        for attempt in range(4):
+            try:
+                return _validator_validate_batch(admin_key, chunks[ix])
+            except Exception:
+                if attempt == 3:
+                    raise
+                time.sleep(1.5 * (attempt + 1))
+        raise RuntimeError("unreachable")
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=par) as pool:
+        futs = {pool.submit(worker, i): i for i in range(len(chunks))}
+        for fut in concurrent.futures.as_completed(futs):
+            out[futs[fut]] = fut.result()
+
+    flat: List[Dict[str, Any]] = []
+    for part in out:
+        if part is None:
+            raise RuntimeError("missing validator batch result")
+        flat.extend(part)
+    return flat
+
+
 def _result_hash(resp: Dict[str, Any]) -> Optional[str]:
     # Service response shape: { accepted: bool, validation: { result_hash: string|null, ... } }
     v = resp.get("validation")
@@ -207,6 +284,40 @@ def _generate_sql(
     return _normalize_sql(text)
 
 
+@torch.inference_mode()
+def _generate_sql_batch(
+    tokenizer,
+    model,
+    messages_list: List[List[Dict[str, str]]],
+    max_new_tokens: int,
+    batch_size: int,
+) -> List[str]:
+    out_sql: List[str] = []
+    bs = max(1, int(batch_size))
+    for i in range(0, len(messages_list), bs):
+        chunk = messages_list[i : i + bs]
+        prompts = [_build_prompt(tokenizer, m) for m in chunk]
+        inputs = tokenizer(
+            prompts,
+            return_tensors="pt",
+            padding=True,
+            add_special_tokens=False,
+        ).to(model.device)
+        out = model.generate(
+            **inputs,
+            max_new_tokens=max_new_tokens,
+            do_sample=False,
+            temperature=0.0,
+            top_p=1.0,
+            eos_token_id=tokenizer.eos_token_id,
+            pad_token_id=tokenizer.pad_token_id,
+        )
+        gen_ids = out[:, inputs["input_ids"].shape[1] :]
+        texts = tokenizer.batch_decode(gen_ids, skip_special_tokens=True)
+        out_sql.extend([_normalize_sql(t) for t in texts])
+    return out_sql
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base_model_id", required=True)
@@ -214,6 +325,10 @@ def main() -> None:
     ap.add_argument("--test_jsonl", required=True)
     ap.add_argument("--out_dir", required=True)
     ap.add_argument("--max_new_tokens", type=int, default=256)
+    ap.add_argument("--gen_batch_size", type=int, default=4)
+    ap.add_argument("--validator_batch_size", type=int, default=50)
+    ap.add_argument("--validator_parallelism", type=int, default=4)
+    ap.add_argument("--limit", type=int, default=0, help="Limit number of rows (0 = no limit)")
     args = ap.parse_args()
 
     admin_key = _load_admin_key()
@@ -240,6 +355,10 @@ def main() -> None:
     model.eval()
 
     rows = _read_jsonl(args.test_jsonl)
+    if args.limit and args.limit > 0:
+        rows = rows[: int(args.limit)]
+
+    sig_map = _fetch_schema_signature_map()
 
     pred_path = os.path.join(args.out_dir, f"predictions.test.{variant}.jsonl")
     report_path = os.path.join(args.out_dir, f"eval_report.{variant}.json")
@@ -250,60 +369,116 @@ def main() -> None:
     validator_fail = 0
     route_fail = 0
 
-    with open(pred_path, "w", encoding="utf-8") as f_out:
-        for row in rows:
-            messages = row["messages"]
-            user_msg = next((m for m in messages if m.get("role") == "user"), None)
-            assistant_msg = next((m for m in messages if m.get("role") == "assistant"), None)
-            if not user_msg or not assistant_msg:
-                continue
+    per_row: List[Dict[str, Any]] = []
+    messages_list: List[List[Dict[str, str]]] = []
+    for row in rows:
+        messages = row.get("messages")
+        if not isinstance(messages, list):
+            continue
+        user_msg = next((m for m in messages if m.get("role") == "user"), None)
+        assistant_msg = next((m for m in messages if m.get("role") == "assistant"), None)
+        if not user_msg or not assistant_msg:
+            continue
 
-            user_content = user_msg["content"]
-            gold_sql = _normalize_sql(assistant_msg["content"])
-            schema_block = _extract_schema_text(user_content)
+        user_content = str(user_msg.get("content") or "")
+        gold_sql = _normalize_sql(str(assistant_msg.get("content") or ""))
+
+        schema_block = _extract_schema_text(user_content)
+        sig = _schema_signature(schema_block)
+        schema_id = sig_map.get(sig)
+        if not schema_id:
             tables = _parse_table_names(schema_block)
             schema_id = _schema_id_from_tables(tables)
-            schema_version = "v1"
+        schema_version = "v1"
 
-            # Question text: best-effort parse from user content.
-            qm = re.search(r"\n\nQuestion:\s*(.*)$", user_content, re.S)
-            question = (qm.group(1).strip() if qm else user_content.strip())
+        qm = re.search(r"\n\nQuestion:\s*(.*)$", user_content, re.S)
+        question = (qm.group(1).strip() if qm else user_content.strip())
 
-            try:
-                pred_sql = _generate_sql(tokenizer, model, messages, max_new_tokens=args.max_new_tokens)
-            except Exception:
-                pred_sql = ""
+        per_row.append(
+            {
+                "messages": messages,
+                "question": question,
+                "gold_sql": gold_sql,
+                "schema_id": schema_id,
+                "schema_version": schema_version,
+            }
+        )
+        messages_list.append(messages)
 
+    pred_sql_list = _generate_sql_batch(
+        tokenizer,
+        model,
+        messages_list,
+        max_new_tokens=args.max_new_tokens,
+        batch_size=args.gen_batch_size,
+    )
+
+    gold_examples: List[Dict[str, Any]] = []
+    pred_examples: List[Dict[str, Any]] = []
+    for meta, pred_sql in zip(per_row, pred_sql_list):
+        gold_examples.append(
+            {
+                "schema_id": meta["schema_id"],
+                "schema_version": meta["schema_version"],
+                "split": "test",
+                "question": meta["question"],
+                "gold_sql": meta["gold_sql"],
+            }
+        )
+        pred_examples.append(
+            {
+                "schema_id": meta["schema_id"],
+                "schema_version": meta["schema_version"],
+                "split": "test",
+                "question": meta["question"],
+                "gold_sql": pred_sql,
+            }
+        )
+
+    gold_res: List[Dict[str, Any]] = []
+    pred_res: List[Dict[str, Any]] = []
+    try:
+        gold_res = _validate_in_batches(
+            admin_key,
+            gold_examples,
+            batch_size=args.validator_batch_size,
+            parallelism=args.validator_parallelism,
+        )
+        pred_res = _validate_in_batches(
+            admin_key,
+            pred_examples,
+            batch_size=args.validator_batch_size,
+            parallelism=args.validator_parallelism,
+        )
+    except requests.HTTPError:
+        validator_fail += 1
+    except Exception:
+        route_fail += 1
+
+    with open(pred_path, "w", encoding="utf-8") as f_out:
+        for i, (meta, pred_sql) in enumerate(zip(per_row, pred_sql_list)):
             total += 1
-            if _normalize_sql(pred_sql).lower() == gold_sql.lower():
+            if _normalize_sql(pred_sql).lower() == str(meta["gold_sql"]).lower():
                 exact_match += 1
 
             exec_ok = False
-            try:
-                gold_v = _validator_validate(admin_key, schema_id, schema_version, question, gold_sql)
-                pred_v = _validator_validate(admin_key, schema_id, schema_version, question, pred_sql)
-
-                gold_hash = _result_hash(gold_v)
-                pred_hash = _result_hash(pred_v)
+            if gold_res and pred_res and i < len(gold_res) and i < len(pred_res):
+                gold_hash = _result_hash(gold_res[i])
+                pred_hash = _result_hash(pred_res[i])
                 if gold_hash and pred_hash and gold_hash == pred_hash:
                     exec_ok = True
-            except requests.HTTPError:
-                validator_fail += 1
-            except Exception:
-                route_fail += 1
-
             if exec_ok:
                 exec_match += 1
 
             f_out.write(
                 json.dumps(
                     {
-                        "schema_id": schema_id,
-                        "schema_version": schema_version,
-                        "question": question,
-                        "gold_sql": gold_sql,
+                        "schema_id": meta["schema_id"],
+                        "schema_version": meta["schema_version"],
+                        "question": meta["question"],
+                        "gold_sql": meta["gold_sql"],
                         "pred_sql": pred_sql,
-                        "exact_match": _normalize_sql(pred_sql).lower() == gold_sql.lower(),
+                        "exact_match": _normalize_sql(pred_sql).lower() == str(meta["gold_sql"]).lower(),
                         "execution_match": exec_ok,
                     },
                     ensure_ascii=True,
