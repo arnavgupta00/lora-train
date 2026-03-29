@@ -41,4 +41,7 @@ Each run writes to `/runpod-volume/outputs/<run_name>/`:
 - `adapter_model.safetensors` (or equivalent) and PEFT config
 - tokenizer files
 - training logs/metrics
-- `predictions.test.jsonl` + `eval_report.json` (execution-match + exact-match)
+- `predictions.test.lora.jsonl` + `eval_report.lora.json` (execution-match + exact-match)
+
+If you set `EVAL_BASE=1`, it also writes:
+- `predictions.test.base.jsonl` + `eval_report.base.json`

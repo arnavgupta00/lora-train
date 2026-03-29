@@ -31,7 +31,7 @@ key = os.environ.get("NL2SQL_ADMIN_API_KEY", "").strip()
 if not key:
   raise SystemExit("NL2SQL_ADMIN_API_KEY is empty")
 with open("finetune_nl2sql/private_key.py", "w", encoding="utf-8") as f:
-  f.write('ADMIN_API_KEY = "' + key.replace('"', '\\"') + '"\\n')
+  f.write('ADMIN_API_KEY = "' + key.replace('"', '\\"') + '"\n')
 PY
   else
     echo "Missing finetune_nl2sql/private_key.py (needed for execution-match eval)."
@@ -126,6 +126,17 @@ if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
   fi
 
   echo "Eval 14B -> $OUT_14B"
+  if [[ "${EVAL_BASE:-0}" == "1" ]]; then
+    python3 finetune_nl2sql/eval_exec.py \
+      --base_model_id "$MODEL_14B_ID" \
+      --test_jsonl "$TEST_JSONL" \
+      --out_dir "$OUT_14B" \
+      --max_new_tokens 256 \
+      --gen_batch_size "${EVAL_GEN_BS_14B_BASE:-8}" \
+      --validator_batch_size "${EVAL_VAL_BS:-50}" \
+      --validator_parallelism "${EVAL_VAL_PAR:-4}" \
+      "${EVAL_EXTRA_ARGS[@]}"
+  fi
   python3 finetune_nl2sql/eval_exec.py \
     --base_model_id "$MODEL_14B_ID" \
     --adapter_dir "$OUT_14B" \
@@ -138,6 +149,17 @@ if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
     "${EVAL_EXTRA_ARGS[@]}"
 
   echo "Eval 32B -> $OUT_32B"
+  if [[ "${EVAL_BASE:-0}" == "1" ]]; then
+    python3 finetune_nl2sql/eval_exec.py \
+      --base_model_id "$MODEL_32B_ID" \
+      --test_jsonl "$TEST_JSONL" \
+      --out_dir "$OUT_32B" \
+      --max_new_tokens 256 \
+      --gen_batch_size "${EVAL_GEN_BS_32B_BASE:-4}" \
+      --validator_batch_size "${EVAL_VAL_BS:-50}" \
+      --validator_parallelism "${EVAL_VAL_PAR:-4}" \
+      "${EVAL_EXTRA_ARGS[@]}"
+  fi
   python3 finetune_nl2sql/eval_exec.py \
     --base_model_id "$MODEL_32B_ID" \
     --adapter_dir "$OUT_32B" \

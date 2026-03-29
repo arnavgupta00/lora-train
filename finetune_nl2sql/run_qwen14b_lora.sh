@@ -32,7 +32,7 @@ key = os.environ.get("NL2SQL_ADMIN_API_KEY", "").strip()
 if not key:
   raise SystemExit("NL2SQL_ADMIN_API_KEY is empty")
 with open("finetune_nl2sql/private_key.py", "w", encoding="utf-8") as f:
-  f.write('ADMIN_API_KEY = "' + key.replace('"', '\\"') + '"\\n')
+  f.write('ADMIN_API_KEY = "' + key.replace('"', '\\"') + '"\n')
 PY
   else
     echo "Missing finetune_nl2sql/private_key.py (needed for execution-match eval)."
@@ -91,6 +91,18 @@ if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
   EVAL_EXTRA_ARGS=()
   if [[ -n "${EVAL_LIMIT:-}" ]]; then
     EVAL_EXTRA_ARGS+=(--limit "$EVAL_LIMIT")
+  fi
+
+  if [[ "${EVAL_BASE:-0}" == "1" ]]; then
+    python3 finetune_nl2sql/eval_exec.py \
+      --base_model_id "$MODEL_ID" \
+      --test_jsonl "$TEST_JSONL" \
+      --out_dir "$OUT_DIR" \
+      --max_new_tokens 256 \
+      --gen_batch_size "${EVAL_GEN_BS_14B_BASE:-8}" \
+      --validator_batch_size "${EVAL_VAL_BS:-50}" \
+      --validator_parallelism "${EVAL_VAL_PAR:-4}" \
+      "${EVAL_EXTRA_ARGS[@]}"
   fi
 
   python3 finetune_nl2sql/eval_exec.py \
