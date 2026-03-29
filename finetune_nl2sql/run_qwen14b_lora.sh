@@ -51,13 +51,34 @@ if [[ -z "$DATASET_DIR" ]]; then
     DATASET_DIR="dataset/t3_test1000_rebalanced"
   elif [[ -f dataset/t3/all-all-train.qwen.jsonl ]]; then
     DATASET_DIR="dataset/t3"
-  else
+  elif [[ "${ALLOW_DATASET_FALLBACK_T2:-0}" == "1" && -f dataset/t2/all-all-train.qwen.jsonl ]]; then
     DATASET_DIR="dataset/t2"
+  else
+    echo "ERROR: No t3 dataset found in repo and DATASET_DIR is not set."
+    echo "Expected one of:"
+    echo "  dataset/t3_test1000_rebalanced/all-all-train.qwen.jsonl"
+    echo "  dataset/t3/all-all-train.qwen.jsonl"
+    echo ""
+    echo "Fix: copy your dataset into the pod and set DATASET_DIR to that folder."
+    echo "If you intentionally want to run on t2, set ALLOW_DATASET_FALLBACK_T2=1."
+    echo ""
+    echo "Datasets present under ./dataset:"
+    ls -la dataset || true
+    exit 1
   fi
 fi
 TRAIN_JSONL="$DATASET_DIR/all-all-train.qwen.jsonl"
 DEV_JSONL="$DATASET_DIR/all-all-dev.qwen.jsonl"
 TEST_JSONL="$DATASET_DIR/all-all-test.qwen.jsonl"
+
+for f in "$TRAIN_JSONL" "$DEV_JSONL" "$TEST_JSONL"; do
+  if [[ ! -f "$f" ]]; then
+    echo "ERROR: missing dataset file: $f"
+    exit 1
+  fi
+done
+echo "Using dataset dir: $DATASET_DIR"
+wc -l "$TRAIN_JSONL" "$DEV_JSONL" "$TEST_JSONL" || true
 
 SEQ_LEN="${QWEN14_MAX_SEQ_LEN:-1024}"
 TRAIN_BS="${QWEN14_TRAIN_BS:-4}"

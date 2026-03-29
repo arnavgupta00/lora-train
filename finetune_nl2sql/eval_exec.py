@@ -337,6 +337,8 @@ def main() -> None:
     tokenizer = AutoTokenizer.from_pretrained(args.base_model_id, use_fast=True, trust_remote_code=True)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
+    # Decoder-only models should left-pad for batched generation to avoid shifting logits.
+    tokenizer.padding_side = "left"
 
     base = AutoModelForCausalLM.from_pretrained(
         args.base_model_id,
