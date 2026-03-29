@@ -28,7 +28,7 @@ Format:
 {
   "examples": [
     {
-      "external_id": "schema_id:split:0001",
+      "external_id": "example-gen-run-001:b2b_saas:train:0001:4f2c9a1b",
       "schema_id": "b2b_saas",
       "schema_version": "v1",
       "split": "train",
@@ -40,6 +40,12 @@ Format:
   ]
 }
 ```
+
+`external_id` must be **globally unique across all time** (the service enforces uniqueness). Include:
+- the `run_name` from config
+- the schema_id + split
+- a counter
+- a short random suffix (8+ hex chars)
 
 ---
 
@@ -81,4 +87,3 @@ The ingest script will stop once accepted rows satisfy the deficit.
 - `train`: broad distribution, easier and medium complexity
 - `dev`: harder edge cases and compositional queries
 - `test`: difficult but still solvable; remember test rows will be stored as `pending_review` even if valid
-
