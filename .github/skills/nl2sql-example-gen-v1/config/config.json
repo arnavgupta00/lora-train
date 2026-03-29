@@ -1,0 +1,28 @@
+{
+  "run_name": "example-gen-run-001",
+  "schemas_per_run": 10,
+
+  "target_total_per_schema": 150,
+  "split_ratio": { "train": 70, "dev": 16, "test": 16 },
+
+  "generation_buffer": {
+    "multiplier": 1.35,
+    "min_extra_per_split": 6
+  },
+
+  "dataset_service": {
+    "base_url": "https://nl2sql-dataset-service.adv-dep-test.workers.dev",
+    "admin_api_key_env": "ADMIN_API_KEY"
+  },
+
+  "defaults": {
+    "schema_version": "v1",
+    "dialect": "sqlite",
+    "source": "copilot-example-gen-v1"
+  },
+
+  "state": {
+    "runs_dir": "runs/nl2sql-example-gen"
+  }
+}
+

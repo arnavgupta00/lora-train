@@ -7,6 +7,7 @@ Minimal LoRA-only NL2SQL fine-tuning + execution-match evaluation (with base-vs-
 - `dataset/t2/`: ChatML JSONL dataset (train/dev/test)
 - `finetune_nl2sql/`: LoRA training + execution-match eval scripts (Runpod-friendly)
 - `.github/skills/nl2sql-schema-gen-v2/`: Copilot workflow to generate + provision 30 new schemas per run (Cloudflare D1)
+- `.github/skills/nl2sql-example-gen-v1/`: Copilot workflow to top up NL→SQL examples per schema to a target split ratio
 - `schema_registry.json`: local registry of generated schemas (used to avoid duplicates)
 - `reports/`: run notes + metrics
 

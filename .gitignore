@@ -14,6 +14,9 @@ finetune_nl2sql/__pycache__/
 # Copilot workflow artifacts
 runs/
 
+# Never commit one-off scripts containing secrets
+scripts/nl2sql_schema_gen/register_remaining_schemas.py
+
 # Not needed for training repo
 .DS_Store
 nl2sql-dataset-service/node_modules/

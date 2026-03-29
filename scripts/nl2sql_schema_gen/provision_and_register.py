@@ -29,18 +29,38 @@ def _upper_snake(s: str) -> str:
 
 
 def _run(cmd: List[str], cwd: Path) -> str:
-    p = subprocess.run(cmd, cwd=str(cwd), check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    p = subprocess.run(cmd, cwd=str(cwd), check=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    if p.returncode != 0:
+        raise SystemExit(f"Command failed: {' '.join(cmd)}\nOutput:\n{p.stdout}")
     return p.stdout
 
 
-def _wrangler_create_db(project_dir: Path, db_name: str) -> str:
-    out = _run(["npx", "wrangler", "d1", "create", db_name, "--json"], cwd=project_dir)
-    data = json.loads(out)
-    # Wrangler JSON output shape can vary; handle common cases.
-    if isinstance(data, dict) and "database_id" in data:
-        return data["database_id"]
-    if isinstance(data, dict) and "result" in data and isinstance(data["result"], dict) and "uuid" in data["result"]:
-        return data["result"]["uuid"]
+def _wrangler_list_dbs(project_dir: Path) -> Dict[str, str]:
+    """List existing D1 databases. Returns {db_name: db_uuid}."""
+    out = _run(["npx", "wrangler", "d1", "list", "--json"], cwd=project_dir)
+    dbs = json.loads(out)
+    return {d["name"]: d["uuid"] for d in dbs}
+
+
+def _wrangler_create_db(project_dir: Path, db_name: str, existing_dbs: Dict[str, str] | None = None) -> str:
+    # Check if DB already exists
+    if existing_dbs is not None and db_name in existing_dbs:
+        print(f"  [skip] DB {db_name} already exists (id={existing_dbs[db_name][:8]}...)")
+        return existing_dbs[db_name]
+    out = _run(["npx", "wrangler", "d1", "create", db_name], cwd=project_dir)
+    # Try JSON parse first (older wrangler versions)
+    try:
+        data = json.loads(out)
+        if isinstance(data, dict) and "database_id" in data:
+            return data["database_id"]
+        if isinstance(data, dict) and "result" in data and isinstance(data["result"], dict) and "uuid" in data["result"]:
+            return data["result"]["uuid"]
+    except json.JSONDecodeError:
+        pass
+    # Parse text output: look for database_id = "UUID"
+    match = re.search(r'database_id\s*=\s*"([^"]+)"', out)
+    if match:
+        return match.group(1)
     raise SystemExit(f"Could not parse database_id from wrangler output: {out[:400]}")
 
 
@@ -49,7 +69,7 @@ def _wrangler_seed_db(project_dir: Path, db_name: str, seed_sql: str) -> None:
         f.write(seed_sql)
         tmp = f.name
     try:
-        _run(["npx", "wrangler", "d1", "execute", db_name, "--file", tmp], cwd=project_dir)
+        _run(["npx", "wrangler", "d1", "execute", db_name, "--file", tmp, "--remote", "-y"], cwd=project_dir)
     finally:
         try:
             os.unlink(tmp)
@@ -78,7 +98,7 @@ def _first_table_from_schema_context(schema_context: str) -> str:
         line = line.strip()
         if not line:
             continue
-        m = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)\s*\\(", line)
+        m = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)\s*\(", line)
         if m:
             return m.group(1)
     return ""
@@ -133,9 +153,24 @@ def main() -> None:
             _assert(req in s and s[req], f"{sid}: missing {req}")
 
     db_map: Dict[str, Dict[str, str]] = {}
+    db_map_path = run_dir / "db_map.json"
+    
+    # Resume from partial run if db_map exists
+    if db_map_path.exists():
+        db_map = _load_json(db_map_path)
+        print(f"Resuming from partial run ({len(db_map)} schemas already processed)")
+
+    # List existing D1 databases to allow re-use
+    existing_dbs = _wrangler_list_dbs(project_dir) if not args.dry_run else {}
 
     for s in schemas:
         sid = s["schema_id"]
+        
+        # Skip if already processed
+        if sid in db_map:
+            print(f"  [skip] {sid} already processed")
+            continue
+            
         version = s.get("version") or default_version
         db_name = f"{prefix}{sid}_{version}"
         binding = s.get("validation_binding") or f"DYNAMIC_{_upper_snake(sid)}_{_upper_snake(version)}_DB"
@@ -144,8 +179,12 @@ def main() -> None:
             print(f"[dry_run] create db {db_name}, binding={binding}")
             db_id = "DRY_RUN_DB_ID"
         else:
-            db_id = _wrangler_create_db(project_dir, db_name)
-            _wrangler_seed_db(project_dir, db_name, s["seed_sql"])
+            db_already_exists = db_name in existing_dbs
+            db_id = _wrangler_create_db(project_dir, db_name, existing_dbs)
+            
+            # Only seed if DB was just created (not already existing)
+            if not db_already_exists:
+                _wrangler_seed_db(project_dir, db_name, s["seed_sql"])
 
             # Patch wrangler.toml to include binding.
             _run(
@@ -165,9 +204,9 @@ def main() -> None:
             )
 
         db_map[sid] = {"db_name": db_name, "db_id": db_id, "binding": binding}
-
-    db_map_path = run_dir / "db_map.json"
-    _save_json(db_map_path, db_map)
+        
+        # Save progress after each schema for resumability
+        _save_json(db_map_path, db_map)
 
     if args.dry_run:
         print("[dry_run] deploy worker")

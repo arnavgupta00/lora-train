@@ -1,6 +1,30 @@
 {
   "schemas": [
     {
+      "schema_id": "airline_operations",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_AIRLINE_OPERATIONS_V1_DB",
+      "description": "Airline operations schema with flights, bookings, passengers, crew assignments, and aircraft maintenance.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "auction_house",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_AUCTION_HOUSE_V1_DB",
+      "description": "Auction house schema with items, auctions, bidders, bids, and settlements.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "auto_repair_shop",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_AUTO_REPAIR_SHOP_V1_DB",
+      "description": "Auto repair shop schema with vehicles, customers, work orders, parts, and invoices.",
+      "source": "remote"
+    },
+    {
       "schema_id": "b2b_saas",
       "version": "v1",
       "dialect": "sqlite",
@@ -9,11 +33,59 @@
       "source": "remote"
     },
     {
+      "schema_id": "car_rental_agency",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CAR_RENTAL_AGENCY_V1_DB",
+      "description": "Car rental agency schema with vehicles, locations, reservations, customers, and billing.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "catering_company",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CATERING_COMPANY_V1_DB",
+      "description": "Catering company schema with events, menus, orders, staff, and billing.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "cleaning_service",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CLEANING_SERVICE_V1_DB",
+      "description": "Cleaning service company schema with clients, properties, cleaners, bookings, and billing.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "craft_brewery",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CRAFT_BREWERY_V1_DB",
+      "description": "Craft brewery schema with beers, batches, taprooms, sales, and distribution.",
+      "source": "remote"
+    },
+    {
       "schema_id": "cybersecurity_siem",
       "version": "v1",
       "dialect": "sqlite",
       "validation_binding": "CYBERSECURITY_SIEM_V1_DB",
       "description": "Large security operations schema with assets, detections, alerts, incidents, auth events, vulnerabilities, and patching.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "daycare_center",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_DAYCARE_CENTER_V1_DB",
+      "description": "Daycare center schema with children, guardians, classrooms, attendance, and billing.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "dental_practice",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_DENTAL_PRACTICE_V1_DB",
+      "description": "Dental practice schema with patients, appointments, treatments, billing, and insurance.",
       "source": "remote"
     },
     {
@@ -33,6 +105,14 @@
       "source": "remote"
     },
     {
+      "schema_id": "equipment_rental",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_EQUIPMENT_RENTAL_V1_DB",
+      "description": "Equipment rental business schema with equipment, customers, rentals, maintenance, and billing.",
+      "source": "remote"
+    },
+    {
       "schema_id": "fintech_lending",
       "version": "v1",
       "dialect": "sqlite",
@@ -41,11 +121,43 @@
       "source": "remote"
     },
     {
+      "schema_id": "fitness_studio_chain",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_FITNESS_STUDIO_CHAIN_V1_DB",
+      "description": "Fitness studio chain schema with locations, classes, memberships, bookings, trainers, and attendance tracking.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "food_truck_fleet",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_FOOD_TRUCK_FLEET_V1_DB",
+      "description": "Food truck fleet schema with trucks, menus, locations, sales, and inventory.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "gym_membership",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_GYM_MEMBERSHIP_V1_DB",
+      "description": "Gym membership platform schema with gyms, members, memberships, check-ins, and personal training.",
+      "source": "remote"
+    },
+    {
       "schema_id": "healthcare_clinic_network",
       "version": "v1",
       "dialect": "sqlite",
       "validation_binding": "HEALTHCARE_CLINIC_NETWORK_V1_DB",
       "description": "Clinic network schema with patients, providers, appointments, claims, diagnoses, prescriptions, and labs.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "home_services",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_HOME_SERVICES_V1_DB",
+      "description": "Home services schema with providers, customers, bookings, services, and reviews.",
       "source": "remote"
     },
     {
@@ -89,11 +201,139 @@
       "source": "remote"
     },
     {
+      "schema_id": "movie_theater",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MOVIE_THEATER_V1_DB",
+      "description": "Movie theater schema with theaters, screens, movies, showtimes, tickets, and concessions.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "music_streaming",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MUSIC_STREAMING_V1_DB",
+      "description": "Music streaming schema with artists, albums, tracks, playlists, and listening history.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "nonprofit_donations",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_NONPROFIT_DONATIONS_V1_DB",
+      "description": "Nonprofit donations schema with donors, campaigns, donations, events, and volunteers.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "online_learning",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_ONLINE_LEARNING_V1_DB",
+      "description": "Online learning platform schema with courses, instructors, students, enrollments, and certificates.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "parking_garage",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PARKING_GARAGE_V1_DB",
+      "description": "Parking garage management schema with garages, spaces, vehicles, sessions, and payments.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "pet_boarding",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PET_BOARDING_V1_DB",
+      "description": "Pet boarding facility schema with pets, owners, reservations, care services, and billing.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "photography_studio",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PHOTOGRAPHY_STUDIO_V1_DB",
+      "description": "Photography studio schema with photographers, clients, sessions, photos, and packages.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "property_management",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PROPERTY_MANAGEMENT_V1_DB",
+      "description": "Property management schema with buildings, units, tenants, leases, maintenance, and payments.",
+      "source": "remote"
+    },
+    {
       "schema_id": "real_estate_brokerage",
       "version": "v1",
       "dialect": "sqlite",
       "validation_binding": "REAL_ESTATE_BROKERAGE_V1_DB",
       "description": "Brokerage schema with agents, clients, properties, listings, showings, offers, and closings.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "recruitment_agency",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_RECRUITMENT_AGENCY_V1_DB",
+      "description": "Recruitment agency schema with clients, jobs, candidates, placements, and commissions.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "restaurant_chain",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_RESTAURANT_CHAIN_V1_DB",
+      "description": "Restaurant chain management schema with locations, menu items, orders, staff, and inventory.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "spa_wellness",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_SPA_WELLNESS_V1_DB",
+      "description": "Spa and wellness center schema with services, therapists, appointments, memberships, and retail.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "sports_league",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_SPORTS_LEAGUE_V1_DB",
+      "description": "Sports league schema with teams, players, seasons, games, and statistics.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "subscription_box",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_SUBSCRIPTION_BOX_V1_DB",
+      "description": "Subscription box service schema with products, boxes, subscribers, shipments, and reviews.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "travel_agency",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_TRAVEL_AGENCY_V1_DB",
+      "description": "Travel agency schema with agents, clients, trips, bookings, and payments.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "tutoring_center",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_TUTORING_CENTER_V1_DB",
+      "description": "Tutoring center schema with tutors, students, subjects, sessions, and progress tracking.",
+      "source": "remote"
+    },
+    {
+      "schema_id": "wine_club",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_WINE_CLUB_V1_DB",
+      "description": "Wine club schema with wines, members, shipments, ratings, and events.",
       "source": "remote"
     }
   ]

@@ -9,7 +9,7 @@
 
   "dataset_service": {
     "base_url": "https://nl2sql-dataset-service.adv-dep-test.workers.dev",
-    "admin_api_key_env": "71hLH6Zse7e_83ncSqBk9s1c9_6KhvPm_WBUQeOJsoc"
+    "admin_api_key_env": "ADMIN_API_KEY"
   },
 
   "cloudflare": {
@@ -26,4 +26,3 @@
     "runs_dir": "runs/nl2sql-schema-gen"
   }
 }
-
