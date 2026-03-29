@@ -329,6 +329,11 @@ def main() -> None:
     ap.add_argument("--validator_batch_size", type=int, default=50)
     ap.add_argument("--validator_parallelism", type=int, default=4)
     ap.add_argument("--limit", type=int, default=0, help="Limit number of rows (0 = no limit)")
+    ap.add_argument(
+        "--load_in_8bit",
+        action="store_true",
+        help="Load the base model in 8-bit (bitsandbytes) to fit smaller VRAM GPUs. This is for eval only.",
+    )
     args = ap.parse_args()
 
     admin_key = _load_admin_key()
@@ -340,20 +345,31 @@ def main() -> None:
     # Decoder-only models should left-pad for batched generation to avoid shifting logits.
     tokenizer.padding_side = "left"
 
-    base = AutoModelForCausalLM.from_pretrained(
-        args.base_model_id,
-        torch_dtype=torch.bfloat16,
-        trust_remote_code=True,
-        attn_implementation="sdpa",
-        low_cpu_mem_usage=True,
-    )
+    if args.load_in_8bit:
+        base = AutoModelForCausalLM.from_pretrained(
+            args.base_model_id,
+            load_in_8bit=True,
+            device_map="auto",
+            trust_remote_code=True,
+            attn_implementation="sdpa",
+            low_cpu_mem_usage=True,
+        )
+    else:
+        base = AutoModelForCausalLM.from_pretrained(
+            args.base_model_id,
+            torch_dtype=torch.bfloat16,
+            trust_remote_code=True,
+            attn_implementation="sdpa",
+            low_cpu_mem_usage=True,
+        )
     if args.adapter_dir:
         model = PeftModel.from_pretrained(base, args.adapter_dir)
         variant = "lora"
     else:
         model = base
         variant = "base"
-    model = model.to("cuda" if torch.cuda.is_available() else "cpu")
+    if not args.load_in_8bit:
+        model = model.to("cuda" if torch.cuda.is_available() else "cpu")
     model.eval()
 
     rows = _read_jsonl(args.test_jsonl)

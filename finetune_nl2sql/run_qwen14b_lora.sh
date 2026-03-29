@@ -85,6 +85,23 @@ TRAIN_BS="${QWEN14_TRAIN_BS:-4}"
 EVAL_BS="${QWEN14_EVAL_BS:-4}"
 GRAD_ACC="${QWEN14_GRAD_ACC:-4}"
 
+LOAD8=0
+if [[ "${QWEN14_LOAD_IN_8BIT:-0}" == "1" ]]; then
+  LOAD8=1
+elif command -v nvidia-smi >/dev/null 2>&1; then
+  VRAM_MIB="$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -n1 || true)"
+  if [[ -n "${VRAM_MIB:-}" && "${VRAM_MIB}" -lt 30000 ]]; then
+    LOAD8=1
+  fi
+fi
+LOAD8_ARGS=()
+EVAL_LOAD8_ARGS=()
+if [[ "$LOAD8" == "1" ]]; then
+  echo "Enabling 8-bit base load for 14B (VRAM too small for bf16 weights)."
+  LOAD8_ARGS+=(--load_in_8bit)
+  EVAL_LOAD8_ARGS+=(--load_in_8bit)
+fi
+
 python3 finetune_nl2sql/train_lora.py \
   --model_id "$MODEL_ID" \
   --train_jsonl "$TRAIN_JSONL" \
@@ -106,7 +123,8 @@ python3 finetune_nl2sql/train_lora.py \
   --lora_dropout 0.05 \
   --gradient_checkpointing \
   --dataloader_num_workers "${DL_WORKERS:-4}" \
-  --tf32
+  --tf32 \
+  "${LOAD8_ARGS[@]}"
 
 if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
   EVAL_EXTRA_ARGS=()
@@ -123,6 +141,7 @@ if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
       --gen_batch_size "${EVAL_GEN_BS_14B_BASE:-8}" \
       --validator_batch_size "${EVAL_VAL_BS:-50}" \
       --validator_parallelism "${EVAL_VAL_PAR:-4}" \
+      "${EVAL_LOAD8_ARGS[@]}" \
       "${EVAL_EXTRA_ARGS[@]}"
   fi
 
@@ -135,6 +154,7 @@ if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
     --gen_batch_size "${EVAL_GEN_BS_14B:-8}" \
     --validator_batch_size "${EVAL_VAL_BS:-50}" \
     --validator_parallelism "${EVAL_VAL_PAR:-4}" \
+    "${EVAL_LOAD8_ARGS[@]}" \
     "${EVAL_EXTRA_ARGS[@]}"
 fi
 

@@ -16,6 +16,7 @@ from transformers import (
     TrainingArguments,
     set_seed,
 )
+from transformers.utils import is_bitsandbytes_available
 
 
 def _read_jsonl(path: str) -> List[Dict[str, Any]]:
@@ -218,6 +219,11 @@ def main() -> None:
     ap.add_argument("--gradient_checkpointing", action="store_true")
     ap.add_argument("--pack", action="store_true")
     ap.add_argument("--attn_implementation", type=str, default="sdpa")
+    ap.add_argument(
+        "--load_in_8bit",
+        action="store_true",
+        help="Load the base model in 8-bit (bitsandbytes) to fit smaller VRAM GPUs. This is LoRA (not QLoRA).",
+    )
     args = ap.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -235,17 +241,41 @@ def main() -> None:
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    model = AutoModelForCausalLM.from_pretrained(
-        args.model_id,
-        torch_dtype=torch.bfloat16,
-        trust_remote_code=True,
-        attn_implementation=args.attn_implementation,
-        low_cpu_mem_usage=True,
-    )
+    if args.load_in_8bit:
+        if not is_bitsandbytes_available():
+            raise SystemExit(
+                "bitsandbytes is not available but --load_in_8bit was set. "
+                "Install it (pip install bitsandbytes) or run on a larger VRAM GPU."
+            )
+        # 8-bit base load is still "LoRA" (not QLoRA); it just reduces memory for the frozen base weights.
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model_id,
+            load_in_8bit=True,
+            device_map="auto",
+            trust_remote_code=True,
+            attn_implementation=args.attn_implementation,
+            low_cpu_mem_usage=True,
+        )
+    else:
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model_id,
+            torch_dtype=torch.bfloat16,
+            trust_remote_code=True,
+            attn_implementation=args.attn_implementation,
+            low_cpu_mem_usage=True,
+        )
 
     if args.gradient_checkpointing:
         model.gradient_checkpointing_enable()
         model.config.use_cache = False
+
+    if args.load_in_8bit:
+        # Prepares LayerNorm etc for stable k-bit training.
+        try:
+            from peft import prepare_model_for_kbit_training
+        except Exception as e:  # pragma: no cover
+            raise SystemExit(f"prepare_model_for_kbit_training import failed: {e}")
+        model = prepare_model_for_kbit_training(model)
 
     lora_config = LoraConfig(
         r=args.lora_r,
@@ -278,7 +308,9 @@ def main() -> None:
         "save_strategy": "steps",
         "save_steps": args.save_steps,
         "save_total_limit": 2,
-        "bf16": True,
+        # Use bf16 when supported, otherwise fp16.
+        "bf16": bool(torch.cuda.is_available() and torch.cuda.is_bf16_supported()),
+        "fp16": bool(torch.cuda.is_available() and not torch.cuda.is_bf16_supported()),
         "report_to": [],
         "remove_unused_columns": False,
         "dataloader_num_workers": int(args.dataloader_num_workers),
