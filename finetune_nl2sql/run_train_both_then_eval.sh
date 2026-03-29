@@ -59,6 +59,13 @@ TEST_JSONL="$DATASET_DIR/all-all-test.qwen.jsonl"
 
 SEQ_14B="${QWEN14_MAX_SEQ_LEN:-1024}"
 SEQ_32B="${QWEN32_MAX_SEQ_LEN:-1024}"
+TRAIN_BS_14B="${QWEN14_TRAIN_BS:-4}"
+EVAL_BS_14B="${QWEN14_EVAL_BS:-4}"
+GRAD_ACC_14B="${QWEN14_GRAD_ACC:-4}"
+
+TRAIN_BS_32B="${QWEN32_TRAIN_BS:-1}"
+EVAL_BS_32B="${QWEN32_EVAL_BS:-1}"
+GRAD_ACC_32B="${QWEN32_GRAD_ACC:-8}"
 
 echo "Training 14B -> $OUT_14B"
 python3 finetune_nl2sql/train_lora.py \
@@ -68,9 +75,9 @@ python3 finetune_nl2sql/train_lora.py \
   --output_dir "$OUT_14B" \
   --max_seq_len "$SEQ_14B" \
   --pack \
-  --per_device_train_batch_size 4 \
-  --per_device_eval_batch_size 4 \
-  --gradient_accumulation_steps 4 \
+  --per_device_train_batch_size "$TRAIN_BS_14B" \
+  --per_device_eval_batch_size "$EVAL_BS_14B" \
+  --gradient_accumulation_steps "$GRAD_ACC_14B" \
   --learning_rate 2e-4 \
   --num_train_epochs "${EPOCHS_14B:-3}" \
   --warmup_ratio 0.03 \
@@ -92,9 +99,9 @@ python3 finetune_nl2sql/train_lora.py \
   --output_dir "$OUT_32B" \
   --max_seq_len "$SEQ_32B" \
   --pack \
-  --per_device_train_batch_size 1 \
-  --per_device_eval_batch_size 1 \
-  --gradient_accumulation_steps 8 \
+  --per_device_train_batch_size "$TRAIN_BS_32B" \
+  --per_device_eval_batch_size "$EVAL_BS_32B" \
+  --gradient_accumulation_steps "$GRAD_ACC_32B" \
   --learning_rate 1e-4 \
   --num_train_epochs "${EPOCHS_32B:-2}" \
   --warmup_ratio 0.03 \
@@ -108,27 +115,36 @@ python3 finetune_nl2sql/train_lora.py \
   --dataloader_num_workers "${DL_WORKERS:-4}" \
   --tf32
 
-echo "Eval 14B -> $OUT_14B"
-python3 finetune_nl2sql/eval_exec.py \
-  --base_model_id "$MODEL_14B_ID" \
-  --adapter_dir "$OUT_14B" \
-  --test_jsonl "$TEST_JSONL" \
-  --out_dir "$OUT_14B" \
-  --max_new_tokens 256 \
-  --gen_batch_size "${EVAL_GEN_BS_14B:-8}" \
-  --validator_batch_size "${EVAL_VAL_BS:-50}" \
-  --validator_parallelism "${EVAL_VAL_PAR:-4}"
+if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
+  EVAL_EXTRA_ARGS=()
+  if [[ -n "${EVAL_LIMIT:-}" ]]; then
+    EVAL_EXTRA_ARGS+=(--limit "$EVAL_LIMIT")
+  fi
 
-echo "Eval 32B -> $OUT_32B"
-python3 finetune_nl2sql/eval_exec.py \
-  --base_model_id "$MODEL_32B_ID" \
-  --adapter_dir "$OUT_32B" \
-  --test_jsonl "$TEST_JSONL" \
-  --out_dir "$OUT_32B" \
-  --max_new_tokens 256 \
-  --gen_batch_size "${EVAL_GEN_BS_32B:-4}" \
-  --validator_batch_size "${EVAL_VAL_BS:-50}" \
-  --validator_parallelism "${EVAL_VAL_PAR:-4}"
+  echo "Eval 14B -> $OUT_14B"
+  python3 finetune_nl2sql/eval_exec.py \
+    --base_model_id "$MODEL_14B_ID" \
+    --adapter_dir "$OUT_14B" \
+    --test_jsonl "$TEST_JSONL" \
+    --out_dir "$OUT_14B" \
+    --max_new_tokens 256 \
+    --gen_batch_size "${EVAL_GEN_BS_14B:-8}" \
+    --validator_batch_size "${EVAL_VAL_BS:-50}" \
+    --validator_parallelism "${EVAL_VAL_PAR:-4}" \
+    "${EVAL_EXTRA_ARGS[@]}"
+
+  echo "Eval 32B -> $OUT_32B"
+  python3 finetune_nl2sql/eval_exec.py \
+    --base_model_id "$MODEL_32B_ID" \
+    --adapter_dir "$OUT_32B" \
+    --test_jsonl "$TEST_JSONL" \
+    --out_dir "$OUT_32B" \
+    --max_new_tokens 256 \
+    --gen_batch_size "${EVAL_GEN_BS_32B:-4}" \
+    --validator_batch_size "${EVAL_VAL_BS:-50}" \
+    --validator_parallelism "${EVAL_VAL_PAR:-4}" \
+    "${EVAL_EXTRA_ARGS[@]}"
+fi
 
 echo "Done:"
 echo "  14B: $OUT_14B"

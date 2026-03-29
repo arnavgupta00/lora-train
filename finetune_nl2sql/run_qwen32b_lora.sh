@@ -55,16 +55,21 @@ TRAIN_JSONL="$DATASET_DIR/all-all-train.qwen.jsonl"
 DEV_JSONL="$DATASET_DIR/all-all-dev.qwen.jsonl"
 TEST_JSONL="$DATASET_DIR/all-all-test.qwen.jsonl"
 
+SEQ_LEN="${QWEN32_MAX_SEQ_LEN:-1024}"
+TRAIN_BS="${QWEN32_TRAIN_BS:-1}"
+EVAL_BS="${QWEN32_EVAL_BS:-1}"
+GRAD_ACC="${QWEN32_GRAD_ACC:-8}"
+
 python3 finetune_nl2sql/train_lora.py \
   --model_id "$MODEL_ID" \
   --train_jsonl "$TRAIN_JSONL" \
   --dev_jsonl "$DEV_JSONL" \
   --output_dir "$OUT_DIR" \
-  --max_seq_len 1024 \
+  --max_seq_len "$SEQ_LEN" \
   --pack \
-  --per_device_train_batch_size 1 \
-  --per_device_eval_batch_size 1 \
-  --gradient_accumulation_steps 8 \
+  --per_device_train_batch_size "$TRAIN_BS" \
+  --per_device_eval_batch_size "$EVAL_BS" \
+  --gradient_accumulation_steps "$GRAD_ACC" \
   --learning_rate 1e-4 \
   --num_train_epochs "${EPOCHS_32B:-2}" \
   --warmup_ratio 0.03 \
@@ -78,14 +83,22 @@ python3 finetune_nl2sql/train_lora.py \
   --dataloader_num_workers "${DL_WORKERS:-4}" \
   --tf32
 
-python3 finetune_nl2sql/eval_exec.py \
-  --base_model_id "$MODEL_ID" \
-  --adapter_dir "$OUT_DIR" \
-  --test_jsonl "$TEST_JSONL" \
-  --out_dir "$OUT_DIR" \
-  --max_new_tokens 256 \
-  --gen_batch_size "${EVAL_GEN_BS_32B:-4}" \
-  --validator_batch_size "${EVAL_VAL_BS:-50}" \
-  --validator_parallelism "${EVAL_VAL_PAR:-4}"
+if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
+  EVAL_EXTRA_ARGS=()
+  if [[ -n "${EVAL_LIMIT:-}" ]]; then
+    EVAL_EXTRA_ARGS+=(--limit "$EVAL_LIMIT")
+  fi
+
+  python3 finetune_nl2sql/eval_exec.py \
+    --base_model_id "$MODEL_ID" \
+    --adapter_dir "$OUT_DIR" \
+    --test_jsonl "$TEST_JSONL" \
+    --out_dir "$OUT_DIR" \
+    --max_new_tokens 256 \
+    --gen_batch_size "${EVAL_GEN_BS_32B:-4}" \
+    --validator_batch_size "${EVAL_VAL_BS:-50}" \
+    --validator_parallelism "${EVAL_VAL_PAR:-4}" \
+    "${EVAL_EXTRA_ARGS[@]}"
+fi
 
 echo "Done: $OUT_DIR"
