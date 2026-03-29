@@ -10,6 +10,10 @@ if [[ -d /runpod-volume ]]; then
   export HF_DATASETS_CACHE="/runpod-volume/hf/datasets"
   OUT_BASE="/runpod-volume/outputs"
 else
+  # No network volume: keep caches on the pod's /workspace volume disk (not the ephemeral container disk).
+  export HF_HOME="/workspace/hf"
+  export TRANSFORMERS_CACHE="/workspace/hf/transformers"
+  export HF_DATASETS_CACHE="/workspace/hf/datasets"
   OUT_BASE="$ROOT_DIR/outputs"
 fi
 
