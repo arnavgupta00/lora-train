@@ -51,6 +51,11 @@ else
   OUT_DIR="${OUT_DIR_ENV:-$OUT_BASE/$RUN_NAME}"
 fi
 
+mkdir -p "$OUT_DIR"
+LOG_FILE="${LOG_FILE:-$OUT_DIR/run.log}"
+echo "Logging to: $LOG_FILE"
+echo "Follow live: tail -n 200 -f $LOG_FILE"
+
 DATASET_DIR="${DATASET_DIR:-}"
 if [[ -z "$DATASET_DIR" ]]; then
   if [[ -f dataset/t3_test1000_rebalanced/all-all-train.qwen.jsonl ]]; then
@@ -118,7 +123,7 @@ python3 finetune_nl2sql/train_lora.py \
   --gradient_checkpointing \
   --dataloader_num_workers "${DL_WORKERS:-4}" \
   --tf32 \
-  "${RESUME_ARGS[@]}"
+  "${RESUME_ARGS[@]}" 2>&1 | tee -a "$LOG_FILE"
 
 if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
   EVAL_EXTRA_ARGS=()
@@ -135,7 +140,7 @@ if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
       --gen_batch_size "${EVAL_GEN_BS_32B_BASE:-4}" \
       --validator_batch_size "${EVAL_VAL_BS:-50}" \
       --validator_parallelism "${EVAL_VAL_PAR:-4}" \
-      "${EVAL_EXTRA_ARGS[@]}"
+      "${EVAL_EXTRA_ARGS[@]}" 2>&1 | tee -a "$LOG_FILE"
   fi
 
   python3 finetune_nl2sql/eval_exec.py \
@@ -147,7 +152,7 @@ if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
     --gen_batch_size "${EVAL_GEN_BS_32B:-4}" \
     --validator_batch_size "${EVAL_VAL_BS:-50}" \
     --validator_parallelism "${EVAL_VAL_PAR:-4}" \
-    "${EVAL_EXTRA_ARGS[@]}"
+    "${EVAL_EXTRA_ARGS[@]}" 2>&1 | tee -a "$LOG_FILE"
 fi
 
 echo "Done: $OUT_DIR"

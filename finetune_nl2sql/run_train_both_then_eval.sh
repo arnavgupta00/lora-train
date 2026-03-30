@@ -47,6 +47,15 @@ STAMP="$(date +%Y%m%d_%H%M%S)"
 OUT_14B="${OUT_14B:-$OUT_BASE/qwen2.5-14b-instruct-lora-$STAMP}"
 OUT_32B="${OUT_32B:-$OUT_BASE/qwen2.5-coder-32b-instruct-lora-$STAMP}"
 
+mkdir -p "$OUT_14B" "$OUT_32B"
+LOG_FILE_14B="${LOG_FILE_14B:-$OUT_14B/run.log}"
+LOG_FILE_32B="${LOG_FILE_32B:-$OUT_32B/run.log}"
+echo "Logging 14B to: $LOG_FILE_14B"
+echo "Logging 32B to: $LOG_FILE_32B"
+echo "Follow live:"
+echo "  tail -n 200 -f $LOG_FILE_14B"
+echo "  tail -n 200 -f $LOG_FILE_32B"
+
 RESUME_14B="${RESUME_14B:-}"
 RESUME_32B="${RESUME_32B:-}"
 RESUME_14B_ARGS=()
@@ -122,7 +131,7 @@ python3 finetune_nl2sql/train_lora.py \
   --gradient_checkpointing \
   --dataloader_num_workers "${DL_WORKERS:-4}" \
   --tf32 \
-  "${RESUME_14B_ARGS[@]}"
+  "${RESUME_14B_ARGS[@]}" 2>&1 | tee -a "$LOG_FILE_14B"
 
 echo "Training 32B -> $OUT_32B"
 python3 finetune_nl2sql/train_lora.py \
@@ -147,7 +156,7 @@ python3 finetune_nl2sql/train_lora.py \
   --gradient_checkpointing \
   --dataloader_num_workers "${DL_WORKERS:-4}" \
   --tf32 \
-  "${RESUME_32B_ARGS[@]}"
+  "${RESUME_32B_ARGS[@]}" 2>&1 | tee -a "$LOG_FILE_32B"
 
 if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
   EVAL_EXTRA_ARGS=()
@@ -165,7 +174,7 @@ if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
       --gen_batch_size "${EVAL_GEN_BS_14B_BASE:-8}" \
       --validator_batch_size "${EVAL_VAL_BS:-50}" \
       --validator_parallelism "${EVAL_VAL_PAR:-4}" \
-      "${EVAL_EXTRA_ARGS[@]}"
+      "${EVAL_EXTRA_ARGS[@]}" 2>&1 | tee -a "$LOG_FILE_14B"
   fi
   python3 finetune_nl2sql/eval_exec.py \
     --base_model_id "$MODEL_14B_ID" \
@@ -176,7 +185,7 @@ if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
     --gen_batch_size "${EVAL_GEN_BS_14B:-8}" \
     --validator_batch_size "${EVAL_VAL_BS:-50}" \
     --validator_parallelism "${EVAL_VAL_PAR:-4}" \
-    "${EVAL_EXTRA_ARGS[@]}"
+    "${EVAL_EXTRA_ARGS[@]}" 2>&1 | tee -a "$LOG_FILE_14B"
 
   echo "Eval 32B -> $OUT_32B"
   if [[ "${EVAL_BASE:-0}" == "1" ]]; then
@@ -188,7 +197,7 @@ if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
       --gen_batch_size "${EVAL_GEN_BS_32B_BASE:-4}" \
       --validator_batch_size "${EVAL_VAL_BS:-50}" \
       --validator_parallelism "${EVAL_VAL_PAR:-4}" \
-      "${EVAL_EXTRA_ARGS[@]}"
+      "${EVAL_EXTRA_ARGS[@]}" 2>&1 | tee -a "$LOG_FILE_32B"
   fi
   python3 finetune_nl2sql/eval_exec.py \
     --base_model_id "$MODEL_32B_ID" \
@@ -199,7 +208,7 @@ if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
     --gen_batch_size "${EVAL_GEN_BS_32B:-4}" \
     --validator_batch_size "${EVAL_VAL_BS:-50}" \
     --validator_parallelism "${EVAL_VAL_PAR:-4}" \
-    "${EVAL_EXTRA_ARGS[@]}"
+    "${EVAL_EXTRA_ARGS[@]}" 2>&1 | tee -a "$LOG_FILE_32B"
 fi
 
 echo "Done:"

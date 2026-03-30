@@ -27,6 +27,14 @@ export OUT_DIR="/workspace/lora-train/outputs/qwen2.5-14b-instruct-lora-YYYYMMDD
 bash finetune_nl2sql/run_qwen14b_lora.sh
 ```
 
+## Tailing Logs
+
+Runner scripts write a per-run log file at `<OUT_DIR>/run.log` and print a tail command. Example:
+
+```bash
+tail -n 200 -f /workspace/lora-train/outputs/qwen2.5-14b-instruct-lora-YYYYMMDD_HHMMSS/run.log
+```
+
 If you want to **train both models first, then eval both**:
 
 ```bash
