@@ -43,7 +43,13 @@ fi
 
 MODEL_ID="Qwen/Qwen2.5-14B-Instruct"
 RUN_NAME="qwen2.5-14b-instruct-lora-$(date +%Y%m%d_%H%M%S)"
-OUT_DIR="$OUT_BASE/$RUN_NAME"
+OUT_DIR_ENV="${OUT_DIR:-}"
+RESUME_FROM="${RESUME_FROM:-}"
+if [[ -n "$RESUME_FROM" && -z "$OUT_DIR_ENV" ]]; then
+  OUT_DIR="$(dirname "$RESUME_FROM")"
+else
+  OUT_DIR="${OUT_DIR_ENV:-$OUT_BASE/$RUN_NAME}"
+fi
 
 DATASET_DIR="${DATASET_DIR:-}"
 if [[ -z "$DATASET_DIR" ]]; then
@@ -102,6 +108,11 @@ if [[ "$LOAD8" == "1" ]]; then
   EVAL_LOAD8_ARGS+=(--load_in_8bit)
 fi
 
+RESUME_ARGS=()
+if [[ -n "$RESUME_FROM" ]]; then
+  RESUME_ARGS+=(--resume_from_checkpoint "$RESUME_FROM")
+fi
+
 python3 finetune_nl2sql/train_lora.py \
   --model_id "$MODEL_ID" \
   --train_jsonl "$TRAIN_JSONL" \
@@ -124,7 +135,8 @@ python3 finetune_nl2sql/train_lora.py \
   --gradient_checkpointing \
   --dataloader_num_workers "${DL_WORKERS:-4}" \
   --tf32 \
-  "${LOAD8_ARGS[@]}"
+  "${LOAD8_ARGS[@]}" \
+  "${RESUME_ARGS[@]}"
 
 if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
   EVAL_EXTRA_ARGS=()

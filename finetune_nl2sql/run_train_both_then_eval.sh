@@ -44,8 +44,15 @@ MODEL_14B_ID="Qwen/Qwen2.5-14B-Instruct"
 MODEL_32B_ID="Qwen/Qwen2.5-Coder-32B-Instruct"
 
 STAMP="$(date +%Y%m%d_%H%M%S)"
-OUT_14B="$OUT_BASE/qwen2.5-14b-instruct-lora-$STAMP"
-OUT_32B="$OUT_BASE/qwen2.5-coder-32b-instruct-lora-$STAMP"
+OUT_14B="${OUT_14B:-$OUT_BASE/qwen2.5-14b-instruct-lora-$STAMP}"
+OUT_32B="${OUT_32B:-$OUT_BASE/qwen2.5-coder-32b-instruct-lora-$STAMP}"
+
+RESUME_14B="${RESUME_14B:-}"
+RESUME_32B="${RESUME_32B:-}"
+RESUME_14B_ARGS=()
+RESUME_32B_ARGS=()
+if [[ -n "$RESUME_14B" ]]; then RESUME_14B_ARGS+=(--resume_from_checkpoint "$RESUME_14B"); fi
+if [[ -n "$RESUME_32B" ]]; then RESUME_32B_ARGS+=(--resume_from_checkpoint "$RESUME_32B"); fi
 
 DATASET_DIR="${DATASET_DIR:-}"
 if [[ -z "$DATASET_DIR" ]]; then
@@ -114,7 +121,8 @@ python3 finetune_nl2sql/train_lora.py \
   --lora_dropout 0.05 \
   --gradient_checkpointing \
   --dataloader_num_workers "${DL_WORKERS:-4}" \
-  --tf32
+  --tf32 \
+  "${RESUME_14B_ARGS[@]}"
 
 echo "Training 32B -> $OUT_32B"
 python3 finetune_nl2sql/train_lora.py \
@@ -138,7 +146,8 @@ python3 finetune_nl2sql/train_lora.py \
   --lora_dropout 0.05 \
   --gradient_checkpointing \
   --dataloader_num_workers "${DL_WORKERS:-4}" \
-  --tf32
+  --tf32 \
+  "${RESUME_32B_ARGS[@]}"
 
 if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
   EVAL_EXTRA_ARGS=()

@@ -13,6 +13,20 @@ bash finetune_nl2sql/run_qwen14b_lora.sh
 bash finetune_nl2sql/run_qwen32b_lora.sh
 ```
 
+## Resuming From A Checkpoint
+
+If a run gets interrupted, you can resume training from a saved checkpoint directory (e.g. `.../checkpoint-300`).
+
+Example:
+
+```bash
+export DATASET_DIR="/workspace/dataset"
+export NL2SQL_ADMIN_API_KEY="..."
+export RESUME_FROM="/workspace/lora-train/outputs/qwen2.5-14b-instruct-lora-YYYYMMDD_HHMMSS/checkpoint-300"
+export OUT_DIR="/workspace/lora-train/outputs/qwen2.5-14b-instruct-lora-YYYYMMDD_HHMMSS"
+bash finetune_nl2sql/run_qwen14b_lora.sh
+```
+
 If you want to **train both models first, then eval both**:
 
 ```bash

@@ -224,6 +224,12 @@ def main() -> None:
         action="store_true",
         help="Load the base model in 8-bit (bitsandbytes) to fit smaller VRAM GPUs. This is LoRA (not QLoRA).",
     )
+    ap.add_argument(
+        "--resume_from_checkpoint",
+        type=str,
+        default="",
+        help="Path to a Trainer checkpoint directory (e.g. .../checkpoint-300) to resume from.",
+    )
     args = ap.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -341,7 +347,12 @@ def main() -> None:
         data_collator=collator,
     )
 
-    trainer.train()
+    resume = args.resume_from_checkpoint.strip() or None
+    if resume:
+        if not os.path.isdir(resume):
+            raise SystemExit(f"--resume_from_checkpoint path does not exist or is not a dir: {resume}")
+        print(f"Resuming from checkpoint: {resume}")
+    trainer.train(resume_from_checkpoint=resume)
 
     # Save PEFT adapter + tokenizer.
     trainer.model.save_pretrained(args.output_dir, safe_serialization=True)
