@@ -96,12 +96,15 @@ runpod/pytorch:2.2.0-py3.10-cuda12.1.0-devel-ubuntu22.04
 
 ## Training Time Estimates
 
-| GPU | Est. Time (1 epoch) | Cost | Batch Size |
-|-----|-----------|------|------------|
-| A100 40GB | 2-3 hours | ~$3-5 | 4 (32 effective) |
-| A40 48GB | 4-5 hours | ~$1.6-2.0 | 4 (32 effective) |
-| RTX 3090 Ti | 5-6 hours | ~$1.35-1.62 | 4 (32 effective) |
-| RTX 4090 | 5-6 hours | ~$2.2-2.64 | 4 (32 effective) |
+| GPU | Est. Time (1 epoch) | Cost | Notes |
+|-----|---------------------|------|-------|
+| **RTX 4090** | **2-3 hours** | **~$0.88-1.32** | ⭐ Fastest option |
+| A100 40GB | 2-3 hours | ~$3.28-4.92 | Enterprise, expensive |
+| **RTX 3090 Ti** | **5-6 hours** | **~$1.35-1.62** | ⭐ Best value |
+| RTX A5000 | 5-6 hours | ~$1.40-1.68 | Similar to 3090 Ti |
+| ⚠️ A40 | ⚠️ 6-8 hours | ⚠️ ~$2.40-3.20 | Avoid - slow & expensive |
+
+**Performance tip**: Gaming GPUs (3090 Ti, 4090) are faster than workstation GPUs (A40) for training due to higher clock speeds.
 
 Note: Times are for SEQ_LEN=1024 (default). SEQ_LEN=2048 is 2-3x slower.
 
