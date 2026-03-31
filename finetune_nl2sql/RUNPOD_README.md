@@ -35,18 +35,18 @@ watch -n 5 nvidia-smi
 | `EPOCHS` | 3 | Number of training epochs |
 | `LR` | 5e-5 | Learning rate |
 | `SEQ_LEN` | 2048 | Max sequence length |
-| `TRAIN_BS` | 8 | Per-device batch size (A40 48GB: 8, RTX 3090 Ti 24GB: 4) |
-| `GRAD_ACC` | 4 | Gradient accumulation steps (effective BS = TRAIN_BS × GRAD_ACC = 32) |
+| `TRAIN_BS` | 4 | Per-device batch size (safe for all 24GB+ GPUs) |
+| `GRAD_ACC` | 8 | Gradient accumulation (effective BS = TRAIN_BS × GRAD_ACC = 32) |
 | `EVAL_BASE` | 1 | Also evaluate base model |
 | `SKIP_EVAL` | 0 | Skip evaluation phase |
 | `EVAL_LIMIT` | - | Limit eval examples |
 
 ### Example with custom settings:
 ```bash
-# For RTX 3090 Ti (24GB) - use smaller batch size
-TRAIN_BS=4 EPOCHS=5 LR=3e-5 nohup bash finetune_nl2sql/run_qwen7b_t7_bird.sh > run.log 2>&1 &
+# Default settings work for all GPUs (24GB+)
+nohup bash finetune_nl2sql/run_qwen7b_t7_bird.sh > run.log 2>&1 &
 
-# For A40 (48GB) - default settings work (TRAIN_BS=8)
+# Custom epochs and learning rate
 EPOCHS=5 LR=3e-5 nohup bash finetune_nl2sql/run_qwen7b_t7_bird.sh > run.log 2>&1 &
 ```
 
@@ -80,10 +80,10 @@ runpod/pytorch:2.2.0-py3.10-cuda12.1.0-devel-ubuntu22.04
 
 | GPU | Est. Time | Cost | Batch Size |
 |-----|-----------|------|------------|
-| A100 40GB | 2-3 hours | ~$4-5 | 8 (32 effective) |
-| A40 48GB | 3-4 hours | ~$1.2-1.6 | 8 (32 effective) |
-| RTX 3090 Ti | 5-6 hours | ~$1.35-1.62 | 4 (16 effective) |
-| RTX 4090 | 5-6 hours | ~$2.2-2.64 | 4 (16 effective) |
+| A100 40GB | 3-4 hours | ~$5-6 | 4 (32 effective) |
+| A40 48GB | 4-5 hours | ~$1.6-2.0 | 4 (32 effective) |
+| RTX 3090 Ti | 5-6 hours | ~$1.35-1.62 | 4 (32 effective) |
+| RTX 4090 | 5-6 hours | ~$2.2-2.64 | 4 (32 effective) |
 
 ---
 
