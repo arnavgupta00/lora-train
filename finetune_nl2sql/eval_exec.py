@@ -220,12 +220,15 @@ def _validate_in_batches(
     if not chunks:
         return []
 
+    print(f"\n📊 Validating {len(examples)} examples with validator service ({len(chunks)} batches, parallelism={par})", flush=True)
     out: List[Optional[List[Dict[str, Any]]]] = [None] * len(chunks)
 
     def worker(ix: int) -> List[Dict[str, Any]]:
         for attempt in range(4):
             try:
-                return _validator_validate_batch(admin_key, chunks[ix])
+                result = _validator_validate_batch(admin_key, chunks[ix])
+                print(f"  ✓ Validated batch {ix+1}/{len(chunks)}", flush=True)
+                return result
             except Exception:
                 if attempt == 3:
                     raise
@@ -294,8 +297,11 @@ def _generate_sql_batch(
 ) -> List[str]:
     out_sql: List[str] = []
     bs = max(1, int(batch_size))
-    for i in range(0, len(messages_list), bs):
+    total_batches = (len(messages_list) + bs - 1) // bs
+    print(f"\n🚀 Generating SQL for {len(messages_list)} examples in {total_batches} batches (batch_size={bs})")
+    for batch_idx, i in enumerate(range(0, len(messages_list), bs), 1):
         chunk = messages_list[i : i + bs]
+        print(f"  Batch {batch_idx}/{total_batches}: Processing examples {i+1}-{min(i+len(chunk), len(messages_list))}/{len(messages_list)}", flush=True)
         prompts = [_build_prompt(tokenizer, m) for m in chunk]
         inputs = tokenizer(
             prompts,
@@ -376,6 +382,8 @@ def main() -> None:
     if args.limit and args.limit > 0:
         rows = rows[: int(args.limit)]
 
+    print(f"\n📋 Loading test set: {len(rows)} examples from {args.test_jsonl}", flush=True)
+    print(f"🔍 Fetching schema signature map from validator...", flush=True)
     sig_map = _fetch_schema_signature_map()
 
     pred_path = os.path.join(args.out_dir, f"predictions.test.{variant}.jsonl")
