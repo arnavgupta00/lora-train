@@ -35,9 +35,9 @@ MODEL_ID="${MODEL_ID:-Qwen/Qwen2.5-7B-Instruct}"
 MODEL_SIZE="7b"
 
 # Training hyperparameters (optimized for BIRD benchmark)
-EPOCHS="${EPOCHS:-3}"                    # 3 epochs (was 1)
+EPOCHS="${EPOCHS:-1}"                    # 1 epoch (3 epochs = 26hrs, diminishing returns)
 LR="${LR:-5e-5}"                         # 5e-5 (was 2e-4, lower = better for fine-tuning)
-SEQ_LEN="${SEQ_LEN:-2048}"               # 2048 (BIRD has long queries)
+SEQ_LEN="${SEQ_LEN:-1024}"               # 1024 (most queries <1024 tokens, 2048 very slow)
 TRAIN_BS="${TRAIN_BS:-4}"                # 4 is safe for all GPUs (24GB+)
 EVAL_BS="${EVAL_BS:-4}"                  # 4 is safe for all GPUs (24GB+)
 GRAD_ACC="${GRAD_ACC:-8}"                # Effective batch size = 4 * 8 = 32

@@ -47,9 +47,9 @@ pkill -9 -f train_lora.py
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `EPOCHS` | 3 | Number of training epochs |
+| `EPOCHS` | 1 | Number of training epochs (1 epoch takes ~4-5 hours) |
 | `LR` | 5e-5 | Learning rate |
-| `SEQ_LEN` | 2048 | Max sequence length |
+| `SEQ_LEN` | 1024 | Max sequence length (1024 is 2x faster than 2048) |
 | `TRAIN_BS` | 4 | Per-device batch size (safe for all 24GB+ GPUs) |
 | `GRAD_ACC` | 8 | Gradient accumulation (effective BS = TRAIN_BS × GRAD_ACC = 32) |
 | `EVAL_BASE` | 1 | Also evaluate base model |
@@ -61,8 +61,11 @@ pkill -9 -f train_lora.py
 # Default settings work for all GPUs (24GB+)
 nohup bash finetune_nl2sql/run_qwen7b_t7_bird.sh > run.log 2>&1 &
 
-# Custom epochs and learning rate
-EPOCHS=5 LR=3e-5 nohup bash finetune_nl2sql/run_qwen7b_t7_bird.sh > run.log 2>&1 &
+# Longer sequences (slower but handles very long queries)
+SEQ_LEN=2048 nohup bash finetune_nl2sql/run_qwen7b_t7_bird.sh > run.log 2>&1 &
+
+# More epochs (diminishing returns after 1-2 epochs)
+EPOCHS=2 nohup bash finetune_nl2sql/run_qwen7b_t7_bird.sh > run.log 2>&1 &
 ```
 
 ---
@@ -93,12 +96,14 @@ runpod/pytorch:2.2.0-py3.10-cuda12.1.0-devel-ubuntu22.04
 
 ## Training Time Estimates
 
-| GPU | Est. Time | Cost | Batch Size |
+| GPU | Est. Time (1 epoch) | Cost | Batch Size |
 |-----|-----------|------|------------|
-| A100 40GB | 3-4 hours | ~$5-6 | 4 (32 effective) |
+| A100 40GB | 2-3 hours | ~$3-5 | 4 (32 effective) |
 | A40 48GB | 4-5 hours | ~$1.6-2.0 | 4 (32 effective) |
 | RTX 3090 Ti | 5-6 hours | ~$1.35-1.62 | 4 (32 effective) |
 | RTX 4090 | 5-6 hours | ~$2.2-2.64 | 4 (32 effective) |
+
+Note: Times are for SEQ_LEN=1024 (default). SEQ_LEN=2048 is 2-3x slower.
 
 ---
 
