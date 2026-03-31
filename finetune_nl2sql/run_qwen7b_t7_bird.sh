@@ -201,7 +201,7 @@ if [[ -n "${RESUME_FROM:-}" ]]; then
   echo "Resuming from: $RESUME_FROM"
 fi
 
-python3 finetune_nl2sql/train_lora.py \
+python3 -u finetune_nl2sql/train_lora.py \
   --model_id "$MODEL_ID" \
   --train_jsonl "$TRAIN_JSONL" \
   --dev_jsonl "$DEV_JSONL" \
