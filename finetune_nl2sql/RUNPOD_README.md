@@ -47,11 +47,11 @@ pkill -9 -f train_lora.py
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `EPOCHS` | 1 | Number of training epochs (1 epoch takes ~4-5 hours) |
+| `EPOCHS` | 1 | Number of training epochs (1 epoch takes ~2-5 hours) |
 | `LR` | 5e-5 | Learning rate |
 | `SEQ_LEN` | 1024 | Max sequence length (1024 is 2x faster than 2048) |
-| `TRAIN_BS` | 4 | Per-device batch size (safe for all 24GB+ GPUs) |
-| `GRAD_ACC` | 8 | Gradient accumulation (effective BS = TRAIN_BS × GRAD_ACC = 32) |
+| `TRAIN_BS` | 2 | Per-device batch size (2 for 24GB GPUs to avoid OOM) |
+| `GRAD_ACC` | 16 | Gradient accumulation (effective BS = TRAIN_BS × GRAD_ACC = 32) |
 | `EVAL_BASE` | 1 | Also evaluate base model |
 | `SKIP_EVAL` | 0 | Skip evaluation phase |
 | `EVAL_LIMIT` | - | Limit eval examples |

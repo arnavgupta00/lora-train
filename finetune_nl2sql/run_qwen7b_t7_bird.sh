@@ -35,12 +35,12 @@ MODEL_ID="${MODEL_ID:-Qwen/Qwen2.5-7B-Instruct}"
 MODEL_SIZE="7b"
 
 # Training hyperparameters (optimized for BIRD benchmark)
-EPOCHS="${EPOCHS:-3}"                    # 1 epoch (3 epochs = 26hrs, diminishing returns)
+EPOCHS="${EPOCHS:-1}"                    # 1 epoch (3 epochs = 26hrs, diminishing returns)
 LR="${LR:-5e-5}"                         # 5e-5 (was 2e-4, lower = better for fine-tuning)
-SEQ_LEN="${SEQ_LEN:-2048}"               # 1024 (most queries <1024 tokens, 2048 very slow)
-TRAIN_BS="${TRAIN_BS:-4}"                # 4 is safe for all GPUs (24GB+)
-EVAL_BS="${EVAL_BS:-4}"                  # 4 is safe for all GPUs (24GB+)
-GRAD_ACC="${GRAD_ACC:-8}"                # Effective batch size = 4 * 8 = 32
+SEQ_LEN="${SEQ_LEN:-1024}"               # 1024 (most queries <1024 tokens, 2048 very slow)
+TRAIN_BS="${TRAIN_BS:-2}"                # 2 for 24GB GPUs (4 caused OOM on RTX 4090)
+EVAL_BS="${EVAL_BS:-2}"                  # 2 for 24GB GPUs
+GRAD_ACC="${GRAD_ACC:-16}"               # Effective batch size = 2 * 16 = 32
 WARMUP_RATIO="${WARMUP_RATIO:-0.1}"      # 10% warmup
 
 # LoRA configuration
