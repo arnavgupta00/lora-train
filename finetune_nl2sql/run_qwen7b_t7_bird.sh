@@ -267,13 +267,13 @@ if [[ "$SKIP_EVAL" != "1" ]]; then
   echo ">>> Evaluating FINE-TUNED model (with LoRA)"
   echo "=============================================="
   
-  python3 finetune_nl2sql/eval_exec.py \
+  python3 -u finetune_nl2sql/eval_exec.py \
     --base_model_id "$MODEL_ID" \
     --adapter_dir "$OUT_DIR" \
     --test_jsonl "$TEST_JSONL" \
     --out_dir "$OUT_DIR" \
     --max_new_tokens 512 \
-    --gen_batch_size 8 \
+    --gen_batch_size 2 \
     --validator_batch_size 50 \
     --validator_parallelism 4 \
     "${LOAD8_ARGS[@]}" \
