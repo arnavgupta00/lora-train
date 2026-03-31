@@ -26,6 +26,21 @@ tail -f run.log
 watch -n 5 nvidia-smi
 ```
 
+### 5. Kill running process (if needed)
+```bash
+# Find the process ID
+ps aux | grep run_qwen7b_t7_bird.sh
+
+# Kill by PID (replace 12345 with actual PID)
+kill 12345
+
+# Or kill all training processes
+pkill -f train_lora.py
+
+# Force kill if needed
+pkill -9 -f train_lora.py
+```
+
 ---
 
 ## Configuration Options
