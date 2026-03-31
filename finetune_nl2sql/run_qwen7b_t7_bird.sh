@@ -38,9 +38,9 @@ MODEL_SIZE="7b"
 EPOCHS="${EPOCHS:-3}"                    # 3 epochs (was 1)
 LR="${LR:-5e-5}"                         # 5e-5 (was 2e-4, lower = better for fine-tuning)
 SEQ_LEN="${SEQ_LEN:-2048}"               # 2048 (BIRD has long queries)
-TRAIN_BS="${TRAIN_BS:-4}"
-EVAL_BS="${EVAL_BS:-4}"
-GRAD_ACC="${GRAD_ACC:-4}"                # Effective batch size = 4 * 4 = 16
+TRAIN_BS="${TRAIN_BS:-8}"                # 8 for A40 48GB (4 for 24GB GPUs)
+EVAL_BS="${EVAL_BS:-8}"                  # 8 for A40 48GB (4 for 24GB GPUs)
+GRAD_ACC="${GRAD_ACC:-4}"                # Effective batch size = 8 * 4 = 32
 WARMUP_RATIO="${WARMUP_RATIO:-0.1}"      # 10% warmup
 
 # LoRA configuration
