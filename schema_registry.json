@@ -335,6 +335,1506 @@
       "validation_binding": "DYNAMIC_WINE_CLUB_V1_DB",
       "description": "Wine club schema with wines, members, shipments, ratings, and events.",
       "source": "remote"
+    },
+    {
+      "schema_id": "adtech_attribution_hub",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_ADTECH_ATTRIBUTION_HUB_V1_DB",
+      "db_name": "nl2sql_dynamic_adtech_attribution_hub_v1",
+      "db_id": "e596626d-dd9d-4749-8015-4b3a0e6302b2",
+      "description": "Adtech attribution platform for campaigns, channels, touchpoints, conversions, and ROI analytics.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "agri_input_distribution",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_AGRI_INPUT_DISTRIBUTION_V1_DB",
+      "db_name": "nl2sql_dynamic_agri_input_distribution_v1",
+      "db_id": "64b015ce-f949-447f-bf89-7ac93771280f",
+      "description": "Agricultural input distribution schema with dealers, products, orders, inventory, and field demand trends.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "airport_retail_concessions",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_AIRPORT_RETAIL_CONCESSIONS_V1_DB",
+      "db_name": "nl2sql_dynamic_airport_retail_concessions_v1",
+      "db_id": "3f6bac60-7144-4def-8707-925753718a75",
+      "description": "Airport retail concessions schema with terminals, stores, assortments, sales, and operator performance.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "battery_swap_network",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_BATTERY_SWAP_NETWORK_V1_DB",
+      "db_name": "nl2sql_dynamic_battery_swap_network_v1",
+      "db_id": "a4a4585a-6bba-4166-ba53-2506cd3c87c2",
+      "description": "Battery swap network schema with stations, batteries, swaps, subscriptions, and uptime tracking.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "construction_bid_management",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CONSTRUCTION_BID_MANAGEMENT_V1_DB",
+      "db_name": "nl2sql_dynamic_construction_bid_management_v1",
+      "db_id": "8c5da0c1-ef9f-4324-963e-062c627ad494",
+      "description": "Construction bid management schema with projects, bidders, bid rounds, awards, and budget variance.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "co_working_space_ops",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CO_WORKING_SPACE_OPS_V1_DB",
+      "db_name": "nl2sql_dynamic_co_working_space_ops_v1",
+      "db_id": "398517cd-7dc5-409c-9dd5-b79dba64f9c6",
+      "description": "Coworking operations schema with locations, desks, memberships, bookings, services, and churn signals.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "cold_chain_distribution",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_COLD_CHAIN_DISTRIBUTION_V1_DB",
+      "db_name": "nl2sql_dynamic_cold_chain_distribution_v1",
+      "db_id": "7f0f487a-3a86-4b58-8d37-e3484eb53324",
+      "description": "Cold-chain distribution schema with warehouses, shipments, temperature logs, spoilage events, and SLA compliance.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "digital_news_subscription",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_DIGITAL_NEWS_SUBSCRIPTION_V1_DB",
+      "db_name": "nl2sql_dynamic_digital_news_subscription_v1",
+      "db_id": "6042d5ee-7927-4db1-9449-af68ef373c4f",
+      "description": "Digital news subscription schema with publications, plans, subscribers, engagement, and retention analytics.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "event_venue_management",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_EVENT_VENUE_MANAGEMENT_V1_DB",
+      "db_name": "nl2sql_dynamic_event_venue_management_v1",
+      "db_id": "bf08bc63-cf51-4e13-a6a3-24d0a033dfbd",
+      "description": "Event venue management schema with venues, events, bookings, vendors, and concession sales.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "freight_brokerage",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_FREIGHT_BROKERAGE_V1_DB",
+      "db_name": "nl2sql_dynamic_freight_brokerage_v1",
+      "db_id": "487bb904-570f-4a4d-9a7e-bbad9f28a984",
+      "description": "Freight brokerage schema with shippers, carriers, loads, milestones, accessorials, and margin tracking.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "green_energy_retail",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_GREEN_ENERGY_RETAIL_V1_DB",
+      "db_name": "nl2sql_dynamic_green_energy_retail_v1",
+      "db_id": "aeace01a-7cb8-4604-b7e5-f13252d3e5f6",
+      "description": "Green energy retail schema with customers, plans, meter usage, invoices, and renewable credits.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "industrial_iot_monitoring",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_INDUSTRIAL_IOT_MONITORING_V1_DB",
+      "db_name": "nl2sql_dynamic_industrial_iot_monitoring_v1",
+      "db_id": "b68f7025-5727-4335-a7ac-c3d98228e21b",
+      "description": "Industrial IoT monitoring schema with plants, assets, sensor alerts, work orders, and reliability KPIs.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "insurance_claims_ops",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_INSURANCE_CLAIMS_OPS_V1_DB",
+      "db_name": "nl2sql_dynamic_insurance_claims_ops_v1",
+      "db_id": "e09e1142-2a38-41e2-82fb-638d203796a7",
+      "description": "Insurance claims operations schema with policies, claims, adjusters, payments, and fraud review actions.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "it_service_desk",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_IT_SERVICE_DESK_V1_DB",
+      "db_name": "nl2sql_dynamic_it_service_desk_v1",
+      "db_id": "4ffac216-cb66-4f86-a8e9-1920eedac4e6",
+      "description": "IT service desk schema with teams, tickets, incidents, SLAs, changes, and resolution throughput.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "legal_case_management",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_LEGAL_CASE_MANAGEMENT_V1_DB",
+      "db_name": "nl2sql_dynamic_legal_case_management_v1",
+      "db_id": "9c6434b0-4c01-46b4-9723-178dcae26332",
+      "description": "Legal case management schema with clients, cases, tasks, billable time, invoices, and outcomes.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "micro_mobility_rentals",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MICRO_MOBILITY_RENTALS_V1_DB",
+      "db_name": "nl2sql_dynamic_micro_mobility_rentals_v1",
+      "db_id": "5c508f60-8167-4bc4-8adc-367b8a53f5e8",
+      "description": "Micro-mobility rentals schema with vehicles, zones, trips, subscriptions, and maintenance logs.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "omnichannel_loyalty_program",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_OMNICHANNEL_LOYALTY_PROGRAM_V1_DB",
+      "db_name": "nl2sql_dynamic_omnichannel_loyalty_program_v1",
+      "db_id": "0ca49fab-7e07-45dc-bb28-5fb007e7eb1e",
+      "description": "Omnichannel loyalty schema with members, tiers, points accrual, redemptions, and campaign lift.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "pharmacy_wholesale",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PHARMACY_WHOLESALE_V1_DB",
+      "db_name": "nl2sql_dynamic_pharmacy_wholesale_v1",
+      "db_id": "003aac0e-1fcb-4cca-b369-b5cf682c6bca",
+      "description": "Pharmacy wholesale schema with suppliers, SKUs, batches, purchase orders, deliveries, and recall tracking.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "port_terminal_ops",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PORT_TERMINAL_OPS_V1_DB",
+      "db_name": "nl2sql_dynamic_port_terminal_ops_v1",
+      "db_id": "c521422e-4cb1-4316-9c79-d1859140aaca",
+      "description": "Port terminal operations schema with berths, vessels, containers, moves, dwell time, and capacity planning.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "procurement_suite",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PROCUREMENT_SUITE_V1_DB",
+      "db_name": "nl2sql_dynamic_procurement_suite_v1",
+      "db_id": "6766a52d-3837-47f6-98fc-801fa25f0afd",
+      "description": "Procurement suite schema with requisitions, suppliers, POs, receipts, invoices, and savings analytics.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "real_estate_leasing_hub",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_REAL_ESTATE_LEASING_HUB_V1_DB",
+      "db_name": "nl2sql_dynamic_real_estate_leasing_hub_v1",
+      "db_id": "ec4cec4e-7bbf-4bc8-85a0-af6d9f144b6e",
+      "description": "Real-estate leasing schema with properties, units, applicants, leases, payments, and vacancy analytics.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "recycling_collection_ops",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_RECYCLING_COLLECTION_OPS_V1_DB",
+      "db_name": "nl2sql_dynamic_recycling_collection_ops_v1",
+      "db_id": "b9c737d0-ca31-4326-b448-e3381ce39cfc",
+      "description": "Recycling collection schema with routes, pickups, material streams, contamination, and recovery rates.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "restaurant_supply_distribution",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_RESTAURANT_SUPPLY_DISTRIBUTION_V1_DB",
+      "db_name": "nl2sql_dynamic_restaurant_supply_distribution_v1",
+      "db_id": "030eb298-a911-4e4c-8e4c-7adc9583e4d1",
+      "description": "Restaurant supply distribution schema with depots, routes, orders, SKUs, and service-level metrics.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "school_transport_network",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_SCHOOL_TRANSPORT_NETWORK_V1_DB",
+      "db_name": "nl2sql_dynamic_school_transport_network_v1",
+      "db_id": "f974436e-872b-4734-812c-c5fff06faeab",
+      "description": "School transport schema with schools, routes, buses, riders, attendance, and on-time performance.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "solar_installation_pipeline",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_SOLAR_INSTALLATION_PIPELINE_V1_DB",
+      "db_name": "nl2sql_dynamic_solar_installation_pipeline_v1",
+      "db_id": "4e1dd397-7bb4-4bf7-8196-176ec52294a3",
+      "description": "Solar installation pipeline schema with leads, site surveys, installs, permits, and project profitability.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "telecom_field_service",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_TELECOM_FIELD_SERVICE_V1_DB",
+      "db_name": "nl2sql_dynamic_telecom_field_service_v1",
+      "db_id": "c956c35d-b881-4ea3-80e3-fe722154eeca",
+      "description": "Telecom field service schema with towers, tickets, dispatches, technicians, parts, and fix-rate analytics.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "ticketing_resale_marketplace",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_TICKETING_RESALE_MARKETPLACE_V1_DB",
+      "db_name": "nl2sql_dynamic_ticketing_resale_marketplace_v1",
+      "db_id": "b3214c88-7706-43a7-be0e-95d6c9e9d643",
+      "description": "Ticket resale marketplace schema with events, listings, buyers, orders, payouts, and fraud checks.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "utility_metering_ops",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_UTILITY_METERING_OPS_V1_DB",
+      "db_name": "nl2sql_dynamic_utility_metering_ops_v1",
+      "db_id": "d9a90657-4247-4977-be81-5ca911e15891",
+      "description": "Utility metering operations schema with meters, readings, outages, service orders, and billing disputes.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "veterinary_hospital_network",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_VETERINARY_HOSPITAL_NETWORK_V1_DB",
+      "db_name": "nl2sql_dynamic_veterinary_hospital_network_v1",
+      "db_id": "a53ee490-5a05-4872-8ab0-b5b02876d7fd",
+      "description": "Veterinary hospital network schema with clinics, pets, appointments, treatments, claims, and pharmacy sales.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "warehouse_robotics_ops",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_WAREHOUSE_ROBOTICS_OPS_V1_DB",
+      "db_name": "nl2sql_dynamic_warehouse_robotics_ops_v1",
+      "db_id": "d14391ec-50c2-4b31-b89e-123aced828fc",
+      "description": "Warehouse robotics schema with facilities, robots, tasks, stations, incidents, and productivity analytics.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "municipal_water_utility",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MUNICIPAL_WATER_UTILITY_V1_DB",
+      "db_name": "nl2sql_dynamic_municipal_water_utility_v1",
+      "db_id": "3c6859ed-6c7c-4ee1-b113-8ef6f0661f42",
+      "description": "Municipal water utility operations with districts, plants, meters, leaks, and billing recovery. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "marine_insurance_underwriting",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MARINE_INSURANCE_UNDERWRITING_V1_DB",
+      "db_name": "nl2sql_dynamic_marine_insurance_underwriting_v1",
+      "db_id": "0af8a5f0-0ca7-4dc3-9e9e-6218fcdf924a",
+      "description": "Marine insurance underwriting with policies, vessels, incidents, claims, and settlements. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "semiconductor_fab_planning",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_SEMICONDUCTOR_FAB_PLANNING_V1_DB",
+      "db_name": "nl2sql_dynamic_semiconductor_fab_planning_v1",
+      "db_id": "95f5fee3-8635-43f8-a068-556656145923",
+      "description": "Semiconductor fabrication planning with tools, lots, recipes, yields, and downtime analysis. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "biobank_sample_tracking",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_BIOBANK_SAMPLE_TRACKING_V1_DB",
+      "db_name": "nl2sql_dynamic_biobank_sample_tracking_v1",
+      "db_id": "58412d9c-0906-43e9-b78f-50d25be8b37b",
+      "description": "Biobank sample lifecycle schema with donors, specimens, storage, assays, and quality checks. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "public_library_network",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PUBLIC_LIBRARY_NETWORK_V1_DB",
+      "db_name": "nl2sql_dynamic_public_library_network_v1",
+      "db_id": "73a62cd8-5dfe-47c7-90ce-0ed893717f54",
+      "description": "Public library network with branches, collections, memberships, loans, fines, and holds. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "carbon_credit_exchange",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CARBON_CREDIT_EXCHANGE_V1_DB",
+      "db_name": "nl2sql_dynamic_carbon_credit_exchange_v1",
+      "db_id": "a561f6b0-97c3-4f75-b479-e3301e574355",
+      "description": "Carbon credit exchange with issuances, listings, bids, trades, and retirement accounting. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "esports_tournament_ops",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_ESPORTS_TOURNAMENT_OPS_V1_DB",
+      "db_name": "nl2sql_dynamic_esports_tournament_ops_v1",
+      "db_id": "d1665ff6-4e59-4ed9-88b8-8878baf8f86b",
+      "description": "Esports tournament operations with teams, rosters, matches, stats, sponsors, and prize payouts. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "waste_to_energy_plants",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_WASTE_TO_ENERGY_PLANTS_V1_DB",
+      "db_name": "nl2sql_dynamic_waste_to_energy_plants_v1",
+      "db_id": "ab91a66b-15da-4e82-be5b-4b3674b3ed5e",
+      "description": "Waste-to-energy operations with intake streams, processing lines, output energy, and compliance metrics. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "rail_freight_intermodal",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_RAIL_FREIGHT_INTERMODAL_V1_DB",
+      "db_name": "nl2sql_dynamic_rail_freight_intermodal_v1",
+      "db_id": "1c84f606-58a9-4d57-8353-0bec611aff13",
+      "description": "Rail freight intermodal movement with terminals, wagons, containers, schedules, and SLA performance. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "blood_bank_operations",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_BLOOD_BANK_OPERATIONS_V1_DB",
+      "db_name": "nl2sql_dynamic_blood_bank_operations_v1",
+      "db_id": "ce67b7d8-d8fe-4a69-a35d-e6e917739b74",
+      "description": "Blood bank operations with donations, components, inventory, crossmatch requests, and transfusion fulfillment. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "museum_exhibition_ops",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MUSEUM_EXHIBITION_OPS_V1_DB",
+      "db_name": "nl2sql_dynamic_museum_exhibition_ops_v1",
+      "db_id": "4ff626bf-b95e-4e4a-bbd1-246be9f130ad",
+      "description": "Museum exhibition planning with galleries, exhibits, loans, visitors, and event revenue tracking. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "drone_delivery_network",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_DRONE_DELIVERY_NETWORK_V1_DB",
+      "db_name": "nl2sql_dynamic_drone_delivery_network_v1",
+      "db_id": "5367084a-941b-41e7-9e32-9486f6327e79",
+      "description": "Drone delivery network with depots, routes, flights, payloads, incidents, and service quality. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "customs_clearance_brokerage",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CUSTOMS_CLEARANCE_BROKERAGE_V1_DB",
+      "db_name": "nl2sql_dynamic_customs_clearance_brokerage_v1",
+      "db_id": "5338f245-0897-4b6f-bbb7-2b7d270f8fe5",
+      "description": "Customs clearance brokerage with declarations, shipments, duties, inspections, and release timelines. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "cruise_line_operations",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CRUISE_LINE_OPERATIONS_V1_DB",
+      "db_name": "nl2sql_dynamic_cruise_line_operations_v1",
+      "db_id": "ed1f67d6-9a1b-4397-a422-512363582ef7",
+      "description": "Cruise line operations with itineraries, cabins, onboard spending, excursions, and occupancy yield. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "alumni_fundraising_platform",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_ALUMNI_FUNDRAISING_PLATFORM_V1_DB",
+      "db_name": "nl2sql_dynamic_alumni_fundraising_platform_v1",
+      "db_id": "2341fe1d-939f-4d2c-9586-0da57239f62f",
+      "description": "Alumni fundraising platform with campaigns, pledges, gifts, matching, and donor retention cohorts. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "fisheries_supply_chain",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_FISHERIES_SUPPLY_CHAIN_V1_DB",
+      "db_name": "nl2sql_dynamic_fisheries_supply_chain_v1",
+      "db_id": "367bdef3-29e5-4541-96cc-40ffef7c867f",
+      "description": "Fisheries supply chain with catches, auctions, cold storage, processing, and buyer contracts. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "satellite_ground_station_ops",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_SATELLITE_GROUND_STATION_OPS_V1_DB",
+      "db_name": "nl2sql_dynamic_satellite_ground_station_ops_v1",
+      "db_id": "be127991-b893-46dc-9d3a-ee6324b6826c",
+      "description": "Satellite ground station operations with passes, antennas, downlinks, alerts, and utilization analytics. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "disaster_response_logistics",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_DISASTER_RESPONSE_LOGISTICS_V1_DB",
+      "db_name": "nl2sql_dynamic_disaster_response_logistics_v1",
+      "db_id": "4593d212-56ba-4484-97aa-67e7fa060426",
+      "description": "Disaster response logistics with incidents, shelters, supplies, dispatches, and coverage gaps. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "mortgage_servicing_platform",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MORTGAGE_SERVICING_PLATFORM_V1_DB",
+      "db_name": "nl2sql_dynamic_mortgage_servicing_platform_v1",
+      "db_id": "eed7dd4c-4eb4-4b78-9c5f-ee15e873a1fa",
+      "description": "Mortgage servicing with loans, statements, escrow, delinquencies, and workout plans. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "pharmaceutical_trial_ops",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PHARMACEUTICAL_TRIAL_OPS_V1_DB",
+      "db_name": "nl2sql_dynamic_pharmaceutical_trial_ops_v1",
+      "db_id": "1f68596d-c08c-412b-88ca-0cf23dbbb28a",
+      "description": "Pharmaceutical trial operations with protocols, sites, cohorts, visits, adverse events, and outcomes. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "data_center_capacity_planning",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_DATA_CENTER_CAPACITY_PLANNING_V1_DB",
+      "db_name": "nl2sql_dynamic_data_center_capacity_planning_v1",
+      "db_id": "441a945e-ec57-4ae4-91d0-f02cf33c70f3",
+      "description": "Data center capacity planning with clusters, racks, workloads, power, cooling, and incident impact. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "election_campaign_finance",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_ELECTION_CAMPAIGN_FINANCE_V1_DB",
+      "db_name": "nl2sql_dynamic_election_campaign_finance_v1",
+      "db_id": "3c32c283-e678-4156-a4d8-d340a276f8f3",
+      "description": "Election campaign finance with committees, contributions, expenditures, filings, and compliance checks. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "court_case_docketing",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_COURT_CASE_DOCKETING_V1_DB",
+      "db_name": "nl2sql_dynamic_court_case_docketing_v1",
+      "db_id": "00bae167-1f62-4dd1-b582-4cff57867ae4",
+      "description": "Court docket operations with filings, hearings, parties, motions, rulings, and clearance rates. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "language_testing_center",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_LANGUAGE_TESTING_CENTER_V1_DB",
+      "db_name": "nl2sql_dynamic_language_testing_center_v1",
+      "db_id": "f1e26790-192b-4d9c-a0b9-70b704442ca6",
+      "description": "Language testing center with sessions, candidates, sections, scores, and retake pathways. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "smart_city_parking_enforcement",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_SMART_CITY_PARKING_ENFORCEMENT_V1_DB",
+      "db_name": "nl2sql_dynamic_smart_city_parking_enforcement_v1",
+      "db_id": "b5b0ded9-574e-41c3-aa64-4de5ab20f3b1",
+      "description": "Smart city parking enforcement with zones, permits, sensors, citations, and adjudication outcomes. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "music_rights_royalties",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MUSIC_RIGHTS_ROYALTIES_V1_DB",
+      "db_name": "nl2sql_dynamic_music_rights_royalties_v1",
+      "db_id": "85dbc272-d781-4ecb-b26f-ba515b4cb553",
+      "description": "Music rights and royalties with works, licenses, usages, statements, and payment reconciliations. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "irrigation_district_management",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_IRRIGATION_DISTRICT_MANAGEMENT_V1_DB",
+      "db_name": "nl2sql_dynamic_irrigation_district_management_v1",
+      "db_id": "cf180340-24d4-48d8-ac60-126705221aa2",
+      "description": "Irrigation district management with canals, allocations, telemetry, maintenance, and farmer billing. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "airport_slot_coordination",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_AIRPORT_SLOT_COORDINATION_V1_DB",
+      "db_name": "nl2sql_dynamic_airport_slot_coordination_v1",
+      "db_id": "9f689bc6-f65b-4530-beef-2b19043e8665",
+      "description": "Airport slot coordination with carriers, requests, allocations, utilization, and delay penalties. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "hospice_care_network",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_HOSPICE_CARE_NETWORK_V1_DB",
+      "db_name": "nl2sql_dynamic_hospice_care_network_v1",
+      "db_id": "40efc4cb-186e-41d1-821b-55f2ec965197",
+      "description": "Hospice care network with referrals, plans, home visits, medications, claims, and family outcomes. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "shipyard_maintenance_planning",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_SHIPYARD_MAINTENANCE_PLANNING_V1_DB",
+      "db_name": "nl2sql_dynamic_shipyard_maintenance_planning_v1",
+      "db_id": "7a88c761-4a1c-400f-8692-11cdf9d292be",
+      "description": "Shipyard maintenance planning with docks, work packages, labor shifts, materials, and schedule variance. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "urban_air_quality_monitoring",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_URBAN_AIR_QUALITY_MONITORING_V1_DB",
+      "db_name": "nl2sql_dynamic_urban_air_quality_monitoring_v1",
+      "db_id": "e2abecc4-89db-45d8-be98-583bd57ad764",
+      "description": "Urban air-quality monitoring with stations, sensors, pollutant trends, alerts, and compliance actions. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "nuclear_outage_planning",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_NUCLEAR_OUTAGE_PLANNING_V1_DB",
+      "db_name": "nl2sql_dynamic_nuclear_outage_planning_v1",
+      "db_id": "7d7a553e-a01d-4027-91c0-adbdb6e18bb8",
+      "description": "Nuclear outage planning with units, maintenance windows, critical paths, contractors, and risk events. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "ferry_terminal_scheduling",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_FERRY_TERMINAL_SCHEDULING_V1_DB",
+      "db_name": "nl2sql_dynamic_ferry_terminal_scheduling_v1",
+      "db_id": "e81b1afe-c7b2-478b-98ab-bf5cff86b8f0",
+      "description": "Ferry terminal scheduling with berths, sailings, passenger loads, delays, and turnaround efficiency. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "floodplain_risk_management",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_FLOODPLAIN_RISK_MANAGEMENT_V1_DB",
+      "db_name": "nl2sql_dynamic_floodplain_risk_management_v1",
+      "db_id": "a6e32e7e-62b8-4781-95db-38385556d3ce",
+      "description": "Floodplain risk management with basins, gauges, incident response, mitigation works, and loss estimates. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "district_heating_grid",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_DISTRICT_HEATING_GRID_V1_DB",
+      "db_name": "nl2sql_dynamic_district_heating_grid_v1",
+      "db_id": "db2ad231-6529-4e27-a39a-6231f27371c5",
+      "description": "District heating grid with plants, substations, load curves, outages, and billing outcomes. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "commodity_derivatives_clearing",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_COMMODITY_DERIVATIVES_CLEARING_V1_DB",
+      "db_name": "nl2sql_dynamic_commodity_derivatives_clearing_v1",
+      "db_id": "051d4031-7713-4041-be92-7db716321719",
+      "description": "Commodity derivatives clearing with members, contracts, margining, settlements, and exception handling. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "trade_finance_operations",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_TRADE_FINANCE_OPERATIONS_V1_DB",
+      "db_name": "nl2sql_dynamic_trade_finance_operations_v1",
+      "db_id": "285f326e-1c2f-4732-a7dd-cc9067750dbd",
+      "description": "Trade finance operations with applicants, facilities, instruments, utilizations, and covenant tracking. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "pension_fund_liability_modeling",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PENSION_FUND_LIABILITY_MODELING_V1_DB",
+      "db_name": "nl2sql_dynamic_pension_fund_liability_modeling_v1",
+      "db_id": "f20fc748-d7ce-40e7-ab07-7b61a0410c41",
+      "description": "Pension fund liability modeling with cohorts, assets, liabilities, assumptions, and stress scenarios. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "reinsurance_treaty_admin",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_REINSURANCE_TREATY_ADMIN_V1_DB",
+      "db_name": "nl2sql_dynamic_reinsurance_treaty_admin_v1",
+      "db_id": "19286138-5d4f-46a1-aaf5-99d65e17a2b6",
+      "description": "Reinsurance treaty administration with cedents, treaties, bordereaux, recoveries, and dispute resolution. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "treasury_cash_forecasting",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_TREASURY_CASH_FORECASTING_V1_DB",
+      "db_name": "nl2sql_dynamic_treasury_cash_forecasting_v1",
+      "db_id": "1e38d0f1-664d-4e82-b575-c4ae545e70ce",
+      "description": "Treasury cash forecasting with entities, accounts, projections, variances, and hedge cost control. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "precision_agriculture_analytics",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PRECISION_AGRICULTURE_ANALYTICS_V1_DB",
+      "db_name": "nl2sql_dynamic_precision_agriculture_analytics_v1",
+      "db_id": "0771791a-5a74-421a-8f9f-7567fd979967",
+      "description": "Precision agriculture analytics with fields, sensors, interventions, yields, and input efficiency. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "genomics_variant_interpretation",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_GENOMICS_VARIANT_INTERPRETATION_V1_DB",
+      "db_name": "nl2sql_dynamic_genomics_variant_interpretation_v1",
+      "db_id": "1dfd7961-da37-4f7a-bcda-f65af49d4090",
+      "description": "Genomics variant interpretation with cohorts, assays, calls, annotations, and evidence curation. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "clinical_imaging_workflow",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CLINICAL_IMAGING_WORKFLOW_V1_DB",
+      "db_name": "nl2sql_dynamic_clinical_imaging_workflow_v1",
+      "db_id": "8152f486-d582-4d35-b5cd-0e071d459021",
+      "description": "Clinical imaging workflow with studies, modalities, reads, turnaround, and quality assurance. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "materials_research_lab",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MATERIALS_RESEARCH_LAB_V1_DB",
+      "db_name": "nl2sql_dynamic_materials_research_lab_v1",
+      "db_id": "9fd6340d-6a07-4f40-83a9-998da1f5597f",
+      "description": "Materials research lab with experiments, samples, instruments, measurements, and reproducibility checks. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "observatory_time_allocation",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_OBSERVATORY_TIME_ALLOCATION_V1_DB",
+      "db_name": "nl2sql_dynamic_observatory_time_allocation_v1",
+      "db_id": "3c368b4c-1b54-471c-907c-64aaa045675e",
+      "description": "Observatory time allocation with proposals, instruments, nights, weather losses, and science yield. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "live_event_merchandising",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_LIVE_EVENT_MERCHANDISING_V1_DB",
+      "db_name": "nl2sql_dynamic_live_event_merchandising_v1",
+      "db_id": "db0c82ff-144b-446c-baa8-41d454f78439",
+      "description": "Live event merchandising with tours, venues, SKUs, inventory moves, and margin analytics. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "podcast_ad_network",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PODCAST_AD_NETWORK_V1_DB",
+      "db_name": "nl2sql_dynamic_podcast_ad_network_v1",
+      "db_id": "e465c967-46c7-41fc-915f-680713bb495d",
+      "description": "Podcast ad network with shows, campaigns, placements, impressions, conversions, and payout reconciliation. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "film_production_accounting",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_FILM_PRODUCTION_ACCOUNTING_V1_DB",
+      "db_name": "nl2sql_dynamic_film_production_accounting_v1",
+      "db_id": "7f492227-3d75-4215-997d-ce8f770883b6",
+      "description": "Film production accounting with projects, departments, costs, approvals, and variance governance. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "creator_membership_platform",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CREATOR_MEMBERSHIP_PLATFORM_V1_DB",
+      "db_name": "nl2sql_dynamic_creator_membership_platform_v1",
+      "db_id": "cb102275-f959-4d29-97b0-8536919ee826",
+      "description": "Creator membership platform with tiers, subscribers, content drops, engagement, and churn cohorts. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "concert_touring_logistics",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CONCERT_TOURING_LOGISTICS_V1_DB",
+      "db_name": "nl2sql_dynamic_concert_touring_logistics_v1",
+      "db_id": "1f2bc9cd-8c39-4195-abf3-d9ceb9222a42",
+      "description": "Concert touring logistics with routes, stage loads, crews, freight, delays, and overtime costs. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "regional_food_bank_network",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_REGIONAL_FOOD_BANK_NETWORK_V1_DB",
+      "db_name": "nl2sql_dynamic_regional_food_bank_network_v1",
+      "db_id": "4b9a95c5-b247-4d25-9577-93ce35bedc45",
+      "description": "Regional food bank network with donors, inventories, agencies, distributions, and fulfillment gaps. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "workforce_apprenticeship_program",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_WORKFORCE_APPRENTICESHIP_PROGRAM_V1_DB",
+      "db_name": "nl2sql_dynamic_workforce_apprenticeship_program_v1",
+      "db_id": "dd2efb04-f690-44e6-a2b5-2cb5bfd9f43c",
+      "description": "Workforce apprenticeship program with candidates, cohorts, mentors, milestones, and placement outcomes. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "public_defender_casework",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PUBLIC_DEFENDER_CASEWORK_V1_DB",
+      "db_name": "nl2sql_dynamic_public_defender_casework_v1",
+      "db_id": "31e88f05-fe8f-41f6-aeea-88a0ae943fa9",
+      "description": "Public defender casework with dockets, assignments, hearings, motions, and workload balancing. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "immigrant_support_services",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_IMMIGRANT_SUPPORT_SERVICES_V1_DB",
+      "db_name": "nl2sql_dynamic_immigrant_support_services_v1",
+      "db_id": "63755c5d-1638-495c-a090-5e6d6d66053e",
+      "description": "Immigrant support services with intakes, case plans, referrals, appointments, and legal outcomes. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "disability_services_coordination",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_DISABILITY_SERVICES_COORDINATION_V1_DB",
+      "db_name": "nl2sql_dynamic_disability_services_coordination_v1",
+      "db_id": "4313aa87-6523-4b71-8ee1-c49235c0821a",
+      "description": "Disability services coordination with assessments, plans, providers, incidents, and satisfaction trends. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "oncology_infusion_daycare",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_ONCOLOGY_INFUSION_DAYCARE_V1_DB",
+      "db_name": "nl2sql_dynamic_oncology_infusion_daycare_v1",
+      "db_id": "647dd101-8625-483a-9484-e6f4b722ae8c",
+      "description": "Oncology infusion day-care with regimens, chair utilization, adverse events, and claim reimbursement. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "rehabilitation_center_outcomes",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_REHABILITATION_CENTER_OUTCOMES_V1_DB",
+      "db_name": "nl2sql_dynamic_rehabilitation_center_outcomes_v1",
+      "db_id": "b82135db-7f13-4594-9865-892af81c84f1",
+      "description": "Rehabilitation center outcomes with episodes, therapy sessions, progress scores, and readmission risk. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "mental_health_crisis_response",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MENTAL_HEALTH_CRISIS_RESPONSE_V1_DB",
+      "db_name": "nl2sql_dynamic_mental_health_crisis_response_v1",
+      "db_id": "b14afcc5-da0c-4ec7-850a-cc404c70e73f",
+      "description": "Mental health crisis response with call triage, dispatch, interventions, follow-up, and stabilization rates. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "pediatric_home_care",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PEDIATRIC_HOME_CARE_V1_DB",
+      "db_name": "nl2sql_dynamic_pediatric_home_care_v1",
+      "db_id": "4f06bec6-bbce-4a69-95e0-39092939813e",
+      "description": "Pediatric home care with care plans, visits, medications, caregiver updates, and claim lifecycle. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "chronic_disease_coaching",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CHRONIC_DISEASE_COACHING_V1_DB",
+      "db_name": "nl2sql_dynamic_chronic_disease_coaching_v1",
+      "db_id": "59176b29-f999-4a69-8c53-97618e92a52a",
+      "description": "Chronic disease coaching with enrollments, interventions, adherence, biometrics, and cost-to-care impact. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "geothermal_plant_dispatch",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_GEOTHERMAL_PLANT_DISPATCH_V1_DB",
+      "db_name": "nl2sql_dynamic_geothermal_plant_dispatch_v1",
+      "db_id": "379ec5a5-1c07-4f0c-87e7-5ad20311dfc0",
+      "description": "Geothermal plant dispatch with wells, turbines, generation schedules, outages, and balancing penalties. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "inland_port_authority",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_INLAND_PORT_AUTHORITY_V1_DB",
+      "db_name": "nl2sql_dynamic_inland_port_authority_v1",
+      "db_id": "68ab4908-eae5-4904-930e-434afff65113",
+      "description": "Inland port authority operations with berths, cranes, cargo lots, gate moves, and congestion metrics. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "wildfire_prevention_patrols",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_WILDFIRE_PREVENTION_PATROLS_V1_DB",
+      "db_name": "nl2sql_dynamic_wildfire_prevention_patrols_v1",
+      "db_id": "4e9a04fb-57a6-4141-87c4-770233452173",
+      "description": "Wildfire prevention patrols with districts, patrol routes, hazard signals, interventions, and containment time. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "stormwater_retention_ops",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_STORMWATER_RETENTION_OPS_V1_DB",
+      "db_name": "nl2sql_dynamic_stormwater_retention_ops_v1",
+      "db_id": "2f73315a-b893-4b9f-ba0c-6edb20baf41d",
+      "description": "Stormwater retention operations with basins, inflow events, pump actions, maintenance, and overflow risk. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "urban_tree_canopy_program",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_URBAN_TREE_CANOPY_PROGRAM_V1_DB",
+      "db_name": "nl2sql_dynamic_urban_tree_canopy_program_v1",
+      "db_id": "b0f8699b-9d70-4a7d-b722-df300456eb0a",
+      "description": "Urban tree canopy program with zones, planting cycles, maintenance visits, survival rates, and grants. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "credit_union_risk_scoring",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CREDIT_UNION_RISK_SCORING_V1_DB",
+      "db_name": "nl2sql_dynamic_credit_union_risk_scoring_v1",
+      "db_id": "ff3b9893-87d9-437c-bd98-c559ac8cea04",
+      "description": "Credit union risk scoring with members, loans, delinquencies, behavioral scores, and loss provisioning. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "municipal_bond_issuance",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MUNICIPAL_BOND_ISSUANCE_V1_DB",
+      "db_name": "nl2sql_dynamic_municipal_bond_issuance_v1",
+      "db_id": "0a9b4983-6a22-45fe-8aef-86423271484e",
+      "description": "Municipal bond issuance with issuers, tranches, book-building, allocations, and coupon servicing. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "invoice_factoring_exchange",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_INVOICE_FACTORING_EXCHANGE_V1_DB",
+      "db_name": "nl2sql_dynamic_invoice_factoring_exchange_v1",
+      "db_id": "78ebb1a5-01d1-4026-b684-33ed0faa9f26",
+      "description": "Invoice factoring exchange with sellers, invoices, bids, assignments, settlements, and disputes. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "catastrophe_bond_portfolio",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CATASTROPHE_BOND_PORTFOLIO_V1_DB",
+      "db_name": "nl2sql_dynamic_catastrophe_bond_portfolio_v1",
+      "db_id": "af938c89-c641-4d2c-9be8-036ba3e1edbe",
+      "description": "Catastrophe bond portfolio with sponsors, triggers, modeled losses, payouts, and basis risk tracking. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "export_credit_agency_ops",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_EXPORT_CREDIT_AGENCY_OPS_V1_DB",
+      "db_name": "nl2sql_dynamic_export_credit_agency_ops_v1",
+      "db_id": "0351d4b4-230d-4591-a896-1832286aa191",
+      "description": "Export credit agency operations with facilities, guarantees, claims, recoveries, and covenant exceptions. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "marine_biology_field_studies",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MARINE_BIOLOGY_FIELD_STUDIES_V1_DB",
+      "db_name": "nl2sql_dynamic_marine_biology_field_studies_v1",
+      "db_id": "02c0b7a4-9dc1-4326-840f-f8775160d7eb",
+      "description": "Marine biology field studies with stations, transects, specimen logs, assays, and biodiversity outcomes. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "pharmacovigilance_signal_tracking",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PHARMACOVIGILANCE_SIGNAL_TRACKING_V1_DB",
+      "db_name": "nl2sql_dynamic_pharmacovigilance_signal_tracking_v1",
+      "db_id": "e9d27dd5-724a-4883-ae08-4749292b61e4",
+      "description": "Pharmacovigilance signal tracking with case reports, coding, signal detection, triage, and closure. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "archaeology_site_management",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_ARCHAEOLOGY_SITE_MANAGEMENT_V1_DB",
+      "db_name": "nl2sql_dynamic_archaeology_site_management_v1",
+      "db_id": "f872a131-c4aa-4adc-947b-06cde27b087a",
+      "description": "Archaeology site management with digs, artifacts, context records, conservation actions, and catalog quality. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "renewable_materials_testing",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_RENEWABLE_MATERIALS_TESTING_V1_DB",
+      "db_name": "nl2sql_dynamic_renewable_materials_testing_v1",
+      "db_id": "3210f8c6-4d84-4580-9ca9-2c74c571c5fc",
+      "description": "Renewable materials testing with formulations, lab batches, stress tests, degradation curves, and QA gates. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "neuro_rehab_trial_design",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_NEURO_REHAB_TRIAL_DESIGN_V1_DB",
+      "db_name": "nl2sql_dynamic_neuro_rehab_trial_design_v1",
+      "db_id": "47f3bc02-3fe2-467f-939f-c4aff114882a",
+      "description": "Neuro-rehab trial design with cohorts, sessions, assessments, adverse events, and endpoint analysis. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "sports_broadcast_scheduling",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_SPORTS_BROADCAST_SCHEDULING_V1_DB",
+      "db_name": "nl2sql_dynamic_sports_broadcast_scheduling_v1",
+      "db_id": "9a38972b-1070-4395-95bc-e7e4322d1e97",
+      "description": "Sports broadcast scheduling with rights windows, feeds, ad breaks, ratings, and make-good accounting. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "digital_comics_subscription",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_DIGITAL_COMICS_SUBSCRIPTION_V1_DB",
+      "db_name": "nl2sql_dynamic_digital_comics_subscription_v1",
+      "db_id": "1f5b7507-008f-4989-8bfc-f948ff87ee8f",
+      "description": "Digital comics subscription with series, chapters, member tiers, reading behavior, and retention cohorts. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "theater_production_management",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_THEATER_PRODUCTION_MANAGEMENT_V1_DB",
+      "db_name": "nl2sql_dynamic_theater_production_management_v1",
+      "db_id": "bbf08094-c2fa-402b-b81d-e9e9254b39e4",
+      "description": "Theater production management with casts, rehearsals, run sheets, ticketing, and labor variance. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "influencer_campaign_attribution",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_INFLUENCER_CAMPAIGN_ATTRIBUTION_V1_DB",
+      "db_name": "nl2sql_dynamic_influencer_campaign_attribution_v1",
+      "db_id": "c563f8a4-e3ed-45f0-9810-69e1d682959e",
+      "description": "Influencer campaign attribution with briefs, posts, engagement ladders, conversion paths, and payouts. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "audiobook_distribution_network",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_AUDIOBOOK_DISTRIBUTION_NETWORK_V1_DB",
+      "db_name": "nl2sql_dynamic_audiobook_distribution_network_v1",
+      "db_id": "389b2c2e-d4e8-436f-9e01-b3527268d0df",
+      "description": "Audiobook distribution network with catalogs, channels, listens, royalty statements, and payment disputes. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "eldercare_referral_exchange",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_ELDERCARE_REFERRAL_EXCHANGE_V1_DB",
+      "db_name": "nl2sql_dynamic_eldercare_referral_exchange_v1",
+      "db_id": "c1f95e12-8208-46cf-963a-f784a3ef7b8a",
+      "description": "Eldercare referral exchange with intakes, eligibility checks, provider matching, appointments, and outcomes. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "vocational_training_grants",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_VOCATIONAL_TRAINING_GRANTS_V1_DB",
+      "db_name": "nl2sql_dynamic_vocational_training_grants_v1",
+      "db_id": "752f3f0f-c770-4f95-b0ef-8d7c9c34c50f",
+      "description": "Vocational training grants with applicants, awards, milestones, reimbursements, and placement tracking. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "legal_aid_intake_management",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_LEGAL_AID_INTAKE_MANAGEMENT_V1_DB",
+      "db_name": "nl2sql_dynamic_legal_aid_intake_management_v1",
+      "db_id": "686bd12f-4a42-4f29-99b5-490b7ccf4cda",
+      "description": "Legal aid intake management with requests, triage, case assignment, hearings, and closure metrics. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "refugee_resettlement_services",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_REFUGEE_RESETTLEMENT_SERVICES_V1_DB",
+      "db_name": "nl2sql_dynamic_refugee_resettlement_services_v1",
+      "db_id": "4e8d16a9-ef1c-41d8-b6fa-e3619f3435fa",
+      "description": "Refugee resettlement services with family cases, housing tasks, benefits navigation, and integration outcomes. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "public_health_outreach_program",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PUBLIC_HEALTH_OUTREACH_PROGRAM_V1_DB",
+      "db_name": "nl2sql_dynamic_public_health_outreach_program_v1",
+      "db_id": "5faf77fd-d72e-4a6a-87a4-0ad9514f615b",
+      "description": "Public health outreach programs with campaigns, cohorts, interventions, follow-ups, and coverage gaps. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "telehealth_triage_network",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_TELEHEALTH_TRIAGE_NETWORK_V1_DB",
+      "db_name": "nl2sql_dynamic_telehealth_triage_network_v1",
+      "db_id": "ed0a953f-e777-4bb4-9a22-10bd9f5aa094",
+      "description": "Telehealth triage network with call queues, nurse assessments, dispositions, escalations, and claim routing. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "dialysis_center_operations",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_DIALYSIS_CENTER_OPERATIONS_V1_DB",
+      "db_name": "nl2sql_dynamic_dialysis_center_operations_v1",
+      "db_id": "d8aae33b-fddb-4fad-8bff-0034e9aae66e",
+      "description": "Dialysis center operations with chair scheduling, treatment sessions, lab indicators, and reimbursement controls. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "maternal_care_pathways",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MATERNAL_CARE_PATHWAYS_V1_DB",
+      "db_name": "nl2sql_dynamic_maternal_care_pathways_v1",
+      "db_id": "755827db-9765-43f6-80dd-69eab6b8ea61",
+      "description": "Maternal care pathways with episodes, prenatal visits, risk flags, interventions, and postnatal outcomes. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "community_pharmacy_clinics",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_COMMUNITY_PHARMACY_CLINICS_V1_DB",
+      "db_name": "nl2sql_dynamic_community_pharmacy_clinics_v1",
+      "db_id": "f54cd60f-212b-4f49-9047-e50851cdde0c",
+      "description": "Community pharmacy clinics with appointments, vaccinations, medication therapy reviews, and payment outcomes. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "addiction_recovery_programs",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_ADDICTION_RECOVERY_PROGRAMS_V1_DB",
+      "db_name": "nl2sql_dynamic_addiction_recovery_programs_v1",
+      "db_id": "e735001d-bfd1-4f18-a573-e79f58cc7951",
+      "description": "Addiction recovery programs with enrollments, counseling sessions, adherence checks, relapse events, and support plans. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "seaport_customs_inspection",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_SEAPORT_CUSTOMS_INSPECTION_V1_DB",
+      "db_name": "nl2sql_dynamic_seaport_customs_inspection_v1",
+      "db_id": "addbd4e3-90b8-40bc-af4e-ea2b355c8587",
+      "description": "Seaport customs inspection with manifests, inspections, holds, release orders, and dwell-time analytics. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "hydrogen_refueling_network",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_HYDROGEN_REFUELING_NETWORK_V1_DB",
+      "db_name": "nl2sql_dynamic_hydrogen_refueling_network_v1",
+      "db_id": "6b14f87c-a316-4348-9891-8d76de439231",
+      "description": "Hydrogen refueling network with stations, dispenser uptime, fill sessions, incidents, and throughput targets. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "river_basin_allocation",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_RIVER_BASIN_ALLOCATION_V1_DB",
+      "db_name": "nl2sql_dynamic_river_basin_allocation_v1",
+      "db_id": "503d45ac-9752-4262-9769-c11af351a02c",
+      "description": "River basin allocation with reservoirs, permits, withdrawals, ecological flows, and compliance outcomes. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "municipal_bridge_maintenance",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MUNICIPAL_BRIDGE_MAINTENANCE_V1_DB",
+      "db_name": "nl2sql_dynamic_municipal_bridge_maintenance_v1",
+      "db_id": "2dc0a3ad-5ea5-445d-ab51-57a08806bbcb",
+      "description": "Municipal bridge maintenance with assets, inspections, defects, work orders, and risk prioritization. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "airport_runway_maintenance",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_AIRPORT_RUNWAY_MAINTENANCE_V1_DB",
+      "db_name": "nl2sql_dynamic_airport_runway_maintenance_v1",
+      "db_id": "7f99104d-dc3c-4525-a041-cb84b7fe3c14",
+      "description": "Airport runway maintenance with closures, crews, safety findings, delays, and service restoration timing. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "small_business_lending_hub",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_SMALL_BUSINESS_LENDING_HUB_V1_DB",
+      "db_name": "nl2sql_dynamic_small_business_lending_hub_v1",
+      "db_id": "4caec966-3289-4d41-92d9-feee7dd6f844",
+      "description": "Small business lending hub with applications, approvals, utilization, repayments, and delinquency stages. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "green_project_finance",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_GREEN_PROJECT_FINANCE_V1_DB",
+      "db_name": "nl2sql_dynamic_green_project_finance_v1",
+      "db_id": "c4df62fa-0bab-4528-846d-a37d93011a64",
+      "description": "Green project finance with facilities, tranches, disbursements, KPIs, and covenant monitoring. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "cross_border_payments_rail",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CROSS_BORDER_PAYMENTS_RAIL_V1_DB",
+      "db_name": "nl2sql_dynamic_cross_border_payments_rail_v1",
+      "db_id": "ea06c225-a273-46d9-881a-5bde2dee4e40",
+      "description": "Cross-border payments rail with corridors, transactions, FX rates, settlements, and exception queues. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "warehouse_receipt_financing",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_WAREHOUSE_RECEIPT_FINANCING_V1_DB",
+      "db_name": "nl2sql_dynamic_warehouse_receipt_financing_v1",
+      "db_id": "44bb6351-ace6-4c2a-bfd2-cab63f5ce44d",
+      "description": "Warehouse receipt financing with collateral lots, valuations, drawdowns, audits, and release workflows. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "tax_appeals_caseflow",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_TAX_APPEALS_CASEFLOW_V1_DB",
+      "db_name": "nl2sql_dynamic_tax_appeals_caseflow_v1",
+      "db_id": "2b3803bc-8bf2-45a0-813d-a429b7329800",
+      "description": "Tax appeals caseflow with petitions, hearings, rulings, adjustments, and collection outcomes. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "climate_model_experiments",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CLIMATE_MODEL_EXPERIMENTS_V1_DB",
+      "db_name": "nl2sql_dynamic_climate_model_experiments_v1",
+      "db_id": "eaba658e-cf4d-422d-afea-34090e5982c8",
+      "description": "Climate model experiments with scenarios, runs, diagnostics, anomalies, and uncertainty envelopes. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "wildlife_corridor_monitoring",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_WILDLIFE_CORRIDOR_MONITORING_V1_DB",
+      "db_name": "nl2sql_dynamic_wildlife_corridor_monitoring_v1",
+      "db_id": "449b6be5-5a9e-4686-84e6-3e0a1eca75af",
+      "description": "Wildlife corridor monitoring with sightings, sensor triggers, interventions, and habitat restoration metrics. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "soil_carbon_measurement",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_SOIL_CARBON_MEASUREMENT_V1_DB",
+      "db_name": "nl2sql_dynamic_soil_carbon_measurement_v1",
+      "db_id": "f663476b-d78b-4fea-802e-7b7d7f1c4b5a",
+      "description": "Soil carbon measurement with sites, samples, lab assays, baselines, and sequestration estimates. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "vaccine_cold_chain_trials",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_VACCINE_COLD_CHAIN_TRIALS_V1_DB",
+      "db_name": "nl2sql_dynamic_vaccine_cold_chain_trials_v1",
+      "db_id": "04900b89-e37b-42d6-bff2-4ceb588c31c9",
+      "description": "Vaccine cold-chain trials with sites, shipments, logger readings, protocol deviations, and endpoint integrity. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "ocean_buoy_telemetry",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_OCEAN_BUOY_TELEMETRY_V1_DB",
+      "db_name": "nl2sql_dynamic_ocean_buoy_telemetry_v1",
+      "db_id": "ace6a52b-9d29-4888-b9b6-4cc7a6b8f395",
+      "description": "Ocean buoy telemetry with stations, payloads, transmissions, signal loss events, and quality controls. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "indie_game_publishing",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_INDIE_GAME_PUBLISHING_V1_DB",
+      "db_name": "nl2sql_dynamic_indie_game_publishing_v1",
+      "db_id": "969a3fe2-2065-4071-9f0f-d2b141374aa3",
+      "description": "Indie game publishing with titles, platforms, releases, DLC sales, refunds, and royalty reconciliation. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "virtual_event_platform",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_VIRTUAL_EVENT_PLATFORM_V1_DB",
+      "db_name": "nl2sql_dynamic_virtual_event_platform_v1",
+      "db_id": "58be7639-2acd-4a31-b9af-8ee292fa35b8",
+      "description": "Virtual event platform with sessions, speakers, attendance funnels, sponsor slots, and engagement lift. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "documentary_distribution",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_DOCUMENTARY_DISTRIBUTION_V1_DB",
+      "db_name": "nl2sql_dynamic_documentary_distribution_v1",
+      "db_id": "028d1d8d-14e6-4cca-a669-51f0be60a3b3",
+      "description": "Documentary distribution with regions, windows, viewership, licensing fees, and dispute tracking. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "music_festival_operations",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_MUSIC_FESTIVAL_OPERATIONS_V1_DB",
+      "db_name": "nl2sql_dynamic_music_festival_operations_v1",
+      "db_id": "e9a48c2a-18e3-4d9b-b5b5-e789673d5d2c",
+      "description": "Music festival operations with stages, artists, set times, incidents, staffing, and concession economics. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "creator_merch_fulfillment",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CREATOR_MERCH_FULFILLMENT_V1_DB",
+      "db_name": "nl2sql_dynamic_creator_merch_fulfillment_v1",
+      "db_id": "a89af7de-36e9-4dae-8c92-06f51c4abe81",
+      "description": "Creator merch fulfillment with launches, SKUs, orders, returns, SLA breaches, and margin rollups. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "community_college_admissions",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_COMMUNITY_COLLEGE_ADMISSIONS_V1_DB",
+      "db_name": "nl2sql_dynamic_community_college_admissions_v1",
+      "db_id": "a58e5a8f-0c1e-43d9-8996-c6bbe0da8e8c",
+      "description": "Community college admissions with applicants, offers, enrollments, aid packaging, and persistence rates. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "public_housing_repairs",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_PUBLIC_HOUSING_REPAIRS_V1_DB",
+      "db_name": "nl2sql_dynamic_public_housing_repairs_v1",
+      "db_id": "7b7a08cb-5bde-466a-a5da-d9f959cc6d71",
+      "description": "Public housing repairs with tickets, contractors, inspections, tenant feedback, and budget adherence. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "job_center_case_management",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_JOB_CENTER_CASE_MANAGEMENT_V1_DB",
+      "db_name": "nl2sql_dynamic_job_center_case_management_v1",
+      "db_id": "c9f2afa6-1d36-4618-a662-5961bc006f3f",
+      "description": "Job center case management with assessments, plans, placements, retention checks, and support utilization. Complexity: low.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "civic_mediation_services",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_CIVIC_MEDIATION_SERVICES_V1_DB",
+      "db_name": "nl2sql_dynamic_civic_mediation_services_v1",
+      "db_id": "a3f1217e-ff71-4c27-b77c-ccc8559b9595",
+      "description": "Civic mediation services with referrals, sessions, agreements, breach events, and closure performance. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "youth_mentorship_network",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_YOUTH_MENTORSHIP_NETWORK_V1_DB",
+      "db_name": "nl2sql_dynamic_youth_mentorship_network_v1",
+      "db_id": "15f7005e-26c5-49db-81cf-3ab478eb30cd",
+      "description": "Youth mentorship network with cohorts, pairings, attendance, milestones, and graduation outcomes. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "urgent_care_capacity",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_URGENT_CARE_CAPACITY_V1_DB",
+      "db_name": "nl2sql_dynamic_urgent_care_capacity_v1",
+      "db_id": "48408e16-4706-4734-8835-f956905fd754",
+      "description": "Urgent care capacity with arrivals, triage categories, bed assignments, wait times, and claim outcomes. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "home_hospice_coordination",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_HOME_HOSPICE_COORDINATION_V1_DB",
+      "db_name": "nl2sql_dynamic_home_hospice_coordination_v1",
+      "db_id": "ef38bde5-4fe9-4f87-b2dc-8f68034c6ca5",
+      "description": "Home hospice coordination with referrals, visits, medications, symptom scores, and family feedback. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "neonatal_followup_program",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_NEONATAL_FOLLOWUP_PROGRAM_V1_DB",
+      "db_name": "nl2sql_dynamic_neonatal_followup_program_v1",
+      "db_id": "5919be34-3422-420f-9f38-f5116576239f",
+      "description": "Neonatal follow-up program with episodes, appointments, developmental screens, interventions, and adherence. Complexity: high.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "ambulatory_surgery_center",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_AMBULATORY_SURGERY_CENTER_V1_DB",
+      "db_name": "nl2sql_dynamic_ambulatory_surgery_center_v1",
+      "db_id": "4c041125-d8e5-4343-a1a0-e247f5bfa8b8",
+      "description": "Ambulatory surgery center with schedules, procedures, supplies, recovery, complications, and reimbursements. Complexity: medium.",
+      "source": "generated"
+    },
+    {
+      "schema_id": "community_nutrition_clinic",
+      "version": "v1",
+      "dialect": "sqlite",
+      "validation_binding": "DYNAMIC_COMMUNITY_NUTRITION_CLINIC_V1_DB",
+      "db_name": "nl2sql_dynamic_community_nutrition_clinic_v1",
+      "db_id": "cdb934c8-3c9b-4824-b6f0-3dd874750a4f",
+      "description": "Community nutrition clinic with enrollments, meal plans, coaching sessions, biomarkers, and outcomes. Complexity: low.",
+      "source": "generated"
     }
   ]
 }

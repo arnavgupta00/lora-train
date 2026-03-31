@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 import tempfile
+import urllib.error
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -89,6 +90,27 @@ def _http_json(method: str, url: str, body: Dict[str, Any], admin_key: str) -> D
             "User-Agent": "curl/8.0",
         },
     )
+    try:
+        with urllib.request.urlopen(req) as resp:  # nosec - internal tool
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        raw = e.read().decode("utf-8", errors="replace") if hasattr(e, "read") else ""
+        try:
+            parsed = json.loads(raw) if raw else {}
+        except json.JSONDecodeError:
+            parsed = {"error": raw}
+
+        # 409 is expected on resume when schema already exists.
+        if e.code == 409:
+            out = dict(parsed) if isinstance(parsed, dict) else {"error": parsed}
+            out["_http_status"] = 409
+            return out
+
+        raise SystemExit(f"HTTP {e.code} {method} {url}\nBody: {raw}") from e
+
+
+def _http_get_json(url: str) -> Dict[str, Any]:
+    req = urllib.request.Request(url, method="GET", headers={"User-Agent": "curl/8.0"})
     with urllib.request.urlopen(req) as resp:  # nosec - internal tool
         return json.loads(resp.read().decode("utf-8"))
 
@@ -213,6 +235,17 @@ def main() -> None:
     else:
         _run(deploy_cmd, cwd=project_dir)
 
+    existing_versions: set[Tuple[str, str]] = set()
+    if not args.dry_run:
+        listed = _http_get_json(f"{base_url}/v1/schemas")
+        for row in listed.get("schemas", []) if isinstance(listed, dict) else []:
+            if not isinstance(row, dict):
+                continue
+            sid = row.get("id") or row.get("schema_id")
+            ver = row.get("version")
+            if isinstance(sid, str) and isinstance(ver, str) and sid and ver:
+                existing_versions.add((sid, ver))
+
     # Register + activate schemas
     for s in schemas:
         sid = s["schema_id"]
@@ -230,7 +263,13 @@ def main() -> None:
         if args.dry_run:
             print(f"[dry_run] register {sid}:{version}")
         else:
-            _http_json("POST", f"{base_url}/v1/schemas", payload, admin_key)
+            print(f"register+activate+sanity {sid}:{version}")
+            if (sid, version) in existing_versions:
+                print(f"  [skip] schema version already exists: {sid}:{version}")
+            else:
+                reg_out = _http_json("POST", f"{base_url}/v1/schemas", payload, admin_key)
+                if reg_out.get("_http_status") == 409:
+                    print(f"  [skip] schema already registered: {sid}:{version}")
             _http_json("POST", f"{base_url}/v1/schemas/{sid}/{version}/activate", {}, admin_key)
 
             # Sanity-check that the schema routes to the right D1 binding and executes.
@@ -244,9 +283,13 @@ def main() -> None:
                 "gold_sql": f"SELECT COUNT(*) AS row_count FROM {table}",
             }
             out = _http_json("POST", f"{base_url}/v1/validate", sanity, admin_key)
+            validation = out.get("validation") if isinstance(out.get("validation"), dict) else {}
+            execution_ok = out.get("execution_ok") if "execution_ok" in out else validation.get("execution_ok")
+            deterministic_ok = out.get("deterministic_ok") if "deterministic_ok" in out else validation.get("deterministic_ok")
+
             _assert(bool(out.get("accepted")), f"{sid}: sanity validate rejected: {out}")
-            _assert(bool(out.get("execution_ok")), f"{sid}: sanity validate execution failed: {out}")
-            _assert(bool(out.get("deterministic_ok")), f"{sid}: sanity validate nondeterministic: {out}")
+            _assert(bool(execution_ok), f"{sid}: sanity validate execution failed: {out}")
+            _assert(bool(deterministic_ok), f"{sid}: sanity validate nondeterministic: {out}")
 
     # Update registry with db ids
     if args.dry_run:

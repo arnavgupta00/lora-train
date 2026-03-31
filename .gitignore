@@ -39,3 +39,4 @@ together-ai/
 dataset.jsonl
 dataset/t1/
 nl2sql-dataset-service/
+outputs.zip

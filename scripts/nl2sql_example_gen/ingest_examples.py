@@ -1,7 +1,9 @@
 import argparse
 import json
 import os
+import secrets
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, DefaultDict, Dict, List, Tuple
 
@@ -33,6 +35,12 @@ def _post_json(url: str, body: Dict[str, Any], admin_key: str) -> Dict[str, Any]
         return json.loads(resp.read().decode("utf-8"))
 
 
+def _get_json(url: str) -> Any:
+    req = urllib.request.Request(url, headers={"User-Agent": "curl/8.0"})
+    with urllib.request.urlopen(req) as resp:  # nosec - internal tool
+        return json.loads(resp.read().decode("utf-8"))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True)
@@ -40,6 +48,9 @@ def main() -> None:
     ap.add_argument("--examples", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--chunk_size", type=int, default=50)
+    ap.add_argument("--max_workers", type=int, default=8)
+    ap.add_argument("--rewrite_external_ids", action="store_true")
+    ap.add_argument("--filter_existing", action="store_true")
     args = ap.parse_args()
 
     cfg = json.loads(Path(args.config).read_text(encoding="utf-8"))
@@ -76,6 +87,33 @@ def main() -> None:
             continue
         grouped[(sid, split)].append(ex)
 
+    if args.filter_existing:
+        existing_payload = _get_json(f"{base_url}/v1/examples")
+        existing = existing_payload.get("examples", existing_payload) if isinstance(existing_payload, dict) else existing_payload
+        seen: set[Tuple[str, str, str, str]] = set()
+        if isinstance(existing, list):
+            for ex in existing:
+                if not isinstance(ex, dict):
+                    continue
+                sid = ex.get("schema_id")
+                split = ex.get("split")
+                q = ex.get("question")
+                sql = ex.get("gold_sql")
+                if isinstance(sid, str) and isinstance(split, str) and isinstance(q, str) and isinstance(sql, str):
+                    seen.add((sid, split, q.strip().lower(), sql.strip().lower()))
+        for key, pool in list(grouped.items()):
+            filtered: List[Dict[str, Any]] = []
+            for ex in pool:
+                q = ex.get("question")
+                sql = ex.get("gold_sql")
+                sid = ex.get("schema_id")
+                split = ex.get("split")
+                if isinstance(sid, str) and isinstance(split, str) and isinstance(q, str) and isinstance(sql, str):
+                    if (sid, split, q.strip().lower(), sql.strip().lower()) in seen:
+                        continue
+                filtered.append(ex)
+            grouped[key] = filtered
+
     report: Dict[str, Any] = {
         "base_url": base_url,
         "accepted": {},
@@ -84,15 +122,12 @@ def main() -> None:
         "errors_sample": {},
     }
 
-    for key, need in required.items():
+    def process_key(key: Tuple[str, str], need: int) -> Tuple[str, int, int, int, List[str]]:
         sid, split = key
+        k = f"{sid}:{split}"
         pool = grouped.get(key, [])
         if not pool:
-            report["attempted"][f"{sid}:{split}"] = 0
-            report["accepted"][f"{sid}:{split}"] = 0
-            report["rejected"][f"{sid}:{split}"] = 0
-            report["errors_sample"][f"{sid}:{split}"] = ["missing examples for this schema/split in generator output"]
-            continue
+            return (k, 0, 0, 0, ["missing examples for this schema/split in generator output"])
 
         accepted = 0
         rejected = 0
@@ -102,6 +137,16 @@ def main() -> None:
         i = 0
         while i < len(pool) and accepted < need:
             chunk = pool[i : i + int(args.chunk_size)]
+            if args.rewrite_external_ids:
+                rewritten = []
+                for ex in chunk:
+                    if not isinstance(ex, dict):
+                        continue
+                    row = dict(ex)
+                    base_id = row.get("external_id") if isinstance(row.get("external_id"), str) else f"{sid}:{split}"
+                    row["external_id"] = f"{base_id}:r{secrets.token_hex(4)}"
+                    rewritten.append(row)
+                chunk = rewritten
             i += int(args.chunk_size)
             resp = _post_json(f"{base_url}/v1/examples/batch", {"examples": chunk}, admin_key)
             results = resp.get("results", [])
@@ -123,10 +168,16 @@ def main() -> None:
             if accepted >= need:
                 break
 
-        report["attempted"][f"{sid}:{split}"] = attempted
-        report["accepted"][f"{sid}:{split}"] = accepted
-        report["rejected"][f"{sid}:{split}"] = rejected
-        report["errors_sample"][f"{sid}:{split}"] = errors
+        return (k, attempted, accepted, rejected, errors)
+
+    with ThreadPoolExecutor(max_workers=max(1, int(args.max_workers))) as ex:
+        futures = [ex.submit(process_key, key, need) for key, need in required.items()]
+        for fut in as_completed(futures):
+            k, attempted, accepted, rejected, errors = fut.result()
+            report["attempted"][k] = attempted
+            report["accepted"][k] = accepted
+            report["rejected"][k] = rejected
+            report["errors_sample"][k] = errors
 
     _save_json(Path(args.out), report)
     print(f"wrote {args.out}")
@@ -134,4 +185,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

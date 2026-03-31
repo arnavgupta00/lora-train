@@ -1,0 +1,47 @@
+{
+  "sources": {
+    "t3": 8938,
+    "bird": 9311,
+    "complex": 306
+  },
+  "splits": {
+    "train": 16699,
+    "dev": 928,
+    "test": 928
+  },
+  "total": 18555,
+  "patterns": {
+    "cte": {
+      "count": 75,
+      "pct": 0.45
+    },
+    "window": {
+      "count": 78,
+      "pct": 0.47
+    },
+    "subquery": {
+      "count": 782,
+      "pct": 4.68
+    },
+    "case": {
+      "count": 853,
+      "pct": 5.11
+    },
+    "join": {
+      "count": 7682,
+      "pct": 46.0
+    },
+    "agg": {
+      "count": 6157,
+      "pct": 36.87
+    },
+    "like": {
+      "count": 571,
+      "pct": 3.42
+    },
+    "having": {
+      "count": 252,
+      "pct": 1.51
+    }
+  }
+}

@@ -1,8 +1,10 @@
 import argparse
 import json
 import math
+import os
+import re
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
 import urllib.request
 
@@ -22,6 +24,55 @@ def _fetch_json(url: str) -> Any:
     req = urllib.request.Request(url, headers={"User-Agent": "curl/8.0"})
     with urllib.request.urlopen(req) as resp:  # nosec - internal tool
         return json.loads(resp.read().decode("utf-8"))
+
+
+def _post_json(url: str, body: Dict[str, Any], admin_key: str) -> Any:
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(body).encode("utf-8"),
+        method="POST",
+        headers={
+            "User-Agent": "curl/8.0",
+            "Authorization": f"Bearer {admin_key}",
+            "Content-Type": "application/json",
+        },
+    )
+    with urllib.request.urlopen(req) as resp:  # nosec - internal tool
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def _context_tables(schema_context: Any) -> Set[str]:
+    if not isinstance(schema_context, str):
+        return set()
+    out: Set[str] = set()
+    for line in schema_context.splitlines():
+        m = re.match(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*\(.*\)\s*$", line.strip())
+        if m:
+            out.add(m.group(1))
+    return out
+
+
+def _runtime_tables(base_url: str, admin_key: str, schema_id: str, schema_version: str, dialect: str) -> Set[str]:
+    body = {
+        "schema_id": schema_id,
+        "schema_version": schema_version,
+        "dialect": dialect,
+        "split": "train",
+        "question": "List all table names.",
+        "gold_sql": "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name",
+        "tags": ["probe"],
+        "metadata": {"source": "probe"},
+    }
+    resp = _post_json(f"{base_url}/v1/validate", body, admin_key)
+    rows = ((resp or {}).get("validation") or {}).get("result_preview", {}).get("rows", [])
+    out: Set[str] = set()
+    if isinstance(rows, list):
+        for r in rows:
+            if isinstance(r, dict):
+                name = r.get("name")
+                if isinstance(name, str) and name and not name.startswith("sqlite_") and name != "_cf_KV":
+                    out.add(name)
+    return out
 
 
 def _targets(total: int, ratio: Dict[str, int]) -> Dict[str, int]:
@@ -69,6 +120,8 @@ def main() -> None:
 
     cfg = json.loads(Path(args.config).read_text(encoding="utf-8"))
     base_url = cfg["dataset_service"]["base_url"].rstrip("/")
+    admin_env = cfg["dataset_service"].get("admin_api_key_env", "ADMIN_API_KEY")
+    admin_key = os.environ.get(admin_env, "").strip()
     runs_dir = Path(cfg["state"]["runs_dir"])
     run_name = cfg["run_name"]
     run_dir = runs_dir / run_name
@@ -132,7 +185,37 @@ def main() -> None:
         )
 
     rows.sort(key=lambda r: (r["total_deficit"], r["schema_id"]), reverse=True)
-    selected = [r for r in rows if r["total_deficit"] > 0][: int(cfg["schemas_per_run"])]
+    cap = int(cfg["schemas_per_run"])
+    selected: List[Dict[str, Any]] = []
+    skipped_binding_mismatch: Dict[str, Any] = {}
+    for r in rows:
+        if r["total_deficit"] <= 0:
+            continue
+        if len(selected) >= cap:
+            break
+        # Guard against schemas whose runtime validation binding doesn't match schema_context.
+        if admin_key:
+            ctx_tables = _context_tables(r.get("schema_context"))
+            if not ctx_tables:
+                skipped_binding_mismatch[r["schema_id"]] = {"error": "missing_schema_context"}
+                continue
+            else:
+                try:
+                    rt_tables = _runtime_tables(base_url, admin_key, r["schema_id"], r["schema_version"], r["dialect"])
+                    overlap = len(ctx_tables & rt_tables)
+                    ratio = overlap / max(1, len(ctx_tables))
+                    if not rt_tables or ratio < 0.2:
+                        skipped_binding_mismatch[r["schema_id"]] = {
+                            "context_tables": len(ctx_tables),
+                            "runtime_tables": len(rt_tables),
+                            "overlap": overlap,
+                            "overlap_ratio": round(ratio, 3),
+                        }
+                        continue
+                except Exception:
+                    skipped_binding_mismatch[r["schema_id"]] = {"error": "runtime_probe_failed"}
+                    continue
+        selected.append(r)
 
     plan = {
         "run_name": run_name,
@@ -141,6 +224,7 @@ def main() -> None:
         "split_ratio": ratio,
         "split_targets": split_targets,
         "selected_schemas": [r["schema_id"] for r in selected],
+        "skipped_binding_mismatch": skipped_binding_mismatch,
         "by_schema": {
             r["schema_id"]: {
                 "schema_version": r["schema_version"],
@@ -174,4 +258,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
