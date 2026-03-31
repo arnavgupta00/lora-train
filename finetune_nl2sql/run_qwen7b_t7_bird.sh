@@ -91,8 +91,10 @@ echo ""
 # =============================================================================
 
 echo ">>> Installing dependencies..."
-python3 -m pip install -U pip --quiet
-python3 -m pip install -r finetune_nl2sql/requirements.txt --quiet
+python3 -m pip install -U pip setuptools wheel
+python3 -m pip install accelerate datasets peft requests safetensors bitsandbytes
+python3 -m pip install "transformers>=4.45.0,<5"
+python3 -m pip install hf-transfer || echo "Warning: hf-transfer install failed (optional)"
 
 # Check for API key
 if [[ ! -f finetune_nl2sql/private_key.py ]]; then
