@@ -40,3 +40,4 @@ dataset.jsonl
 dataset/t1/
 nl2sql-dataset-service/
 outputs.zip
+finetune_nl2sql/TRAINING_EXPLAINED.md

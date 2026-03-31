@@ -5,13 +5,13 @@
 ### 1. Clone the repo on RunPod
 ```bash
 cd /workspace
-git clone https://github.com/YOUR_USERNAME/lm.git
-cd lm
+git clone https://github.com/arnavgupta00/lora-train.git
+cd lora-train
 ```
 
 ### 2. Set your API key (for evaluation)
 ```bash
-export NL2SQL_ADMIN_API_KEY="your-api-key-here"
+export NL2SQL_ADMIN_API_KEY="71hLH6Zse7e_83ncSqBk9s1c9_6KhvPm_WBUQeOJsoc"
 ```
 
 ### 3. Run training (background mode)
@@ -26,46 +26,24 @@ tail -f run.log
 watch -n 5 nvidia-smi
 ```
 
-### 5. Kill running process (if needed)
-```bash
-# Find the process ID
-ps aux | grep run_qwen7b_t7_bird.sh
-
-# Kill by PID (replace 12345 with actual PID)
-kill 12345
-
-# Or kill all training processes
-pkill -f train_lora.py
-
-# Force kill if needed
-pkill -9 -f train_lora.py
-```
-
 ---
 
 ## Configuration Options
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `EPOCHS` | 1 | Number of training epochs (1 epoch takes ~2-5 hours) |
+| `EPOCHS` | 3 | Number of training epochs |
 | `LR` | 5e-5 | Learning rate |
-| `SEQ_LEN` | 1024 | Max sequence length (1024 is 2x faster than 2048) |
-| `TRAIN_BS` | 2 | Per-device batch size (2 for 24GB GPUs to avoid OOM) |
-| `GRAD_ACC` | 16 | Gradient accumulation (effective BS = TRAIN_BS × GRAD_ACC = 32) |
+| `SEQ_LEN` | 2048 | Max sequence length |
+| `TRAIN_BS` | 4 | Per-device batch size |
+| `GRAD_ACC` | 4 | Gradient accumulation steps |
 | `EVAL_BASE` | 1 | Also evaluate base model |
 | `SKIP_EVAL` | 0 | Skip evaluation phase |
 | `EVAL_LIMIT` | - | Limit eval examples |
 
 ### Example with custom settings:
 ```bash
-# Default settings work for all GPUs (24GB+)
-nohup bash finetune_nl2sql/run_qwen7b_t7_bird.sh > run.log 2>&1 &
-
-# Longer sequences (slower but handles very long queries)
-SEQ_LEN=2048 nohup bash finetune_nl2sql/run_qwen7b_t7_bird.sh > run.log 2>&1 &
-
-# More epochs (diminishing returns after 1-2 epochs)
-EPOCHS=2 nohup bash finetune_nl2sql/run_qwen7b_t7_bird.sh > run.log 2>&1 &
+EPOCHS=5 LR=3e-5 nohup bash finetune_nl2sql/run_qwen7b_t7_bird.sh > run.log 2>&1 &
 ```
 
 ---
@@ -96,17 +74,11 @@ runpod/pytorch:2.2.0-py3.10-cuda12.1.0-devel-ubuntu22.04
 
 ## Training Time Estimates
 
-| GPU | Est. Time (1 epoch) | Cost | Notes |
-|-----|---------------------|------|-------|
-| **RTX 4090** | **2-3 hours** | **~$0.88-1.32** | ⭐ Fastest option |
-| A100 40GB | 2-3 hours | ~$3.28-4.92 | Enterprise, expensive |
-| **RTX 3090 Ti** | **5-6 hours** | **~$1.35-1.62** | ⭐ Best value |
-| RTX A5000 | 5-6 hours | ~$1.40-1.68 | Similar to 3090 Ti |
-| ⚠️ A40 | ⚠️ 6-8 hours | ⚠️ ~$2.40-3.20 | Avoid - slow & expensive |
-
-**Performance tip**: Gaming GPUs (3090 Ti, 4090) are faster than workstation GPUs (A40) for training due to higher clock speeds.
-
-Note: Times are for SEQ_LEN=1024 (default). SEQ_LEN=2048 is 2-3x slower.
+| GPU | Est. Time | Cost |
+|-----|-----------|------|
+| A100 40GB | 3-4 hours | ~$6-7 |
+| RTX A6000 | 5-6 hours | ~$4-5 |
+| RTX 4090 | 6-8 hours | ~$3-4 |
 
 ---
 
