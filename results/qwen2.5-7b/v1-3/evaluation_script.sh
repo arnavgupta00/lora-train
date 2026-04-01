@@ -1,0 +1,1 @@
+../../../evaluation/run_bird_eval.sh

@@ -5,7 +5,18 @@
 **Date:** March 31 - April 1, 2026  
 **Status:** ✅ Completed
 
-> **Note:** The t3 dataset is not included in this directory as it's excluded by `.gitignore` (large size). The t7 dataset used here is located at `data/training/t7/`.
+---
+
+## 🔗 Quick Links
+
+**Files used in this run:**
+- 📊 **Training Dataset:** [`dataset_used/`](dataset_used/) → `data/training/t7/` (16,699 examples)
+- ⚙️ **Training Config:** [`training_config.sh`](training_config.sh) → `training/configs/qwen2.5-7b.sh`
+- 🧪 **Evaluation Script:** [`evaluation_script.sh`](evaluation_script.sh) → `evaluation/run_bird_eval.sh` (v3 with DDL schema)
+- 📈 **Results:** [`bird_evaluation/bird_eval_report_v3.json`](bird_evaluation/bird_eval_report_v3.json)
+- 🧠 **Model Adapters:** [`qwen2.5-7b-t7-bird-20260331_193013/`](qwen2.5-7b-t7-bird-20260331_193013/) (154MB LoRA weights)
+
+> **Note:** Symlinks point to the actual files in the repository structure.
 
 ---
 
