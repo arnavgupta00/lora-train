@@ -55,58 +55,48 @@ wc -l data/training/t8/eval/bird_dev.jsonl
 
 ## Step 3: Download BIRD Benchmark (for evaluation)
 
-**⚠️ IMPORTANT:** The official Aliyun OSS links are currently returning 403 Forbidden errors. Use one of these alternatives:
-
-### Option A: Clone BIRD Official Repository (Recommended)
-
 ```bash
-# Clone official BIRD repo (includes databases)
-cd /workspace
-git clone --depth 1 https://github.com/AlibabaResearch/DAMO-ConvAI.git
-
-# Copy databases to expected location
-mkdir -p /workspace/lora-train/bird_eval/dev_20240627
-cp -r /workspace/DAMO-ConvAI/bird/data/dev_databases /workspace/lora-train/bird_eval/dev_20240627/
-cp /workspace/DAMO-ConvAI/bird/data/dev.json /workspace/lora-train/bird_eval/dev_20240627/
-
-cd /workspace/lora-train
-
-# Verify installation
-ls -la bird_eval/dev_20240627/dev_databases/
-# Should see: california_schools, card_games, codebase_community, etc. (11 databases)
-
-find bird_eval/dev_20240627/dev_databases -name "*.sqlite" | wc -l
-# Should output: 11
-```
-
-### Option B: Download from Alternative Source
-
-```bash
-# Try direct GitHub raw content
+# Create directory
 cd /workspace/lora-train
 mkdir -p bird_eval/dev_20240627
 cd bird_eval/dev_20240627
 
-# Download dev.json from GitHub
-wget https://raw.githubusercontent.com/AlibabaResearch/DAMO-ConvAI/main/bird/data/dev.json
+# Download BIRD dev set (330 MB - contains databases + metadata)
+wget https://bird-bench.oss-cn-beijing.aliyuncs.com/dev.zip
 
-# Note: GitHub doesn't host the large .sqlite files directly
-# If Option A fails, contact user for alternative hosting
+# Extract (may take a few minutes)
+unzip dev.zip
+
+# The extracted structure should be:
+# dev/
+#   dev.json                 - Metadata with questions/SQL
+#   dev_databases/           - 11 SQLite databases
+#     california_schools/
+#     card_games/
+#     ... (9 more)
+
+# Move files to expected location
+mv dev/dev.json ./
+mv dev/dev_databases ./
+rm -rf dev  # Clean up extra directory
+
 cd /workspace/lora-train
 ```
 
-### Option C: Manual Upload from Local Machine
-
-If you have BIRD databases on your local machine at `/Users/arnav/programming/lm/`:
+**Verify installation:**
 
 ```bash
-# On LOCAL machine terminal:
-# tar czf bird_dev_dbs.tar.gz bird_eval/dev_20240627/dev_databases/
-# scp bird_dev_dbs.tar.gz root@YOUR_RUNPOD_IP:/workspace/lora-train/
+# Check databases exist (should show 11)
+find bird_eval/dev_20240627/dev_databases -name "*.sqlite" | wc -l
 
-# On RUNPOD:
-# cd /workspace/lora-train
-# tar xzf bird_dev_dbs.tar.gz
+# Check total size
+du -sh bird_eval/dev_20240627/dev_databases/
+
+# List all databases
+ls bird_eval/dev_20240627/dev_databases/
+# Expected: california_schools, card_games, codebase_community, 
+#           debit_card_specializing, european_football_2, financial,
+#           formula_1, student_club, superhero, thrombosis_prediction, toxicology
 ```
 
 ---
