@@ -1,90 +1,188 @@
 {
   "version": "baseline_no_lora",
   "total_examples": 1534,
-  "exact_match": 0,
-  "exact_match_pct": 0.0,
-  "execution_match": 0,
-  "execution_accuracy": 0.0,
-  "execution_errors": 0,
-  "execution_error_pct": 0.0,
+  "exact_match": 76,
+  "exact_match_pct": 4.95,
+  "execution_match": 644,
+  "execution_accuracy": 41.98,
+  "execution_errors": 333,
+  "execution_error_pct": 21.71,
   "by_database": [
-    {
-      "db_id": "california_schools",
-      "total": 89,
-      "exec_match": 0,
-      "errors": 0,
-      "accuracy": 0.0
-    },
     {
       "db_id": "card_games",
       "total": 191,
-      "exec_match": 0,
-      "errors": 0,
-      "accuracy": 0.0
+      "exec_match": 67,
+      "errors": 35,
+      "accuracy": 35.1
     },
     {
       "db_id": "codebase_community",
       "total": 186,
-      "exec_match": 0,
-      "errors": 0,
-      "accuracy": 0.0
-    },
-    {
-      "db_id": "debit_card_specializing",
-      "total": 64,
-      "exec_match": 0,
-      "errors": 0,
-      "accuracy": 0.0
-    },
-    {
-      "db_id": "european_football_2",
-      "total": 129,
-      "exec_match": 0,
-      "errors": 0,
-      "accuracy": 0.0
-    },
-    {
-      "db_id": "financial",
-      "total": 106,
-      "exec_match": 0,
-      "errors": 0,
-      "accuracy": 0.0
+      "exec_match": 96,
+      "errors": 28,
+      "accuracy": 51.6
     },
     {
       "db_id": "formula_1",
       "total": 174,
-      "exec_match": 0,
-      "errors": 0,
-      "accuracy": 0.0
-    },
-    {
-      "db_id": "student_club",
-      "total": 158,
-      "exec_match": 0,
-      "errors": 0,
-      "accuracy": 0.0
-    },
-    {
-      "db_id": "superhero",
-      "total": 129,
-      "exec_match": 0,
-      "errors": 0,
-      "accuracy": 0.0
+      "exec_match": 62,
+      "errors": 37,
+      "accuracy": 35.6
     },
     {
       "db_id": "thrombosis_prediction",
       "total": 163,
-      "exec_match": 0,
-      "errors": 0,
-      "accuracy": 0.0
+      "exec_match": 41,
+      "errors": 72,
+      "accuracy": 25.2
+    },
+    {
+      "db_id": "student_club",
+      "total": 158,
+      "exec_match": 87,
+      "errors": 28,
+      "accuracy": 55.1
     },
     {
       "db_id": "toxicology",
       "total": 145,
-      "exec_match": 0,
-      "errors": 0,
-      "accuracy": 0.0
+      "exec_match": 63,
+      "errors": 22,
+      "accuracy": 43.4
+    },
+    {
+      "db_id": "superhero",
+      "total": 129,
+      "exec_match": 90,
+      "errors": 15,
+      "accuracy": 69.8
+    },
+    {
+      "db_id": "european_football_2",
+      "total": 129,
+      "exec_match": 67,
+      "errors": 26,
+      "accuracy": 51.9
+    },
+    {
+      "db_id": "financial",
+      "total": 106,
+      "exec_match": 31,
+      "errors": 32,
+      "accuracy": 29.2
+    },
+    {
+      "db_id": "california_schools",
+      "total": 89,
+      "exec_match": 16,
+      "errors": 23,
+      "accuracy": 18.0
+    },
+    {
+      "db_id": "debit_card_specializing",
+      "total": 64,
+      "exec_match": 24,
+      "errors": 15,
+      "accuracy": 37.5
     }
   ],
-  "note": "Generated locally from predictions file"
+  "sample_errors": [
+    {
+      "db_id": "california_schools",
+      "question": "How many schools with an average score in Math greater than 400 in the SAT test are exclusively virt",
+      "pred_sql": "SELECT COUNT(*) FROM satscores WHERE AvgScrMath > 400 AND Virtual = 'F'",
+      "gold_sql": "SELECT COUNT(DISTINCT T2.School) FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Virtual = 'F' AND T1.AvgScrMath > 400",
+      "error": "no such column: Virtual"
+    },
+    {
+      "db_id": "california_schools",
+      "question": "Among the schools with the average score in Math over 560 in the SAT test, how many schools are dire",
+      "pred_sql": "SELECT COUNT(*) \nFROM satscores \nWHERE AvgScrMath > 560 AND FundingType = 'Direct Charter';",
+      "gold_sql": "SELECT COUNT(T2.`School Code`) FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.`Charter Funding Type` = 'Directly funded'",
+      "error": "no such column: FundingType"
+    },
+    {
+      "db_id": "california_schools",
+      "question": "For the school with the highest average score in Reading in the SAT test, what is its FRPM count for",
+      "pred_sql": "SELECT T1.FRPM_Count__Ages_5_17__ FROM frpm AS T1 JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T2.AvgScrRead = ( SELECT MAX(AvgScrRead) FROM satscores )",
+      "gold_sql": "SELECT T2.`FRPM Count (Ages 5-17)` FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode ORDER BY T1.AvgScrRead DESC LIMIT 1",
+      "error": "no such column: T1.FRPM_Count__Ages_5_17__"
+    },
+    {
+      "db_id": "california_schools",
+      "question": "List the top five schools, by descending order, from the highest to the lowest, the most number of E",
+      "pred_sql": "SELECT S.NCESSchool, S.CDSCode AS NCES_School_Id\nFROM schools S\nORDER BY S.Enrollment_Ages_5_17 DESC\nLIMIT 5;",
+      "gold_sql": "SELECT T1.NCESSchool FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode ORDER BY T2.`Enrollment (Ages 5-17)` DESC LIMIT 5",
+      "error": "no such column: S.Enrollment_Ages_5_17"
+    },
+    {
+      "db_id": "california_schools",
+      "question": "List the names of schools with more than 30 difference in enrollements between K-12 and ages 5-17? P",
+      "pred_sql": "SELECT \n    s.School, \n    s.Street, \n    s.StreetAbr, \n    s.City, \n    s.State, \n    s.Zip\nFROM \n    schools s\nWHERE \n    (s.Enrollment_12 - s.Enrollment_5_17) > 30;",
+      "gold_sql": "SELECT T1.School, T1.Street FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.`Enrollment (K-12)` - T2.`Enrollment (Ages 5-17)` > 30",
+      "error": "no such column: s.Enrollment_12"
+    },
+    {
+      "db_id": "california_schools",
+      "question": "Give the names of the schools with the percent eligible for free meals in K-12 is more than 0.1 and ",
+      "pred_sql": "SELECT DISTINCT s.School \nFROM frpm f\nJOIN satscores s ON f.CDSCode = s.cds\nWHERE f.`Percent (%) Eligible Free (K-12)` > 0.1 AND s.NumGE1500 >= 1;",
+      "gold_sql": "SELECT T2.`School Name` FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE CAST(T2.`Free Meal Count (K-12)` AS REAL) / T2.`Enrollment (K-12)` > 0.1 AND T1.NumGE1500 > 0",
+      "error": "no such column: s.School"
+    },
+    {
+      "db_id": "california_schools",
+      "question": "Consider the average difference between K-12 enrollment and 15-17 enrollment of schools that are loc",
+      "pred_sql": "SELECT \n    s.School, \n    s.DOCType\nFROM \n    frpm f\nJOIN \n    schools s \nON \n    f.CDSCode = s.CDSCode\nWHERE \n    f.`Charter School (Y/N)` = 0 AND \n    f.`Charter Funding Type` = 'Locally Funded'\nGROUP BY \n    s.School, s.DOCType\nHAVING \n    (`Enrollment (K-12)\" - \"Enrollment (Ages 5-17)\") > (\n   ",
+      "gold_sql": "SELECT T2.School, T2.DOC FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.FundingType = 'Locally funded' AND (T1.`Enrollment (K-12)` - T1.`Enrollment (Ages 5-17)`) > (SELECT AVG(T3.`Enrollment (K-12)` - T3.`Enrollment (Ages 5-17)`) FROM frpm AS T3 INNER JOIN schools AS T4",
+      "error": "near \"Enrollment\": syntax error"
+    },
+    {
+      "db_id": "california_schools",
+      "question": "When did the first-through-twelfth-grade school with the largest enrollment open?",
+      "pred_sql": "SELECT OpenDate FROM frpm WHERE `Enrollment (K-12)` = (SELECT MAX(`Enrollment (K-12)`) FROM frpm)",
+      "gold_sql": "SELECT T2.OpenDate FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode ORDER BY T1.`Enrollment (K-12)` DESC LIMIT 1",
+      "error": "no such column: OpenDate"
+    },
+    {
+      "db_id": "california_schools",
+      "question": "Which cities have the top 5 lowest enrollment number for students in grades 1 through 12?",
+      "pred_sql": "SELECT City \nFROM schools \nORDER BY Enrollment_12 ASC \nLIMIT 5;",
+      "gold_sql": "SELECT T2.City FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode GROUP BY T2.City ORDER BY SUM(T1.`Enrollment (K-12)`) ASC LIMIT 5",
+      "error": "no such column: Enrollment_12"
+    },
+    {
+      "db_id": "california_schools",
+      "question": "List the names of virtual schools that are among the top 5 in their respective counties based on ave",
+      "pred_sql": "SELECT s.School \nFROM schools s\nJOIN (\n    SELECT cname, AVG(AvgScrRead) AS avg_read_score\n    FROM satscores\n    WHERE Virtual = 'F'\n    GROUP BY cname\n    ORDER BY avg_read_score DESC\n    LIMIT 5\n) t ON s.CDSCode = t.cname\nWHERE s.Virtual = 'T';",
+      "gold_sql": "SELECT School FROM (SELECT T2.School,T1.AvgScrRead, RANK() OVER (PARTITION BY T2.County ORDER BY T1.AvgScrRead DESC) AS rnk FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Virtual = 'F' ) ranked_schools WHERE rnk <= 5",
+      "error": "no such column: Virtual"
+    }
+  ],
+  "sample_successes": [
+    {
+      "db_id": "california_schools",
+      "question": "What is the highest eligible free rate for K-12 students in the schools in Alameda County?",
+      "pred_sql": "SELECT MAX(`Percent (%) Eligible Free (K-12)`) FROM frpm WHERE `County Name` = 'Alameda'"
+    },
+    {
+      "db_id": "california_schools",
+      "question": "What is the number of SAT test takers of the schools with the highest FRPM count for K-12 students?",
+      "pred_sql": "SELECT t2.NumTstTakr \nFROM frpm AS t1\nJOIN satscores AS t2 ON t1.CDSCode = t2.cds\nWHERE t1.`FRPM Count (K-12)` = (\n    SELECT MAX(`FRPM Count (K-12)`) \n    FROM frpm\n)\nORDER BY t2.NumTstTakr DESC\nLIMI"
+    },
+    {
+      "db_id": "california_schools",
+      "question": "Please list the codes of the schools with a total enrollment of over 500.",
+      "pred_sql": "SELECT DISTINCT CDSCode \nFROM frpm \nWHERE `Enrollment (K-12)` + `Enrollment (Ages 5-17)` > 500;"
+    },
+    {
+      "db_id": "california_schools",
+      "question": "What is the phone number of the school that has the highest average score in Math?",
+      "pred_sql": "SELECT T2.Phone FROM satscores AS T1 JOIN schools AS T2 ON T1.cds = T2.CDSCode ORDER BY T1.AvgScrMath DESC LIMIT 1"
+    },
+    {
+      "db_id": "california_schools",
+      "question": "How many schools in Amador which the Low Grade is 9 and the High Grade is 12?",
+      "pred_sql": "SELECT COUNT(*) FROM frpm WHERE `County Name` = 'Amador' AND `Low Grade` = '9' AND `High Grade` = '12'"
+    }
+  ]
 }
