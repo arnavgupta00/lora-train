@@ -1,0 +1,90 @@
+{
+  "version": "baseline_no_lora",
+  "total_examples": 1534,
+  "exact_match": 0,
+  "exact_match_pct": 0.0,
+  "execution_match": 0,
+  "execution_accuracy": 0.0,
+  "execution_errors": 0,
+  "execution_error_pct": 0.0,
+  "by_database": [
+    {
+      "db_id": "california_schools",
+      "total": 89,
+      "exec_match": 0,
+      "errors": 0,
+      "accuracy": 0.0
+    },
+    {
+      "db_id": "card_games",
+      "total": 191,
+      "exec_match": 0,
+      "errors": 0,
+      "accuracy": 0.0
+    },
+    {
+      "db_id": "codebase_community",
+      "total": 186,
+      "exec_match": 0,
+      "errors": 0,
+      "accuracy": 0.0
+    },
+    {
+      "db_id": "debit_card_specializing",
+      "total": 64,
+      "exec_match": 0,
+      "errors": 0,
+      "accuracy": 0.0
+    },
+    {
+      "db_id": "european_football_2",
+      "total": 129,
+      "exec_match": 0,
+      "errors": 0,
+      "accuracy": 0.0
+    },
+    {
+      "db_id": "financial",
+      "total": 106,
+      "exec_match": 0,
+      "errors": 0,
+      "accuracy": 0.0
+    },
+    {
+      "db_id": "formula_1",
+      "total": 174,
+      "exec_match": 0,
+      "errors": 0,
+      "accuracy": 0.0
+    },
+    {
+      "db_id": "student_club",
+      "total": 158,
+      "exec_match": 0,
+      "errors": 0,
+      "accuracy": 0.0
+    },
+    {
+      "db_id": "superhero",
+      "total": 129,
+      "exec_match": 0,
+      "errors": 0,
+      "accuracy": 0.0
+    },
+    {
+      "db_id": "thrombosis_prediction",
+      "total": 163,
+      "exec_match": 0,
+      "errors": 0,
+      "accuracy": 0.0
+    },
+    {
+      "db_id": "toxicology",
+      "total": 145,
+      "exec_match": 0,
+      "errors": 0,
+      "accuracy": 0.0
+    }
+  ],
+  "note": "Generated locally from predictions file"
+}
