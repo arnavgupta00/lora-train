@@ -78,24 +78,12 @@ cd /workspace/lora-train
 
 ---
 
-## Step 4: Set API Key (for eval_exec.py)
+## Step 4: Start Training
+
+**Note:** The t8 training script does NOT require the NL2SQL_ADMIN_API_KEY. This was only needed for old custom evaluation (eval_exec.py) which we're not using. BIRD evaluation uses actual SQLite databases instead.
 
 ```bash
-# Option 1: Create private_key.py
-cat > training/private_key.py << 'EOF'
-ADMIN_API_KEY = "your-nl2sql-api-key-here"
-EOF
-
-# Option 2: Set environment variable
-export NL2SQL_ADMIN_API_KEY="your-nl2sql-api-key-here"
-```
-
----
-
-## Step 5: Start Training
-
-```bash
-# Start training in background
+# Start training in background (no API key needed)
 nohup bash training/configs/qwen2.5-7b-t8.sh > t8_train.log 2>&1 &
 
 # Save the process ID
@@ -119,7 +107,7 @@ watch -n 1 nvidia-smi
 
 ---
 
-## Step 6: Run BIRD Evaluation
+## Step 5: Run BIRD Evaluation
 
 After training completes:
 
