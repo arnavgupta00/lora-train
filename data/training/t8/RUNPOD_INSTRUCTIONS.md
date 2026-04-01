@@ -17,7 +17,7 @@
 
 ```bash
 cd /workspace
-git clone https://github.com/YOUR_USERNAME/lm.git lora-train
+git clone https://github.com/arnavgupta00/lora-train.git
 cd lora-train
 ```
 
@@ -55,25 +55,58 @@ wc -l data/training/t8/eval/bird_dev.jsonl
 
 ## Step 3: Download BIRD Benchmark (for evaluation)
 
+**⚠️ IMPORTANT:** The official Aliyun OSS links are currently returning 403 Forbidden errors. Use one of these alternatives:
+
+### Option A: Clone BIRD Official Repository (Recommended)
+
 ```bash
-# Create eval directory
+# Clone official BIRD repo (includes databases)
+cd /workspace
+git clone --depth 1 https://github.com/AlibabaResearch/DAMO-ConvAI.git
+
+# Copy databases to expected location
+mkdir -p /workspace/lora-train/bird_eval/dev_20240627
+cp -r /workspace/DAMO-ConvAI/bird/data/dev_databases /workspace/lora-train/bird_eval/dev_20240627/
+cp /workspace/DAMO-ConvAI/bird/data/dev.json /workspace/lora-train/bird_eval/dev_20240627/
+
+cd /workspace/lora-train
+
+# Verify installation
+ls -la bird_eval/dev_20240627/dev_databases/
+# Should see: california_schools, card_games, codebase_community, etc. (11 databases)
+
+find bird_eval/dev_20240627/dev_databases -name "*.sqlite" | wc -l
+# Should output: 11
+```
+
+### Option B: Download from Alternative Source
+
+```bash
+# Try direct GitHub raw content
+cd /workspace/lora-train
 mkdir -p bird_eval/dev_20240627
 cd bird_eval/dev_20240627
 
-# Download BIRD dev set
-wget https://bird-bench.oss-cn-beijing.aliyuncs.com/dev.json
+# Download dev.json from GitHub
+wget https://raw.githubusercontent.com/AlibabaResearch/DAMO-ConvAI/main/bird/data/dev.json
 
-# Download BIRD dev databases
-wget https://bird-bench.oss-cn-beijing.aliyuncs.com/dev_20240627/dev_databases.zip
-
-# Extract databases
-unzip dev_databases.zip
-
-# Verify
-ls -la dev_databases/
-# Should see: california_schools, card_games, codebase_community, etc.
-
+# Note: GitHub doesn't host the large .sqlite files directly
+# If Option A fails, contact user for alternative hosting
 cd /workspace/lora-train
+```
+
+### Option C: Manual Upload from Local Machine
+
+If you have BIRD databases on your local machine at `/Users/arnav/programming/lm/`:
+
+```bash
+# On LOCAL machine terminal:
+# tar czf bird_dev_dbs.tar.gz bird_eval/dev_20240627/dev_databases/
+# scp bird_dev_dbs.tar.gz root@YOUR_RUNPOD_IP:/workspace/lora-train/
+
+# On RUNPOD:
+# cd /workspace/lora-train
+# tar xzf bird_dev_dbs.tar.gz
 ```
 
 ---
