@@ -1,31 +1,64 @@
 # lora-train
 
-Minimal LoRA-only NL2SQL fine-tuning + execution-match evaluation (with base-vs-LoRA comparison).
+Fine-tuning small models (7B-14B) to beat mainstream models on NL2SQL benchmarks.
 
-## What’s In Here
+## 🎯 Goal
+Beat GPT-4 (54.89%) and Claude Opus (70.15%) on BIRD benchmark using a 7B parameter model with LoRA.
 
-- `dataset/t2/`: ChatML JSONL dataset (train/dev/test)
-- `finetune_nl2sql/`: LoRA training + execution-match eval scripts (Runpod-friendly)
-- `.github/skills/nl2sql-schema-gen-v2/`: Copilot workflow to generate + provision 30 new schemas per run (Cloudflare D1)
-- `.github/skills/nl2sql-example-gen-v1/`: Copilot workflow to top up NL→SQL examples per schema to a target split ratio
-- `schema_registry.json`: local registry of generated schemas (used to avoid duplicates)
-- `reports/`: run notes + metrics
+## 📁 Repository Structure
 
-## Latest Run (2026-03-28)
+```
+lm/
+├── data/                    # All datasets
+│   ├── raw/                 # BIRD/Spider original data
+│   ├── processed/           # ChatML formatted
+│   └── training/            # Training sets (t2, t7, etc.)
+│
+├── training/                # Training code
+│   ├── train_lora.py        # Main training script
+│   ├── eval_exec.py         # Execution-match evaluation
+│   └── configs/             # Per-model training configs
+│
+├── evaluation/              # BIRD benchmark evaluation
+│   ├── run_bird_eval.sh     # Current (v3) - DDL schema
+│   └── versions/            # History showing learning journey
+│
+├── results/                 # Training outputs
+│   ├── qwen2.5-7b/          # 7B model runs
+│   ├── qwen2.5-14b/         # 14B model runs
+│   └── reports/             # Analysis documents
+│
+├── tools/                   # Data generation scripts
+└── experiments/             # Archived old experiments
+```
 
-Headline: LoRA improved strict execution-match vs the base models, but accuracy is still low on a mixed multi-schema test set.
+## 📊 Results Timeline
 
-See:
+| Date | Dataset | Model | BIRD Score | Notes |
+|------|---------|-------|------------|-------|
+| 2026-03-28 | t2 | 14B | 24.4%* | Custom schemas only |
+| 2026-03-31 | t7 | 7B | **TBD** | BIRD + custom (running) |
 
-- `RESULTS_SUMMARY.md`
-- `reports/2026-03-28_run.md`
+*Custom eval, not official BIRD
 
-## Reproduce
+See `CHANGELOG.md` for the full journey.
 
-Runpod instructions: `finetune_nl2sql/README.md`.
+## 🚀 Quick Start
 
-## Scale Up (Many Schemas)
+### Training (RunPod)
+```bash
+cd /workspace/lora-train
+bash training/configs/qwen2.5-7b.sh
+```
 
-If you want to grow schema coverage without duplicating prior work, use the Copilot workflow:
+### BIRD Evaluation
+```bash
+bash evaluation/run_bird_eval.sh
+```
 
-- `.github/skills/nl2sql-schema-gen-v2/FLOW.md`
+## 📚 Documentation
+
+- `training/docs/README.md` - Training guide
+- `training/docs/RUNPOD_README.md` - RunPod setup
+- `evaluation/versions/` - History of eval attempts (learning journey)
+- `CHANGELOG.md` - Full project history

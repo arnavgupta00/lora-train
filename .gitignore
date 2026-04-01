@@ -5,39 +5,51 @@ __pycache__/
 .ruff_cache/
 .venv/
 
-# Runpod / finetune outputs + caches
-outputs/
-finetune_nl2sql/outputs/
-finetune_nl2sql/private_key.py
-finetune_nl2sql/__pycache__/
+# ============================================
+# Training outputs (large model files)
+# ============================================
+results/*/adapters/
+results/*/*.safetensors
+training/outputs/
 
-# Copilot workflow artifacts
-runs/
+# ============================================
+# Large datasets (download separately)
+# ============================================
+data/training/t1/
+data/training/t3/
+data/training/t3_*/
 
-# Large local datasets (keep out of git)
-dataset/t3/
-dataset/t3_*/
+# ============================================
+# Experiments (old work, preserved locally)
+# ============================================
+experiments/
 
-# Never commit one-off scripts containing secrets
-scripts/nl2sql_schema_gen/register_remaining_schemas.py
+# ============================================
+# Services (separate repos)
+# ============================================
+services/
 
-# Copilot scratch / one-off generators (keep out of git)
+# ============================================
+# Secrets
+# ============================================
+training/private_key.py
+**/private_key.py
+
+# ============================================
+# One-off generators (Copilot artifacts)
+# ============================================
 .github/skills/**/config/config.run*.json
-generate_*.py
-scripts/nl2sql_example_gen/*.py
-!scripts/nl2sql_example_gen/plan_run.py
-!scripts/nl2sql_example_gen/ingest_examples.py
-scripts/nl2sql_schema_gen/generate_*.py
+tools/example_gen/archive/
+tools/schema_gen/generate_*.py
 
-# Not needed for training repo
+# ============================================
+# Build artifacts
+# ============================================
 .DS_Store
-nl2sql-dataset-service/node_modules/
-fireworks/
-gemma-3-12b/
-lora/
-together-ai/
-dataset.jsonl
-dataset/t1/
-nl2sql-dataset-service/
-outputs.zip
-finetune_nl2sql/TRAINING_EXPLAINED.md
+node_modules/
+*.zip
+
+# ============================================
+# Training docs (personal notes)
+# ============================================
+training/docs/TRAINING_EXPLAINED.md
