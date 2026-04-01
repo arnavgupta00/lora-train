@@ -41,7 +41,7 @@ from pathlib import Path
 import time
 
 MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
-ADAPTER_DIR = "/workspace/lora-train/outputs/qwen2.5-7b-t7-bird-20260331_193013"
+ADAPTER_DIR = "/workspace/lora-train/outputs/qwen2.5-7b-t8-bird-20260401_134325"
 DEV_JSON = "/workspace/lora-train/bird_eval/dev_20240627/dev.json"
 DB_DIR = "/workspace/lora-train/bird_eval/dev_20240627/dev_databases"
 OUTPUT_FILE = "/workspace/lora-train/outputs/bird_evaluation/predictions_v3.json"
