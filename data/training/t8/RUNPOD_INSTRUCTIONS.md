@@ -139,7 +139,7 @@ ls -la /runpod-volume/outputs/
 ls -la outputs/
 
 # Run evaluation
-bash evaluation/run_bird_eval.sh > bird_eval_t8.log 2>&1
+nohup bash evaluation/run_bird_eval.sh > bird_eval_t8.log 2>&1 &
 
 # Monitor progress
 tail -f bird_eval_t8.log
