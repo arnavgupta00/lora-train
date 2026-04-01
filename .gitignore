@@ -15,10 +15,16 @@ results/**/checkpoint-*/
 training/outputs/
 
 # ============================================
-# Large datasets (download separately)
+# Large datasets (download separately or regenerate)
 # ============================================
+# t1: Early custom dataset (superseded by t7)
 data/training/t1/
+
+# t3: 23,577 examples used for 14B training (March 30)
+# Location: data/t3_test1000_rebalanced/
+# Note: This directory should exist locally but is too large for git
 data/training/t3/
+data/t3_test1000_rebalanced/
 data/training/t3_*/
 
 # ============================================

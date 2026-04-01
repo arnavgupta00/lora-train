@@ -1,0 +1,11 @@
+{
+  "variant": "base",
+  "total": 1000,
+  "exact_match": 1,
+  "exact_match_accuracy": 0.001,
+  "execution_match": 35,
+  "execution_match_accuracy": 0.035,
+  "validator_http_failures": 0,
+  "routing_or_other_failures": 0,
+  "predictions_path": "/workspace/lora-train/outputs/qwen2.5-14b-instruct-lora-20260330_205025/predictions.test.base.jsonl"
+}

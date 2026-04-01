@@ -1,0 +1,11 @@
+{
+  "variant": "lora",
+  "total": 1534,
+  "exact_match": 26,
+  "exact_match_accuracy": 0.01694915254237288,
+  "execution_match": 0,
+  "execution_match_accuracy": 0.0,
+  "validator_http_failures": 0,
+  "routing_or_other_failures": 0,
+  "predictions_path": "/workspace/lora-train/outputs/qwen2.5-7b-t7-bird-20260331_193013/predictions.test.lora.jsonl"
+}

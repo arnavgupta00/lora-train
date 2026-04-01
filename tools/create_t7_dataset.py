@@ -43,19 +43,19 @@ def main():
     print("Creating t7 dataset...")
     
     # Load t3 train data
-    t3_path = Path("dataset/t3_test1000_rebalanced/all-all-train.qwen.jsonl")
+    t3_path = Path("data/t3_test1000_rebalanced/all-all-train.qwen.jsonl")
     print(f"\n1. Loading t3 train from {t3_path}...")
     t3_examples = load_jsonl(t3_path)
     print(f"   Loaded {len(t3_examples)} examples")
     
     # Load BIRD train (ChatML format)
-    bird_path = Path("dataset/bird_train_chatml.jsonl")
+    bird_path = Path("data/bird_train_chatml.jsonl")
     print(f"\n2. Loading BIRD train from {bird_path}...")
     bird_examples = load_jsonl(bird_path)
     print(f"   Loaded {len(bird_examples)} examples")
     
     # Load complex patterns
-    complex_path = Path("dataset/complex_patterns.jsonl")
+    complex_path = Path("data/complex_patterns.jsonl")
     print(f"\n3. Loading complex patterns from {complex_path}...")
     complex_examples = load_jsonl(complex_path)
     print(f"   Loaded {len(complex_examples)} examples")
@@ -73,7 +73,7 @@ def main():
     random.shuffle(all_examples)
     
     # Create output directory
-    output_dir = Path("dataset/t7")
+    output_dir = Path("data/t7")
     output_dir.mkdir(exist_ok=True)
     
     # Split: 90% train, 5% dev, 5% test

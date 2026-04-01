@@ -3,14 +3,14 @@
 # RunPod Training Script for Qwen2.5-7B on t7 Dataset (BIRD Benchmark)
 # 
 # Usage: 
-#   nohup bash finetune_nl2sql/run_qwen7b_t7_bird.sh > run.log 2>&1 &
+#   nohup bash training/run_qwen7b_t7_bird.sh > run.log 2>&1 &
 #
 # Or with environment variables:
-#   EPOCHS=3 LR=5e-5 nohup bash finetune_nl2sql/run_qwen7b_t7_bird.sh > run.log 2>&1 &
+#   EPOCHS=3 LR=5e-5 nohup bash training/run_qwen7b_t7_bird.sh > run.log 2>&1 &
 #
 # Required:
 #   - NL2SQL_ADMIN_API_KEY environment variable (for execution-match eval)
-#   - dataset/t7/ directory with train.jsonl, dev.jsonl, test.jsonl
+#   - data/training/t7/ directory with train.jsonl, dev.jsonl, test.jsonl
 #
 # RunPod Configuration Recommendation:
 #   - GPU: RTX A6000 (48GB) or A100 40GB 
@@ -97,7 +97,7 @@ python3 -m pip install "transformers>=4.45.0,<5"
 python3 -m pip install hf-transfer || echo "Warning: hf-transfer install failed (optional)"
 
 # Check for API key
-if [[ ! -f finetune_nl2sql/private_key.py ]]; then
+if [[ ! -f training/private_key.py ]]; then
   if [[ -n "${NL2SQL_ADMIN_API_KEY:-}" ]]; then
     echo "Creating private_key.py from environment..."
     python3 - <<'PY'
@@ -105,9 +105,9 @@ import os
 key = os.environ.get("NL2SQL_ADMIN_API_KEY", "").strip()
 if not key:
     raise SystemExit("NL2SQL_ADMIN_API_KEY is empty")
-with open("finetune_nl2sql/private_key.py", "w") as f:
+with open("training/private_key.py", "w") as f:
     f.write(f'ADMIN_API_KEY = "{key}"\n')
-print("Created finetune_nl2sql/private_key.py")
+print("Created training/private_key.py")
 PY
   else
     echo "WARNING: Missing NL2SQL_ADMIN_API_KEY - eval may fail"
@@ -122,7 +122,7 @@ echo ""
 echo ">>> Setting up dataset..."
 
 # Use t7 dataset
-DATASET_DIR="${DATASET_DIR:-dataset/t7}"
+DATASET_DIR="${DATASET_DIR:-data/training/t7}"
 
 # t7 uses different file names
 if [[ -f "$DATASET_DIR/train.jsonl" ]]; then
@@ -139,7 +139,7 @@ else
   echo "Expected files: train.jsonl, dev.jsonl, test.jsonl"
   echo ""
   echo "Available datasets:"
-  ls -la dataset/ 2>/dev/null || echo "No dataset directory found"
+  ls -la data/training/ 2>/dev/null || echo "No dataset directory found"
   exit 1
 fi
 
@@ -203,7 +203,7 @@ if [[ -n "${RESUME_FROM:-}" ]]; then
   echo "Resuming from: $RESUME_FROM"
 fi
 
-python3 -u finetune_nl2sql/train_lora.py \
+python3 -u training/train_lora.py \
   --model_id "$MODEL_ID" \
   --train_jsonl "$TRAIN_JSONL" \
   --dev_jsonl "$DEV_JSONL" \
@@ -248,7 +248,7 @@ if [[ "$SKIP_EVAL" != "1" ]]; then
     echo ">>> Evaluating BASE model (no LoRA)"
     echo "=============================================="
     
-    python3 finetune_nl2sql/eval_exec.py \
+    python3 training/eval_exec.py \
       --base_model_id "$MODEL_ID" \
       --test_jsonl "$TEST_JSONL" \
       --out_dir "$OUT_DIR" \
@@ -267,7 +267,7 @@ if [[ "$SKIP_EVAL" != "1" ]]; then
   echo ">>> Evaluating FINE-TUNED model (with LoRA)"
   echo "=============================================="
   
-  python3 -u finetune_nl2sql/eval_exec.py \
+  python3 -u training/eval_exec.py \
     --base_model_id "$MODEL_ID" \
     --adapter_dir "$OUT_DIR" \
     --test_jsonl "$TEST_JSONL" \

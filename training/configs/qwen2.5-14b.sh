@@ -22,20 +22,20 @@ export HF_HUB_ENABLE_HF_TRANSFER=1
 mkdir -p "$OUT_BASE"
 
 python3 -m pip install -U pip
-python3 -m pip install -r finetune_nl2sql/requirements.txt
+python3 -m pip install -r training/requirements.txt
 
-if [[ ! -f finetune_nl2sql/private_key.py ]]; then
+if [[ ! -f training/private_key.py ]]; then
   if [[ -n "${NL2SQL_ADMIN_API_KEY:-}" ]]; then
     python3 - <<'PY'
 import os
 key = os.environ.get("NL2SQL_ADMIN_API_KEY", "").strip()
 if not key:
   raise SystemExit("NL2SQL_ADMIN_API_KEY is empty")
-with open("finetune_nl2sql/private_key.py", "w", encoding="utf-8") as f:
+with open("training/private_key.py", "w", encoding="utf-8") as f:
   f.write('ADMIN_API_KEY = "' + key.replace('"', '\\"') + '"\n')
 PY
   else
-    echo "Missing finetune_nl2sql/private_key.py (needed for execution-match eval)."
+    echo "Missing training/private_key.py (needed for execution-match eval)."
     echo "Set NL2SQL_ADMIN_API_KEY env var or create the file from private_key.py.example."
     exit 1
   fi
@@ -58,17 +58,17 @@ echo "Follow live: tail -n 200 -f $LOG_FILE"
 
 DATASET_DIR="${DATASET_DIR:-}"
 if [[ -z "$DATASET_DIR" ]]; then
-  if [[ -f dataset/t3_test1000_rebalanced/all-all-train.qwen.jsonl ]]; then
-    DATASET_DIR="dataset/t3_test1000_rebalanced"
-  elif [[ -f dataset/t3/all-all-train.qwen.jsonl ]]; then
-    DATASET_DIR="dataset/t3"
-  elif [[ "${ALLOW_DATASET_FALLBACK_T2:-0}" == "1" && -f dataset/t2/all-all-train.qwen.jsonl ]]; then
-    DATASET_DIR="dataset/t2"
+  if [[ -f data/training/t3_test1000_rebalanced/all-all-train.qwen.jsonl ]]; then
+    DATASET_DIR="data/training/t3_test1000_rebalanced"
+  elif [[ -f data/training/t3/all-all-train.qwen.jsonl ]]; then
+    DATASET_DIR="data/training/t3"
+  elif [[ "${ALLOW_DATASET_FALLBACK_T2:-0}" == "1" && -f data/training/t2/all-all-train.qwen.jsonl ]]; then
+    DATASET_DIR="data/training/t2"
   else
     echo "ERROR: No t3 dataset found in repo and DATASET_DIR is not set."
     echo "Expected one of:"
-    echo "  dataset/t3_test1000_rebalanced/all-all-train.qwen.jsonl"
-    echo "  dataset/t3/all-all-train.qwen.jsonl"
+    echo "  data/training/t3_test1000_rebalanced/all-all-train.qwen.jsonl"
+    echo "  data/training/t3/all-all-train.qwen.jsonl"
     echo ""
     echo "Fix: copy your dataset into the pod and set DATASET_DIR to that folder."
     echo "If you intentionally want to run on t2, set ALLOW_DATASET_FALLBACK_T2=1."
@@ -118,7 +118,7 @@ if [[ -n "$RESUME_FROM" ]]; then
   RESUME_ARGS+=(--resume_from_checkpoint "$RESUME_FROM")
 fi
 
-python3 finetune_nl2sql/train_lora.py \
+python3 training/train_lora.py \
   --model_id "$MODEL_ID" \
   --train_jsonl "$TRAIN_JSONL" \
   --dev_jsonl "$DEV_JSONL" \
@@ -150,7 +150,7 @@ if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
   fi
 
   if [[ "${EVAL_BASE:-0}" == "1" ]]; then
-    python3 finetune_nl2sql/eval_exec.py \
+    python3 training/eval_exec.py \
       --base_model_id "$MODEL_ID" \
       --test_jsonl "$TEST_JSONL" \
       --out_dir "$OUT_DIR" \
@@ -162,7 +162,7 @@ if [[ "${SKIP_EVAL:-0}" != "1" ]]; then
       "${EVAL_EXTRA_ARGS[@]}" 2>&1 | tee -a "$LOG_FILE"
   fi
 
-  python3 finetune_nl2sql/eval_exec.py \
+  python3 training/eval_exec.py \
     --base_model_id "$MODEL_ID" \
     --adapter_dir "$OUT_DIR" \
     --test_jsonl "$TEST_JSONL" \
