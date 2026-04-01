@@ -102,7 +102,7 @@ base = AutoModelForCausalLM.from_pretrained(
     MODEL_ID,
     torch_dtype=torch.bfloat16,
     trust_remote_code=True,
-    attn_implementation="flash_attention_2",  # Faster
+    attn_implementation="sdpa",  # Scaled Dot Product Attention (fast, no extra deps)
     low_cpu_mem_usage=True,
 )
 
