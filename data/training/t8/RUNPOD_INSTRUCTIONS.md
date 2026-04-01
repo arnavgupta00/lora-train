@@ -56,29 +56,22 @@ wc -l data/training/t8/eval/bird_dev.jsonl
 ## Step 3: Download BIRD Benchmark (for evaluation)
 
 ```bash
-# Create directory
 cd /workspace/lora-train
-mkdir -p bird_eval/dev_20240627
-cd bird_eval/dev_20240627
+mkdir -p bird_eval
+cd bird_eval
 
-# Download BIRD dev set (330 MB - contains databases + metadata)
+# Download BIRD dev set (330 MB)
 wget https://bird-bench.oss-cn-beijing.aliyuncs.com/dev.zip
 
-# Extract (may take a few minutes)
+# Extract - creates dev_20240627/ directory
 unzip dev.zip
 
-# The extracted structure should be:
-# dev/
-#   dev.json                 - Metadata with questions/SQL
-#   dev_databases/           - 11 SQLite databases
-#     california_schools/
-#     card_games/
-#     ... (9 more)
+# The zip contains another zip for databases - extract it
+cd dev_20240627
+unzip dev_databases.zip
 
-# Move files to expected location
-mv dev/dev.json ./
-mv dev/dev_databases ./
-rm -rf dev  # Clean up extra directory
+# Clean up the nested zip
+rm dev_databases.zip
 
 cd /workspace/lora-train
 ```
@@ -89,14 +82,15 @@ cd /workspace/lora-train
 # Check databases exist (should show 11)
 find bird_eval/dev_20240627/dev_databases -name "*.sqlite" | wc -l
 
-# Check total size
-du -sh bird_eval/dev_20240627/dev_databases/
-
 # List all databases
 ls bird_eval/dev_20240627/dev_databases/
 # Expected: california_schools, card_games, codebase_community, 
 #           debit_card_specializing, european_football_2, financial,
 #           formula_1, student_club, superhero, thrombosis_prediction, toxicology
+
+# Check files
+ls bird_eval/dev_20240627/
+# Should see: dev.json, dev.sql, dev_tables.json, dev_databases/
 ```
 
 ---
