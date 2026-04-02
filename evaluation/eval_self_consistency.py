@@ -554,7 +554,6 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(
         args.model_id, 
         trust_remote_code=True,
-        resume_download=True,
     )
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -579,7 +578,6 @@ def main():
         trust_remote_code=True,
         attn_implementation="sdpa",
         low_cpu_mem_usage=True,
-        resume_download=True,
     )
     logger.info("Model weights loaded successfully")
     
