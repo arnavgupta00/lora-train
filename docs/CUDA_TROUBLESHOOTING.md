@@ -30,13 +30,15 @@ pip uninstall torch torchvision torchaudio -y
 apt-get update && apt-get install -y aria2
 PYTHON_VER=$(python3 -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
 aria2c -x 16 -s 16 https://download.pytorch.org/whl/cu121/torch-2.5.1%2Bcu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
-pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl --no-deps
+pip install filelock typing-extensions sympy networkx jinja2 fsspec
 rm torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
 
 # OPTION B: Download with wget (if aria2c not available)
 PYTHON_VER=$(python3 -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
 wget https://download.pytorch.org/whl/cu121/torch-2.5.1%2Bcu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
-pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl --no-deps
+pip install filelock typing-extensions sympy networkx jinja2 fsspec
 rm torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
 
 # OPTION C: Install only torch (smaller, skips torchvision/torchaudio)
@@ -118,8 +120,11 @@ apt-get update && apt-get install -y aria2
 PYTHON_VER=$(python3 -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
 aria2c -x 16 -s 16 https://download.pytorch.org/whl/cu121/torch-2.5.1%2Bcu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
 
-# Install from local file (instant)
-pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+# Install from local file with --no-deps (prevents slow dependency downloads)
+pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl --no-deps
+
+# Install small Python dependencies (filelock, sympy, etc.)
+pip install filelock typing-extensions sympy networkx jinja2 fsspec
 
 # Clean up
 rm torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
@@ -135,7 +140,8 @@ pip install torch==2.5.1+cu121 --index-url https://download.pytorch.org/whl/cu12
 ```bash
 PYTHON_VER=$(python3 -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
 wget https://download.pytorch.org/whl/cu121/torch-2.5.1%2Bcu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
-pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl --no-deps
+pip install filelock typing-extensions sympy networkx jinja2 fsspec
 rm torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
 ```
 

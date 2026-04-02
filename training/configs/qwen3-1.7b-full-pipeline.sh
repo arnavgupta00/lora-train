@@ -334,7 +334,8 @@ if [[ $INSTALL_REQUIRED -eq 1 ]]; then
             echo "Using aria2c for fast parallel download..."
             aria2c -x 16 -s 16 "$TORCH_URL"
             if [[ -f "$TORCH_WHEEL" ]]; then
-                pip3 install "$TORCH_WHEEL" -q
+                pip3 install "$TORCH_WHEEL" --no-deps -q
+                pip3 install filelock typing-extensions sympy networkx jinja2 fsspec -q
                 rm -f "$TORCH_WHEEL"
                 echo "PyTorch installed successfully!"
             else
@@ -348,7 +349,8 @@ if [[ $INSTALL_REQUIRED -eq 1 ]]; then
                 echo "Downloading PyTorch with wget..."
                 wget -q --show-progress "$TORCH_URL"
                 if [[ -f "$TORCH_WHEEL" ]]; then
-                    pip3 install "$TORCH_WHEEL" -q
+                    pip3 install "$TORCH_WHEEL" --no-deps -q
+                    pip3 install filelock typing-extensions sympy networkx jinja2 fsspec -q
                     rm -f "$TORCH_WHEEL"
                     echo "PyTorch installed successfully!"
                 else
