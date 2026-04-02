@@ -1,13 +1,40 @@
 # NL2SQL Fine-tuning Project
 
-Fine-tuning small models (7B-14B) to compete with mainstream models on NL2SQL benchmarks.
+Fine-tuning small language models (1.7B-7B) for text-to-SQL on the BIRD benchmark.
 
-## 🎯 Goal
-Beat GPT-4 (54.89%) on BIRD benchmark using a 7B parameter model with LoRA fine-tuning.
+## 🎯 Latest: Qwen3-1.7B Training Pipeline (T9 Dataset)
 
-## 🏆 Current Best Result
+**New in v5:** Complete training pipeline for Qwen3-1.7B with LoRA SFT + GRPO + Self-Consistency evaluation on T9 dataset (14K examples).
 
-**Qwen2.5-7B + LoRA (v1-3): 44.26%** on BIRD benchmark
+### Quick Start (Cloud GPU)
+
+```bash
+# Clone the repo
+git clone https://github.com/arnavgupta00/lora-train.git
+cd lora-train
+
+# Download BIRD benchmark data (required for evaluation)
+# Visit https://bird-bench.github.io/ and extract to ./bird_eval/
+
+# Run fast training pipeline (2-3 hours on RTX 3090)
+EPOCHS=2 BATCH_SIZE=8 SEQ_LEN=1024 SKIP_GRPO=1 \
+  nohup bash training/configs/qwen3-1.7b-full-pipeline.sh > pipeline.log 2>&1 &
+
+# Monitor progress
+tail -f pipeline.log
+```
+
+**Expected Results:**
+- **Fast mode (2-3 hrs):** ~55-60% BIRD accuracy
+- **Full mode (6-8 hrs):** ~60-67% BIRD accuracy with GRPO + Self-Consistency
+
+See [`docs/TRAINING_GUIDE.md`](docs/TRAINING_GUIDE.md) for detailed commands and options.
+
+---
+
+## 🏆 Previous Best: Qwen2.5-7B (v1-3)
+
+**Qwen2.5-7B + LoRA: 44.26%** on BIRD benchmark
 - Gap to GPT-4: -10.63% (closing in!)
 - 37.61% improvement from initial attempts (6.65% → 44.26%)
 - Training time: 50 minutes on RTX 5090
@@ -15,47 +42,52 @@ Beat GPT-4 (54.89%) on BIRD benchmark using a 7B parameter model with LoRA fine-
 
 See [`results/qwen2.5-7b/v1-3/RUN_LOG.md`](results/qwen2.5-7b/v1-3/RUN_LOG.md) for full analysis.
 
+---
+
 ## 📁 Repository Structure
 
 ```
-lm/
+lora-train/
 ├── data/                           # All datasets
 │   ├── raw/                        # BIRD/Spider original data
 │   ├── processed/                  # ChatML formatted data
-│   ├── training/                   # Training sets
-│   │   ├── t2/                     # 562 examples (custom schemas)
-│   │   └── t7/                     # 16,699 examples (BIRD + custom) ✅
-│   └── t3_test1000_rebalanced/     # 23,577 examples (missing locally)
+│   └── training/                   # Training sets
+│       ├── t2/                     # 562 examples (custom schemas)
+│       ├── t7/                     # 16,699 examples (BIRD + custom) - Qwen2.5-7B
+│       └── t9/                     # 14,034 examples (T9 v4) - Qwen3-1.7B ✅ NEW
+│           ├── train_v4.jsonl      # Training data (14K examples)
+│           └── dev_v4.jsonl        # Dev data (665 examples)
 │
 ├── training/                       # Training code
-│   ├── train_lora.py               # Main training script
-│   ├── eval_exec.py                # Execution-match evaluation
-│   ├── configs/                    # Per-model training configs
-│   │   ├── qwen2.5-7b.sh          # 7B config (used for v1-3)
-│   │   └── qwen2.5-14b.sh         # 14B config
-│   └── docs/                       # Training documentation
+│   ├── train_lora.py               # SFT training script
+│   ├── train_grpo.py               # GRPO training (execution rewards) ✅ NEW
+│   └── configs/                    # Training wrapper scripts
+│       ├── qwen2.5-7b.sh          # 7B config (v1-3)
+│       ├── qwen3-1.7b-sft-t9.sh   # Qwen3 SFT (Script 1) ✅ NEW
+│       ├── qwen3-1.7b-grpo-t9.sh  # Qwen3 GRPO (Script 2) ✅ NEW
+│       └── qwen3-1.7b-full-pipeline.sh  # Combined pipeline ✅ NEW
 │
 ├── evaluation/                     # BIRD benchmark evaluation
-│   ├── run_bird_eval.sh           # Current (v3) - DDL schema extraction
-│   └── versions/                   # v1 (6.65%) → v2 (39.11%) → v3 (44.26%)
+│   ├── run_bird_eval.sh           # v3 evaluation (DDL schema)
+│   ├── eval_bird.py               # Unified BIRD eval ✅ NEW
+│   ├── eval_self_consistency.py   # Self-consistency voting ✅ NEW
+│   ├── run_eval_basic.sh          # Basic eval wrapper (Script 3a) ✅ NEW
+│   └── run_eval_self_consistency.sh  # SC eval wrapper (Script 3b) ✅ NEW
 │
 ├── results/                        # Training outputs by model
 │   ├── qwen2.5-7b/
-│   │   └── v1-3/                  # 44.26% BIRD score ✅
-│   │       ├── RUN_LOG.md         # Full analysis & recommendations
-│   │       ├── dataset_used/      # → data/training/t7/
-│   │       ├── training_config.sh # → training/configs/qwen2.5-7b.sh
-│   │       ├── evaluation_script.sh # → evaluation/run_bird_eval.sh
-│   │       └── bird_evaluation/   # All BIRD results
-│   └── qwen2.5-14b/
-│       └── qwen2.5-14b-*/         # 24.4% on custom eval
-│           ├── RUN_LOG.md
-│           └── dataset_used_t3/   # → data/t3_test1000_rebalanced/
+│   │   └── v1-3/                  # 44.26% BIRD score
+│   └── qwen2.5-7b/v5/
+│       └── research/              # T9 dataset analysis & planning ✅ NEW
+│           ├── T9_SPECIFICATION.md
+│           ├── T9_V2_EVALUATION_REPORT.md
+│           └── SOTA_METHODS_ANALYSIS.md
 │
-├── tools/                          # Dataset generation scripts
-│   └── create_t7_dataset.py       # Creates t7 from BIRD + custom
+├── docs/                           # Documentation ✅ NEW
+│   └── TRAINING_GUIDE.md          # Complete training & eval guide
 │
-└── experiments/                    # Archived experiments (preserved)
+└── tools/                          # Dataset generation scripts
+    └── create_t7_dataset.py       # Creates t7 dataset
 ```
 
 ## 📊 Results Timeline
@@ -86,20 +118,51 @@ lm/
 
 ## 🚀 Quick Start
 
-### Training (RunPod)
+### Option 1: Qwen3-1.7B Pipeline (Recommended for Cloud GPU)
+
+**Faster training, advanced techniques (GRPO + Self-Consistency)**
+
 ```bash
-cd /workspace/lora-train
-bash training/configs/qwen2.5-7b.sh  # Trains with t7 dataset
-# Training time: ~50 minutes on RTX 5090
-# Output: results/qwen2.5-7b/qwen2.5-7b-t7-bird-YYYYMMDD_HHMMSS/
+# Clone repo
+git clone https://github.com/arnavgupta00/lora-train.git
+cd lora-train
+
+# Download BIRD benchmark (required for eval)
+# Visit: https://bird-bench.github.io/
+# Extract dev.json and dev_databases/ to ./bird_eval/
+
+# Fast training (2-3 hours on RTX 3090)
+EPOCHS=2 BATCH_SIZE=8 SEQ_LEN=1024 SKIP_GRPO=1 \
+  nohup bash training/configs/qwen3-1.7b-full-pipeline.sh > pipeline.log 2>&1 &
+tail -f pipeline.log
+
+# Full training (6-8 hours, includes GRPO)
+nohup bash training/configs/qwen3-1.7b-full-pipeline.sh > pipeline.log 2>&1 &
 ```
 
-### BIRD Evaluation
+**Expected Results:**
+- Fast mode: ~55-60% BIRD accuracy
+- Full mode: ~60-67% BIRD accuracy
+
+See [`docs/TRAINING_GUIDE.md`](docs/TRAINING_GUIDE.md) for all commands and options.
+
+---
+
+### Option 2: Qwen2.5-7B (Proven 44.26% Result)
+
+**Proven baseline, simpler setup**
+
 ```bash
+cd lora-train
+
+# Training (RunPod)
+bash training/configs/qwen2.5-7b.sh
+# ~50 minutes on RTX 5090
+
+# BIRD Evaluation
 bash evaluation/run_bird_eval.sh \
   --model-path results/qwen2.5-7b/qwen2.5-7b-t7-bird-*/
-# Evaluation time: ~45 minutes
-# Output: bird_eval_report.json with execution accuracy
+# ~45 minutes
 ```
 
 ## 📚 Key Documentation

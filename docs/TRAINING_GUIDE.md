@@ -8,10 +8,14 @@ Complete guide for training Qwen3-1.7B on the T9 dataset for BIRD text-to-SQL be
 
 ```bash
 # Clone and setup
-git clone <repo-url> && cd lm
-pip install -r requirements.txt
+git clone https://github.com/arnavgupta00/lora-train.git
+cd lora-train
 
-# Run fast pipeline
+# Download BIRD benchmark (required for evaluation)
+# Visit: https://bird-bench.github.io/
+# Extract dev.json and dev_databases/ to ./bird_eval/
+
+# Run fast pipeline (auto-installs dependencies)
 EPOCHS=2 BATCH_SIZE=8 SEQ_LEN=1024 SKIP_GRPO=1 \
   nohup bash training/configs/qwen3-1.7b-full-pipeline.sh > pipeline.log 2>&1 &
 tail -f pipeline.log
@@ -21,6 +25,7 @@ tail -f pipeline.log
 
 ```bash
 # Run complete pipeline (SFT + GRPO + Eval)
+# Auto-installs dependencies on first run
 nohup bash training/configs/qwen3-1.7b-full-pipeline.sh > pipeline.log 2>&1 &
 tail -f pipeline.log
 ```

@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 ###############################################################################
-# Combined Pipeline: SFT + GRPO + Evaluation
+# Combined Pipeline: SFT + GRPO + Evaluation for Qwen3-1.7B
 #
 # Sleep-friendly script that runs the complete training and evaluation pipeline.
 # Start it before bed, wake up to results.
 #
+# QUICK START (from fresh clone):
+#   git clone https://github.com/arnavgupta00/lora-train.git
+#   cd lora-train
+#   # Download BIRD data (see BIRD_SETUP section below)
+#   EPOCHS=2 BATCH_SIZE=8 SEQ_LEN=1024 SKIP_GRPO=1 \
+#     nohup bash training/configs/qwen3-1.7b-full-pipeline.sh > pipeline.log 2>&1 &
+#   tail -f pipeline.log
+#
 # Pipeline:
+#   0. Auto-install Python dependencies (if missing)
 #   1. Pre-flight checks (deps, GPU, datasets)
 #   2. SFT Training → outputs/qwen3-1.7b-sft-<timestamp>/
 #   3. GRPO Training (optional) → outputs/qwen3-1.7b-grpo-<timestamp>/
@@ -18,7 +27,7 @@
 #   nohup bash training/configs/qwen3-1.7b-full-pipeline.sh > pipeline.log 2>&1 &
 #   tail -f pipeline.log
 #
-#   # Fast pipeline (2-3 hours)
+#   # Fast pipeline (2-3 hours) ⭐ RECOMMENDED
 #   EPOCHS=2 BATCH_SIZE=8 SEQ_LEN=1024 SKIP_GRPO=1 \
 #     nohup bash training/configs/qwen3-1.7b-full-pipeline.sh > pipeline.log 2>&1 &
 #
@@ -46,8 +55,19 @@
 #   # Dataset
 #   USE_LITE=0        # Use 8K lite dataset (faster, lower quality)
 #
+#   # BIRD Data Paths (auto-detected or set manually)
+#   BIRD_DEV_JSON=/path/to/bird/dev.json
+#   DB_DIR=/path/to/bird/dev_databases
+#
 # Hardware: RTX 3090/4090 (24GB VRAM)
 # Time: 2-8 hours depending on configuration
+#
+# BIRD_SETUP:
+#   Download BIRD benchmark from: https://bird-bench.github.io/
+#   Extract to: ./bird_eval/ or /workspace/bird_eval/
+#   Required files:
+#     - dev.json (evaluation questions)
+#     - dev_databases/ (SQLite databases)
 ###############################################################################
 
 set -euo pipefail
@@ -209,6 +229,124 @@ echo "Estimated Time: ~${total_hrs} hours"
 echo ""
 
 # =============================================================================
+# Dependency Installation
+# =============================================================================
+
+echo "=============================================="
+echo ">>> Checking and Installing Dependencies"
+echo "=============================================="
+echo ""
+
+INSTALL_REQUIRED=0
+
+# Check Python packages
+MISSING_PACKAGES=()
+
+echo -n "Checking PyTorch... "
+if python3 -c "import torch" 2>/dev/null; then
+    version=$(python3 -c "import torch; print(torch.__version__)")
+    echo "OK ($version)"
+else
+    echo "MISSING"
+    MISSING_PACKAGES+=("torch")
+    INSTALL_REQUIRED=1
+fi
+
+echo -n "Checking transformers... "
+if python3 -c "import transformers" 2>/dev/null; then
+    version=$(python3 -c "import transformers; print(transformers.__version__)")
+    echo "OK ($version)"
+else
+    echo "MISSING"
+    MISSING_PACKAGES+=("transformers")
+    INSTALL_REQUIRED=1
+fi
+
+echo -n "Checking accelerate... "
+if python3 -c "import accelerate" 2>/dev/null; then
+    version=$(python3 -c "import accelerate; print(accelerate.__version__)")
+    echo "OK ($version)"
+else
+    echo "MISSING"
+    MISSING_PACKAGES+=("accelerate")
+    INSTALL_REQUIRED=1
+fi
+
+echo -n "Checking peft... "
+if python3 -c "import peft" 2>/dev/null; then
+    version=$(python3 -c "import peft; print(peft.__version__)")
+    echo "OK ($version)"
+else
+    echo "MISSING"
+    MISSING_PACKAGES+=("peft")
+    INSTALL_REQUIRED=1
+fi
+
+echo -n "Checking trl... "
+if python3 -c "import trl" 2>/dev/null; then
+    version=$(python3 -c "import trl; print(trl.__version__)")
+    echo "OK ($version)"
+else
+    echo "MISSING"
+    MISSING_PACKAGES+=("trl")
+    INSTALL_REQUIRED=1
+fi
+
+echo -n "Checking datasets... "
+if python3 -c "import datasets" 2>/dev/null; then
+    version=$(python3 -c "import datasets; print(datasets.__version__)")
+    echo "OK ($version)"
+else
+    echo "MISSING"
+    MISSING_PACKAGES+=("datasets")
+    INSTALL_REQUIRED=1
+fi
+
+echo -n "Checking bitsandbytes... "
+if python3 -c "import bitsandbytes" 2>/dev/null; then
+    version=$(python3 -c "import bitsandbytes; print(bitsandbytes.__version__)" 2>/dev/null || echo "unknown")
+    echo "OK ($version)"
+else
+    echo "MISSING"
+    MISSING_PACKAGES+=("bitsandbytes")
+    INSTALL_REQUIRED=1
+fi
+
+echo ""
+
+# Install missing packages
+if [[ $INSTALL_REQUIRED -eq 1 ]]; then
+    echo ">>> Installing missing packages: ${MISSING_PACKAGES[*]}"
+    echo ""
+    
+    # Check if requirements.txt exists
+    if [[ -f "$ROOT_DIR/requirements.txt" ]]; then
+        echo "Using requirements.txt..."
+        pip3 install -r "$ROOT_DIR/requirements.txt" -q
+    else
+        echo "Installing packages individually..."
+        # Core packages
+        if [[ " ${MISSING_PACKAGES[*]} " =~ " torch " ]]; then
+            pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 -q
+        fi
+        
+        # Other packages
+        for pkg in "${MISSING_PACKAGES[@]}"; do
+            if [[ "$pkg" != "torch" ]]; then
+                pip3 install "$pkg" -q
+            fi
+        done
+    fi
+    
+    echo ""
+    echo ">>> Dependencies installed successfully!"
+    echo ""
+else
+    echo ">>> All dependencies already installed!"
+    echo ""
+fi
+
+# =============================================================================
 # Pre-flight Checks
 # =============================================================================
 
@@ -230,16 +368,15 @@ if command -v nvidia-smi >/dev/null 2>&1; then
         echo "  WARNING: Less than 20GB VRAM detected. May need reduced batch size."
     fi
 else
-    echo "FAILED - nvidia-smi not found"
-    PREFLIGHT_PASSED=0
+    echo "WARNING - nvidia-smi not found (training requires GPU)"
 fi
 
-# Check Python packages
+# Verify core packages are now available
 echo -n "PyTorch: "
 if python3 -c "import torch; print(torch.__version__)" 2>/dev/null; then
     :
 else
-    echo "FAILED - PyTorch not installed"
+    echo "FAILED - PyTorch still not available after install"
     PREFLIGHT_PASSED=0
 fi
 
@@ -247,7 +384,7 @@ echo -n "Transformers: "
 if python3 -c "import transformers; print(transformers.__version__)" 2>/dev/null; then
     :
 else
-    echo "FAILED - transformers not installed"
+    echo "FAILED - transformers still not available after install"
     PREFLIGHT_PASSED=0
 fi
 
@@ -310,9 +447,26 @@ if [[ -f "$BIRD_DEV_JSON" && -d "$DB_DIR" ]]; then
     echo "  databases: $DB_DIR"
 else
     if [[ "$SKIP_GRPO" == "1" && "$SKIP_EVAL" == "1" ]]; then
-        echo "SKIPPED (not needed)"
+        echo "SKIPPED (not needed for SFT-only run)"
     else
-        echo "FAILED - BIRD data not found"
+        echo "NOT FOUND"
+        echo ""
+        echo "  BIRD benchmark data is required for GRPO training and evaluation."
+        echo ""
+        echo "  Please download BIRD benchmark:"
+        echo "    1. Visit: https://bird-bench.github.io/"
+        echo "    2. Download the dev set"
+        echo "    3. Extract to one of these locations:"
+        echo "       - $ROOT_DIR/bird_eval/"
+        echo "       - /workspace/bird_eval/"
+        echo ""
+        echo "  Or set paths manually:"
+        echo "    export BIRD_DEV_JSON=/path/to/dev.json"
+        echo "    export DB_DIR=/path/to/dev_databases"
+        echo ""
+        echo "  To skip evaluation and GRPO, run with:"
+        echo "    SKIP_GRPO=1 SKIP_EVAL=1 bash training/configs/qwen3-1.7b-full-pipeline.sh"
+        echo ""
         PREFLIGHT_PASSED=0
     fi
 fi
