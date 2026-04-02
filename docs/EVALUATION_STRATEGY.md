@@ -32,9 +32,9 @@ python3 evaluation/eval_bird.py \
 
 # Wait 2 mins for model to load, then Terminal 2: SFT LoRA
 sleep 120
-python3 evaluation/eval_bird.py \
+cd /workspace/lora-train && python3 evaluation/eval_bird.py \
   --model_id Qwen/Qwen2.5-1.5B-Instruct \
-  --adapter_dir outputs/qwen3-1.7b-sft-XXXXXX \
+  --adapter_dir /workspace/outputs/qwen3-1.7b-sft-20260402_152110 \
   --bird_dev_json ./bird_eval/dev.json \
   --db_dir ./bird_eval/dev_databases \
   --output_dir ./eval_2_sft_lora > eval_sft.log 2>&1 &

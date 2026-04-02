@@ -317,14 +317,27 @@ Only output the SQL query, nothing else."""
                 )
                 futures.append((i, ex, future))
             
+            # Track completion with progress logging
+            completed = 0
             for i, ex, future in futures:
                 result = future.result()
                 result["question"] = ex.get("question", "")
                 result["index"] = i
                 results.append(result)
+                
+                completed += 1
+                if completed % max(1, len(futures) // 10) == 0 or completed == len(futures):
+                    elapsed = time.time() - eval_start
+                    rate = completed / elapsed
+                    remaining = (len(futures) - completed) / rate if rate > 0 else 0
+                    logger.info(
+                        f"[{completed}/{len(futures)}] "
+                        f"{100*completed/len(futures):.1f}% - "
+                        f"{rate:.1f} ex/s - ETA: {remaining/60:.1f}min"
+                    )
         
         eval_time = time.time() - eval_start
-        logger.info(f"Evaluation complete: {eval_time:.1f}s")
+        logger.info(f"Evaluation complete: {eval_time/60:.1f}min ({len(futures)/eval_time:.1f} ex/s)")
         
         # Compute metrics
         exact_match = sum(1 for r in results if r["exact_match"])
