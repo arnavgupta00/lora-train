@@ -595,6 +595,7 @@ echo ""
 
 SFT_OUTPUT_DIR="$OUT_BASE/qwen3-1.7b-sft-$PIPELINE_TS"
 SFT_LOG="$PIPELINE_DIR/sft_training.log"
+LOGGING_STEPS="${LOGGING_STEPS:-10}"
 
 # Export for downstream scripts
 export SFT_OUTPUT_DIR
@@ -614,7 +615,7 @@ python3 -u training/train_lora.py \
     --lora_r "$LORA_R" \
     --lora_alpha "$LORA_ALPHA" \
     --save_steps 500 \
-    --logging_steps 50 \
+    --logging_steps "$LOGGING_STEPS" \
     --gradient_checkpointing 2>&1 | tee "$SFT_LOG"
 
 SFT_EXIT_CODE=${PIPESTATUS[0]}
