@@ -18,7 +18,7 @@ SSH into your remote machine and run the evaluation WITHOUT background redirecti
 ```bash
 # Terminal 1: Run evaluation with visible output
 python3 evaluation/eval_bird.py \
-    --model_id Qwen/Qwen2.5-1.5B-Instruct \
+    --model_id Qwen/Qwen3-1.7B \
     --bird_dev_json ./bird_eval/dev.json \
     --db_dir ./bird_eval/dev_databases \
     --output_dir ./eval_1_base
@@ -36,7 +36,7 @@ If you need both terminal visibility AND persistent logs:
 ```bash
 # Run evaluation with tee (shows output and saves to file)
 python3 evaluation/eval_bird.py \
-    --model_id Qwen/Qwen2.5-1.5B-Instruct \
+    --model_id Qwen/Qwen3-1.7B \
     --bird_dev_json ./bird_eval/dev.json \
     --db_dir ./bird_eval/dev_databases \
     --output_dir ./eval_1_base 2>&1 | tee eval_1_base.log
@@ -63,7 +63,7 @@ tail -f eval_1_base.log | grep -E "\[.*\].*%"
 Expected log output (these WILL show in log files):
 
 ```
-2026-04-02 17:36:21 [INFO] Loading model: Qwen/Qwen2.5-1.5B-Instruct
+2026-04-02 17:36:21 [INFO] Loading model: Qwen/Qwen3-1.7B
 2026-04-02 17:36:21 [INFO] Downloading model weights (this may take a few minutes)...
 2026-04-02 17:37:15 [INFO] Model weights loaded successfully
 2026-04-02 17:37:16 [INFO] Evaluating 350 examples...
@@ -132,14 +132,14 @@ Expected log output (these WILL show in log files):
 ```bash
 # Terminal 1: Base model evaluation
 python3 evaluation/eval_bird.py \
-    --model_id Qwen/Qwen2.5-1.5B-Instruct \
+    --model_id Qwen/Qwen3-1.7B \
     --bird_dev_json ./bird_eval/dev.json \
     --db_dir ./bird_eval/dev_databases \
     --output_dir ./eval_1_base 2>&1 | tee eval_1_base.log &
 
 # Terminal 2: SFT model evaluation (after base starts)
 python3 evaluation/eval_bird.py \
-    --model_id Qwen/Qwen2.5-1.5B-Instruct \
+    --model_id Qwen/Qwen3-1.7B \
     --adapter_dir ./outputs/sft_adapter/ \
     --bird_dev_json ./bird_eval/dev.json \
     --db_dir ./bird_eval/dev_databases \
