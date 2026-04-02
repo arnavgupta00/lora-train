@@ -58,14 +58,30 @@ tail -f pipeline.log
 
 ### Software
 ```bash
-# Required packages
-pip install torch transformers accelerate peft trl bitsandbytes
-pip install datasets wandb tqdm
+# ⚠️ CRITICAL: Install PyTorch with CUDA support FIRST
+# Check your CUDA version
+nvidia-smi  # Look for "CUDA Version: X.Y"
+
+# Install PyTorch matching your CUDA version
+# For CUDA 12.1 (most cloud GPUs):
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# For CUDA 11.8 (older systems):
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# Verify GPU is detected
+python3 -c "import torch; print(f'CUDA: {torch.cuda.is_available()}')"
+# Must show: CUDA: True
+
+# Required packages (the script auto-installs these, but you can pre-install)
+pip install transformers accelerate peft trl bitsandbytes datasets tqdm
 
 # Optional (faster loading)
 pip install hf_transfer
 export HF_HUB_ENABLE_HF_TRANSFER=1
 ```
+
+**⚠️ GPU Not Detected?** If `torch.cuda.is_available()` returns `False`, training will be EXTREMELY slow (CPU-only). See [`CUDA_TROUBLESHOOTING.md`](CUDA_TROUBLESHOOTING.md) for fixes.
 
 ### Data
 - **T9 Dataset**: `data/training/t9/train_v4.jsonl` (14,034 examples)
