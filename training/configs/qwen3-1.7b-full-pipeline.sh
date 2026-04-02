@@ -319,17 +319,45 @@ if [[ $INSTALL_REQUIRED -eq 1 ]]; then
     echo ">>> Installing missing packages: ${MISSING_PACKAGES[*]}"
     echo ""
     
-    # Check if requirements.txt exists
-    if [[ -f "$ROOT_DIR/requirements.txt" ]]; then
-        echo "Using requirements.txt..."
-        pip3 install -r "$ROOT_DIR/requirements.txt" -q
-    else
-        echo "Installing packages individually..."
-        # Core packages
-        if [[ " ${MISSING_PACKAGES[*]} " =~ " torch " ]]; then
-            pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 -q
-        fi
+    # Special handling for PyTorch (often slow via pip)
+    if [[ " ${MISSING_PACKAGES[*]} " =~ " torch " ]]; then
+        echo "Installing PyTorch with optimized method..."
+        echo ""
         
+        # Detect Python version for correct wheel
+        PYTHON_VERSION=$(python3 -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
+        
+        # Try pip install with timeout first (fast if CDN is good)
+        echo "Attempting pip install (will timeout if too slow)..."
+        timeout 60 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 -q 2>/dev/null
+        
+        if [[ $? -ne 0 ]]; then
+            echo "Pip install too slow, using direct download method..."
+            
+            # Download wheel directly (uses full bandwidth like wget)
+            TORCH_WHEEL="torch-2.5.1+cu121-${PYTHON_VERSION}-${PYTHON_VERSION}-linux_x86_64.whl"
+            TORCH_URL="https://download.pytorch.org/whl/cu121/${TORCH_WHEEL}"
+            
+            echo "Downloading PyTorch wheel directly..."
+            if wget -q --show-progress "$TORCH_URL" 2>&1 | grep -q "ERROR"; then
+                echo "Wget failed, falling back to regular pip (this may take time)..."
+                pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+            else
+                echo "Installing from local wheel..."
+                pip3 install "$TORCH_WHEEL" -q
+                rm -f "$TORCH_WHEEL"
+            fi
+        fi
+        echo ""
+    fi
+    
+    # Check if requirements.txt exists for other packages
+    if [[ -f "$ROOT_DIR/requirements.txt" ]]; then
+        echo "Installing other dependencies from requirements.txt..."
+        # Install all except torch (already installed)
+        grep -v "^torch" "$ROOT_DIR/requirements.txt" | pip3 install -r /dev/stdin -q
+    else
+        echo "Installing other packages individually..."
         # Other packages
         for pkg in "${MISSING_PACKAGES[@]}"; do
             if [[ "$pkg" != "torch" ]]; then

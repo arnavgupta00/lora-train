@@ -26,11 +26,20 @@ nvidia-smi
 # 3. Reinstall PyTorch with matching CUDA version
 pip uninstall torch torchvision torchaudio -y
 
+# OPTION A: Fast download with wget (recommended if pip is slow)
+PYTHON_VER=$(python3 -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
+wget https://download.pytorch.org/whl/cu121/torch-2.5.1%2Bcu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+rm torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+
+# OPTION B: Regular pip (may be slow ~100 KB/s from some regions)
 # For CUDA 12.1 (most common on cloud GPUs)
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-
 # For CUDA 11.8 (older systems)
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# OPTION C: Use mirror (faster in Asia)
+pip install torch torchvision torchaudio -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 # 4. Verify GPU is detected
 python3 -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}'); print(f'GPU: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"None\"}')"
@@ -58,6 +67,48 @@ EPOCHS=2 BATCH_SIZE=8 SEQ_LEN=1024 SKIP_GRPO=1 \
 ```bash
 nvidia-smi | grep "CUDA Version"
 ```
+
+---
+
+## Slow PyTorch Download Issue
+
+**Symptom:** `pip install torch` downloading at ~100-200 KB/s despite fast internet (e.g., 1 Gbps connection)
+
+**Cause:** PyTorch's CDN (`download.pytorch.org`) can be extremely slow from certain geographic regions, especially Asia
+
+**Solution - Fast Download with wget:**
+```bash
+# This uses your full bandwidth (like downloading BIRD data)
+PYTHON_VER=$(python3 -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
+
+# Download wheel directly (will use full 40+ MB/s)
+wget https://download.pytorch.org/whl/cu121/torch-2.5.1%2Bcu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+
+# Install from local file (instant)
+pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+
+# Clean up
+rm torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+```
+
+**Alternative - Use PyPI Mirrors:**
+```bash
+# Tsinghua mirror (fast in Asia - China, Singapore, etc.)
+pip install torch torchvision torchaudio -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# Aliyun mirror (also fast in Asia)
+pip install torch torchvision torchaudio -i https://mirrors.aliyun.com/pypi/simple/
+
+# USTC mirror
+pip install torch torchvision torchaudio -i https://pypi.mirrors.ustc.edu.cn/simple/
+```
+
+**Speed Comparison:**
+- Default pip: ~100-200 KB/s (1-2 hours for 780 MB)
+- wget + local install: ~40-50 MB/s (20 seconds for 780 MB) ✅
+- PyPI mirrors: ~10-30 MB/s (30-80 seconds)
+
+**Note:** The training pipeline script automatically detects slow downloads and switches to wget method.
 
 ---
 
