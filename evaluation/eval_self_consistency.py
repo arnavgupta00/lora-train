@@ -546,7 +546,7 @@ def main():
                         help="Output directory for results")
     
     # Self-consistency arguments
-    parser.add_argument("--n_samples", type=int, default=10,
+    parser.add_argument("--n_samples", "--num_samples", dest="n_samples", type=int, default=10,
                         help="Number of SQL candidates to generate per question")
     parser.add_argument("--temperature", type=float, default=0.7,
                         help="Sampling temperature")
