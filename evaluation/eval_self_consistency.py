@@ -96,10 +96,27 @@ def normalize_sql(sql: str) -> str:
     if not sql:
         return ""
     sql = sql.strip()
+    
+    # Handle Qwen3 thinking tags: extract SQL after </think>
+    if "</think>" in sql:
+        sql = sql.split("</think>")[-1].strip()
+    elif "<think>" in sql:
+        # Thinking started but never ended - likely truncated
+        # Try to find any SELECT/INSERT/UPDATE/DELETE after thinking
+        import re
+        match = re.search(r'(SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)\s', sql, re.IGNORECASE)
+        if match:
+            sql = sql[match.start():]
+        else:
+            sql = ""  # No SQL found
+    
+    # Handle markdown code blocks
     if sql.startswith("```"):
         lines = sql.split("\n")
         sql = "\n".join(l for l in lines if not l.startswith("```"))
     sql = sql.strip()
+    
+    # Take only first statement
     if ";" in sql:
         sql = sql.split(";")[0] + ";"
     return sql
