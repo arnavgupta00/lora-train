@@ -127,11 +127,15 @@ lora-train/
 git clone https://github.com/arnavgupta00/lora-train.git
 cd lora-train
 
+# Optional: Check environment setup
+bash check_environment.sh
+
 # Download BIRD benchmark (required for eval)
 # Visit: https://bird-bench.github.io/
 # Extract dev.json and dev_databases/ to ./bird_eval/
 
 # Fast training (2-3 hours on RTX 3090)
+# Dependencies auto-install on first run
 EPOCHS=2 BATCH_SIZE=8 SEQ_LEN=1024 SKIP_GRPO=1 \
   nohup bash training/configs/qwen3-1.7b-full-pipeline.sh > pipeline.log 2>&1 &
 tail -f pipeline.log
