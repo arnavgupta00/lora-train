@@ -14,6 +14,23 @@ cd lora-train
 # Download BIRD benchmark (required for evaluation)
 # Visit: https://bird-bench.github.io/
 # Extract dev.json and dev_databases/ to ./bird_eval/
+  cd /workspace/lora-train
+  mkdir bird_eval
+  wget https://bird-bench.oss-cn-beijing.aliyuncs.com/dev.zip
+  unzip dev.zip
+   cd /workspace/lora-train/bird_eval/dev_20240627
+   unzip dev_databases.zip
+   
+   # 2. Move files to expected locations
+   cd /workspace/lora-train
+   mv bird_eval/dev_20240627/dev.json bird_eval/
+   mv bird_eval/dev_20240627/dev_databases bird_eval/
+   
+   # 3. Verify the structure is correct
+   ls  bird_eval/
+   
+   # 4. Run environment check to confirm
+   bash check_environment.sh
 
 # Run fast pipeline (auto-installs dependencies)
 EPOCHS=2 BATCH_SIZE=8 SEQ_LEN=1024 SKIP_GRPO=1 \

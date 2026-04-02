@@ -13,6 +13,18 @@ Fine-tuning small language models (1.7B-7B) for text-to-SQL on the BIRD benchmar
 git clone https://github.com/arnavgupta00/lora-train.git
 cd lora-train
 
+# ⚠️ IMPORTANT: Install PyTorch with CUDA support first!
+# Check your CUDA version
+nvidia-smi  # Look for "CUDA Version: X.Y"
+
+# Install PyTorch matching your CUDA version
+# For CUDA 12.1 (most cloud GPUs):
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# Verify GPU is detected
+python3 -c "import torch; print(f'CUDA: {torch.cuda.is_available()}')"
+# Should print: CUDA: True
+
 # Download BIRD benchmark data (required for evaluation)
 # Visit https://bird-bench.github.io/ and extract to ./bird_eval/
 
@@ -23,6 +35,8 @@ EPOCHS=2 BATCH_SIZE=8 SEQ_LEN=1024 SKIP_GRPO=1 \
 # Monitor progress
 tail -f pipeline.log
 ```
+
+**⚠️ Troubleshooting:** If training is stuck at 0% for >5 minutes, see [`docs/CUDA_TROUBLESHOOTING.md`](docs/CUDA_TROUBLESHOOTING.md)
 
 **Expected Results:**
 - **Fast mode (2-3 hrs):** ~55-60% BIRD accuracy

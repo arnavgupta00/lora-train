@@ -1,5 +1,19 @@
-# Core ML packages
+# PyTorch - INSTALL WITH CUDA VERSION MATCHING YOUR DRIVER
+# Check your CUDA version: nvidia-smi
+# Then choose ONE of these:
+#
+# For CUDA 12.1 (most cloud GPUs):
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+#
+# For CUDA 11.8 (older systems):
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+#
+# Default (may not match your CUDA):
 torch>=2.0.0
+# torchvision>=0.15.0
+# torchaudio>=2.0.0
+
+# Core ML packages
 transformers>=4.40.0
 accelerate>=0.27.0
 peft>=0.10.0

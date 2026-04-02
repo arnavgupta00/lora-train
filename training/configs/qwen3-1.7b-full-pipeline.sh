@@ -380,6 +380,47 @@ else
     PREFLIGHT_PASSED=0
 fi
 
+# CRITICAL: Check CUDA availability in PyTorch
+echo -n "CUDA in PyTorch: "
+CUDA_AVAILABLE=$(python3 -c "import torch; print(torch.cuda.is_available())" 2>/dev/null || echo "False")
+if [[ "$CUDA_AVAILABLE" == "True" ]]; then
+    CUDA_GPU_NAME=$(python3 -c "import torch; print(torch.cuda.get_device_name(0))" 2>/dev/null || echo "Unknown")
+    echo "✓ ($CUDA_GPU_NAME)"
+else
+    echo "✗ FAILED - GPU NOT DETECTED BY PYTORCH"
+    echo ""
+    echo "  ╔══════════════════════════════════════════════════════════════╗"
+    echo "  ║  CRITICAL: PyTorch cannot detect your GPU!                  ║"
+    echo "  ║  Training will run on CPU and be EXTREMELY SLOW (days).     ║"
+    echo "  ╚══════════════════════════════════════════════════════════════╝"
+    echo ""
+    echo "  Common causes:"
+    echo "    1. PyTorch CUDA version doesn't match NVIDIA driver"
+    echo "    2. CUDA not installed or not in PATH"
+    echo ""
+    echo "  Check your CUDA version:"
+    echo "    nvidia-smi  # Look for 'CUDA Version: X.Y'"
+    echo ""
+    echo "  Reinstall PyTorch with correct CUDA version:"
+    if command -v nvidia-smi >/dev/null 2>&1; then
+        DRIVER_VERSION=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -n1)
+        echo "    # Your NVIDIA driver: $DRIVER_VERSION"
+        # Guess CUDA version from driver
+        if [[ "$DRIVER_VERSION" > "535" ]]; then
+            echo "    pip uninstall torch torchvision torchaudio -y"
+            echo "    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121"
+        else
+            echo "    pip uninstall torch torchvision torchaudio -y"
+            echo "    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118"
+        fi
+    else
+        echo "    pip uninstall torch torchvision torchaudio -y"
+        echo "    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121"
+    fi
+    echo ""
+    PREFLIGHT_PASSED=0
+fi
+
 echo -n "Transformers: "
 if python3 -c "import transformers; print(transformers.__version__)" 2>/dev/null; then
     :
