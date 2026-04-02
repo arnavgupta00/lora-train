@@ -15,6 +15,21 @@ CUDA initialization: The NVIDIA driver on your system is too old
 
 ## Quick Fix
 
+**Easiest: Run the automated fixer (auto-detects your driver version):**
+```bash
+bash tools/fix_pytorch_cuda.sh
+```
+
+This script:
+- Detects your GPU driver version
+- Installs the correct PyTorch for your driver
+- Verifies CUDA is working
+- Ready to run!
+
+---
+
+**Manual fix (if you prefer):**
+
 ```bash
 # 1. Kill stuck process
 pkill -f train_lora.py
