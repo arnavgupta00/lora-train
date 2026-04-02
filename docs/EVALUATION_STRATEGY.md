@@ -25,7 +25,7 @@
 ```bash
 # Terminal 1: Base model (no LoRA)
 python3 evaluation/eval_bird.py \
-  --model_id Qwen/Qwen2.5-1.5B-Instruct \
+  --model_id Qwen/Qwen3-1.7B \
   --bird_dev_json ./bird_eval/dev.json \
   --db_dir ./bird_eval/dev_databases \
   --output_dir ./eval_1_base > eval_base.log 2>&1 &
@@ -33,11 +33,11 @@ python3 evaluation/eval_bird.py \
 # Wait 2 mins for model to load, then Terminal 2: SFT LoRA
 sleep 120
 cd /workspace/lora-train && python3 evaluation/eval_bird.py \
-  --model_id Qwen/Qwen2.5-1.5B-Instruct \
+  --model_id Qwen/Qwen3-1.7B \
   --adapter_dir /workspace/outputs/qwen3-1.7b-sft-20260402_152110 \
   --bird_dev_json ./bird_eval/dev.json \
   --db_dir ./bird_eval/dev_databases \
-  --output_dir ./eval_2_sft_lora > eval_sft.log 2>&1 &
+  --output_dir ./eval_2_sft_lora 
 
 # Monitor
 watch -n 10 'nvidia-smi | head -15'
@@ -49,7 +49,7 @@ watch -n 10 'nvidia-smi | head -15'
 
 # Terminal 1: Base + Self-Consistency
 python3 evaluation/eval_self_consistency.py \
-  --model_id Qwen/Qwen2.5-1.5B-Instruct \
+  --model_id Qwen/Qwen3-1.7B \
   --bird_dev_json ./bird_eval/dev.json \
   --db_dir ./bird_eval/dev_databases \
   --output_dir ./eval_3_base_sc \
@@ -58,12 +58,12 @@ python3 evaluation/eval_self_consistency.py \
 # Wait 2 mins, then Terminal 2: SFT + Self-Consistency
 sleep 120
 python3 evaluation/eval_self_consistency.py \
-  --model_id Qwen/Qwen2.5-1.5B-Instruct \
-  --adapter_dir outputs/qwen3-1.7b-sft-XXXXXX \
+  --model_id Qwen/Qwen3-1.7B \
+  --adapter_dir /workspace/outputs/qwen3-1.7b-sft-20260402_152110 \
   --bird_dev_json ./bird_eval/dev.json \
   --db_dir ./bird_eval/dev_databases \
   --output_dir ./eval_4_sft_sc \
-  --num_samples 5 > eval_sft_sc.log 2>&1 &
+  --num_samples 7 > eval_sft_sc.log 2>&1 &
 ```
 
 ### Alternative: All Sequential (~120 mins, safest)
@@ -74,7 +74,7 @@ cd /workspace/lora-train
 # 1. Base model (20-30 mins)
 echo "=== Eval 1: Base Model ==="
 python3 evaluation/eval_bird.py \
-  --model_id Qwen/Qwen2.5-1.5B-Instruct \
+  --model_id Qwen/Qwen3-1.7B \
   --bird_dev_json ./bird_eval/dev.json \
   --db_dir ./bird_eval/dev_databases \
   --output_dir ./eval_1_base
@@ -82,7 +82,7 @@ python3 evaluation/eval_bird.py \
 # 2. SFT LoRA (20-30 mins)
 echo "=== Eval 2: SFT LoRA ==="
 python3 evaluation/eval_bird.py \
-  --model_id Qwen/Qwen2.5-1.5B-Instruct \
+  --model_id Qwen/Qwen3-1.7B \
   --adapter_dir outputs/qwen3-1.7b-sft-XXXXXX \
   --bird_dev_json ./bird_eval/dev.json \
   --db_dir ./bird_eval/dev_databases \
@@ -91,7 +91,7 @@ python3 evaluation/eval_bird.py \
 # 3. Base + Self-Consistency (30-40 mins)
 echo "=== Eval 3: Base + SC ==="
 python3 evaluation/eval_self_consistency.py \
-  --model_id Qwen/Qwen2.5-1.5B-Instruct \
+  --model_id Qwen/Qwen3-1.7B \
   --bird_dev_json ./bird_eval/dev.json \
   --db_dir ./bird_eval/dev_databases \
   --output_dir ./eval_3_base_sc \
@@ -100,7 +100,7 @@ python3 evaluation/eval_self_consistency.py \
 # 4. SFT + Self-Consistency (30-40 mins)
 echo "=== Eval 4: SFT + SC ==="
 python3 evaluation/eval_self_consistency.py \
-  --model_id Qwen/Qwen2.5-1.5B-Instruct \
+  --model_id Qwen/Qwen3-1.7B \
   --adapter_dir outputs/qwen3-1.7b-sft-XXXXXX \
   --bird_dev_json ./bird_eval/dev.json \
   --db_dir ./bird_eval/dev_databases \
@@ -157,7 +157,7 @@ done
 ```bash
 # Use 8-bit quantization to reduce memory
 python3 evaluation/eval_bird.py \
-  --model_id Qwen/Qwen2.5-1.5B-Instruct \
+  --model_id Qwen/Qwen3-1.7B \
   --adapter_dir outputs/qwen3-1.7b-sft-XXXXXX \
   --load_in_8bit \
   --bird_dev_json ./bird_eval/dev.json \
@@ -170,7 +170,7 @@ python3 evaluation/eval_bird.py \
 ```bash
 # Reduce batch size if OOM, increase if fast
 python3 evaluation/eval_bird.py \
-  --model_id Qwen/Qwen2.5-1.5B-Instruct \
+  --model_id Qwen/Qwen3-1.7B \
   --batch_size 4 \
   ...
 ```
@@ -193,7 +193,7 @@ echo "Starting 4-point evaluation..."
 
 # Phase 1: Base + SFT LoRA in parallel
 python3 evaluation/eval_bird.py \
-  --model_id Qwen/Qwen2.5-1.5B-Instruct \
+  --model_id Qwen/Qwen3-1.7B \
   --bird_dev_json ./bird_eval/dev.json \
   --db_dir ./bird_eval/dev_databases \
   --output_dir ./eval_base &
@@ -201,7 +201,7 @@ python3 evaluation/eval_bird.py \
 sleep 120
 
 python3 evaluation/eval_bird.py \
-  --model_id Qwen/Qwen2.5-1.5B-Instruct \
+  --model_id Qwen/Qwen3-1.7B \
   --adapter_dir outputs/qwen3-1.7b-sft-* \
   --bird_dev_json ./bird_eval/dev.json \
   --db_dir ./bird_eval/dev_databases \
@@ -212,7 +212,7 @@ wait
 
 # Phase 2: SC evaluations
 python3 evaluation/eval_self_consistency.py \
-  --model_id Qwen/Qwen2.5-1.5B-Instruct \
+  --model_id Qwen/Qwen3-1.7B \
   --adapter_dir outputs/qwen3-1.7b-sft-* \
   --bird_dev_json ./bird_eval/dev.json \
   --db_dir ./bird_eval/dev_databases \

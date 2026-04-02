@@ -1,203 +1,259 @@
 {
   "total_examples": 1534,
-  "exact_match": 0,
-  "exact_match_pct": 0.0,
-  "execution_match": 0,
-  "execution_accuracy": 0.0,
-  "execution_errors": 1534,
-  "execution_error_pct": 100.0,
-  "generation_time_min": 16.87,
-  "evaluation_time_sec": 630.41,
+  "exact_match": 163,
+  "exact_match_pct": 10.63,
+  "execution_match": 533,
+  "execution_accuracy": 34.75,
+  "execution_errors": 428,
+  "execution_error_pct": 27.9,
+  "generation_time_min": 16.66,
+  "evaluation_time_sec": 691.15,
   "by_database": [
     {
       "db_id": "card_games",
       "total": 191,
-      "exec_match": 0,
-      "errors": 191,
-      "accuracy": 0.0
+      "exec_match": 66,
+      "errors": 35,
+      "accuracy": 34.6
     },
     {
       "db_id": "codebase_community",
       "total": 186,
-      "exec_match": 0,
-      "errors": 186,
-      "accuracy": 0.0
+      "exec_match": 94,
+      "errors": 33,
+      "accuracy": 50.5
     },
     {
       "db_id": "formula_1",
       "total": 174,
-      "exec_match": 0,
-      "errors": 174,
-      "accuracy": 0.0
+      "exec_match": 36,
+      "errors": 50,
+      "accuracy": 20.7
     },
     {
       "db_id": "thrombosis_prediction",
       "total": 163,
-      "exec_match": 0,
-      "errors": 163,
-      "accuracy": 0.0
+      "exec_match": 34,
+      "errors": 91,
+      "accuracy": 20.9
     },
     {
       "db_id": "student_club",
       "total": 158,
-      "exec_match": 0,
-      "errors": 158,
-      "accuracy": 0.0
+      "exec_match": 80,
+      "errors": 30,
+      "accuracy": 50.6
     },
     {
       "db_id": "toxicology",
       "total": 145,
-      "exec_match": 0,
-      "errors": 145,
-      "accuracy": 0.0
+      "exec_match": 48,
+      "errors": 38,
+      "accuracy": 33.1
     },
     {
       "db_id": "superhero",
       "total": 129,
-      "exec_match": 0,
-      "errors": 129,
-      "accuracy": 0.0
+      "exec_match": 59,
+      "errors": 44,
+      "accuracy": 45.7
     },
     {
       "db_id": "european_football_2",
       "total": 129,
-      "exec_match": 0,
-      "errors": 129,
-      "accuracy": 0.0
+      "exec_match": 66,
+      "errors": 20,
+      "accuracy": 51.2
     },
     {
       "db_id": "financial",
       "total": 106,
-      "exec_match": 0,
-      "errors": 106,
-      "accuracy": 0.0
+      "exec_match": 21,
+      "errors": 34,
+      "accuracy": 19.8
     },
     {
       "db_id": "california_schools",
       "total": 89,
-      "exec_match": 0,
-      "errors": 89,
-      "accuracy": 0.0
+      "exec_match": 6,
+      "errors": 42,
+      "accuracy": 6.7
     },
     {
       "db_id": "debit_card_specializing",
       "total": 64,
-      "exec_match": 0,
-      "errors": 64,
-      "accuracy": 0.0
+      "exec_match": 23,
+      "errors": 11,
+      "accuracy": 35.9
     }
   ],
   "sample_errors": [
     {
-      "pred_sql": "<think>\n\n</think>\n\nSELECT MAX(T1.`Free Meal Count (K-12)` / T1.`Enrollment (K-12)`) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.`District Code` = T2.District WHERE T2.County = 'Alameda County'",
-      "gold_sql": "SELECT `Free Meal Count (K-12)` / `Enrollment (K-12)` FROM frpm WHERE `County Name` = 'Alameda' ORDER BY (CAST(`Free Meal Count (K-12)` AS REAL) / `Enrollment (K-12)`) DESC LIMIT 1",
-      "db_id": "california_schools",
-      "exact_match": false,
-      "exec_match": false,
-      "pred_executes": false,
-      "error": "near \"<\": syntax error",
-      "question": "What is the highest eligible free rate for K-12 students in the schools in Alameda County?",
-      "index": 0
-    },
-    {
-      "pred_sql": "<think>\n\n</think>\n\nSELECT T1.FreeMealCountAges517, T1.EnrollmentAges517 FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.DistrictCode = T2.District WHERE T2.StatusType = 'Continuation' ORDER BY T1.FreeMealCountAges517 / T1.EnrollmentAges517 DESC LIMIT 3",
+      "pred_sql": "SELECT T1.FreeMealCountAges517, T1.EnrollmentAges517 FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.DistrictCode = T2.District WHERE T2.StatusType = 'Continuation' ORDER BY T1.FreeMealCountAges517 / T1.EnrollmentAges517 DESC LIMIT 3",
       "gold_sql": "SELECT `Free Meal Count (Ages 5-17)` / `Enrollment (Ages 5-17)` FROM frpm WHERE `Educational Option Type` = 'Continuation School' AND `Free Meal Count (Ages 5-17)` / `Enrollment (Ages 5-17)` IS NOT NULL ORDER BY `Free Meal Count (Ages 5-17)` / `Enrollment (Ages 5-17)` ASC LIMIT 3",
       "db_id": "california_schools",
       "exact_match": false,
       "exec_match": false,
       "pred_executes": false,
-      "error": "near \"<\": syntax error",
+      "error": "no such column: T1.FreeMealCountAges517",
       "question": "Please list the lowest three eligible free rates for students aged 5-17 in continuation schools.",
       "index": 1
     },
     {
-      "pred_sql": "<think>\n\n</think>\n\nSELECT DISTINCT T1.Zip FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.`Charter School (Y/N)` = 1 AND T1.County = 'Fresno County Office of Education'",
-      "gold_sql": "SELECT T2.Zip FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.`District Name` = 'Fresno County Office of Education' AND T1.`Charter School (Y/N)` = 1",
-      "db_id": "california_schools",
-      "exact_match": false,
-      "exec_match": false,
-      "pred_executes": false,
-      "error": "near \"<\": syntax error",
-      "question": "Please list the zip code of all the charter schools in Fresno County Office of Education.",
-      "index": 2
-    },
-    {
-      "pred_sql": "<think>\n\n</think>\n\nSELECT T2.MailingStreet FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.`Free Meal Count (K-12)` = ( SELECT MAX(`Free Meal Count (K-12)` ) FROM frpm )",
+      "pred_sql": "SELECT T2.MailingStreet FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.`Free Meal Count (K-12)` = ( SELECT MAX(`Free Meal Count (K-12)` ) FROM frpm )",
       "gold_sql": "SELECT T2.MailStreet FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode ORDER BY T1.`FRPM Count (K-12)` DESC LIMIT 1",
       "db_id": "california_schools",
       "exact_match": false,
       "exec_match": false,
       "pred_executes": false,
-      "error": "near \"<\": syntax error",
+      "error": "no such column: T2.MailingStreet",
       "question": "What is the unabbreviated mailing street address of the school with the highest FRPM count for K-12 students?",
       "index": 3
     },
     {
-      "pred_sql": "<think>\n\n</think>\n\nSELECT T1.Phone FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.`Charter School (Y/N)` = 1 AND T1.OpenDate > '2000-01-01'",
-      "gold_sql": "SELECT T2.Phone FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.`Charter Funding Type` = 'Directly funded' AND T1.`Charter School (Y/N)` = 1 AND T2.OpenDate > '2000-01-01'",
-      "db_id": "california_schools",
-      "exact_match": false,
-      "exec_match": false,
-      "pred_executes": false,
-      "error": "near \"<\": syntax error",
-      "question": "Please list the phone numbers of the direct charter-funded schools that are opened after 2000/1/1.",
-      "index": 4
-    },
-    {
-      "pred_sql": "<think>\n\n</think>\n\nSELECT COUNT(T1.cds) FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T2.AvgScrMath > 400 AND T1.Virtual = 'F'",
+      "pred_sql": "SELECT COUNT(T1.cds) FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T2.AvgScrMath > 400 AND T1.Virtual = 'F'",
       "gold_sql": "SELECT COUNT(DISTINCT T2.School) FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Virtual = 'F' AND T1.AvgScrMath > 400",
       "db_id": "california_schools",
       "exact_match": false,
       "exec_match": false,
       "pred_executes": false,
-      "error": "near \"<\": syntax error",
+      "error": "no such column: T1.cds",
       "question": "How many schools with an average score in Math greater than 400 in the SAT test are exclusively virtual?",
       "index": 5
     },
     {
-      "pred_sql": "<think>\n\n</think>\n\nSELECT T1.School FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T2.NumTstTakr > 500 AND T1.Magnet = 1",
-      "gold_sql": "SELECT T2.School FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Magnet = 1 AND T1.NumTstTakr > 500",
-      "db_id": "california_schools",
-      "exact_match": false,
-      "exec_match": false,
-      "pred_executes": false,
-      "error": "near \"<\": syntax error",
-      "question": "Among the schools with the SAT test takers of over 500, please list the schools that are magnet schools or offer a magnet program.",
-      "index": 6
-    },
-    {
-      "pred_sql": "<think>\n\n</think>\n\nSELECT T1.Phone FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T2.NumGE1500 > 0 AND T2.AvgScrRead > 1500",
-      "gold_sql": "SELECT T2.Phone FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode ORDER BY T1.NumGE1500 DESC LIMIT 1",
-      "db_id": "california_schools",
-      "exact_match": false,
-      "exec_match": false,
-      "pred_executes": false,
-      "error": "near \"<\": syntax error",
-      "question": "What is the phone number of the school that has the highest number of test takers with an SAT score of over 1500?",
-      "index": 7
-    },
-    {
-      "pred_sql": "<think>\n\n</think>\n\nSELECT COUNT(T1.cds) FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.rtype = 'K-12' GROUP BY T1.cds ORDER BY T1.FRPMCount DESC LIMIT 1",
+      "pred_sql": "SELECT COUNT(T1.cds) FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.rtype = 'K-12' GROUP BY T1.cds ORDER BY T1.FRPMCount DESC LIMIT 1",
       "gold_sql": "SELECT NumTstTakr FROM satscores WHERE cds = ( SELECT CDSCode FROM frpm ORDER BY `FRPM Count (K-12)` DESC LIMIT 1 )",
       "db_id": "california_schools",
       "exact_match": false,
       "exec_match": false,
       "pred_executes": false,
-      "error": "near \"<\": syntax error",
+      "error": "no such column: T1.FRPMCount",
       "question": "What is the number of SAT test takers of the schools with the highest FRPM count for K-12 students?",
       "index": 8
     },
     {
-      "pred_sql": "<think>\n\n</think>\n\nSELECT COUNT(T1.CDSCode) FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T2.AvgScrMath > 560 AND T1.FundingType = 'Charter'",
-      "gold_sql": "SELECT COUNT(T2.`School Code`) FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.`Charter Funding Type` = 'Directly funded'",
+      "pred_sql": "SELECT T2.FRPM_COUNT FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T1.rtype = 'Reading' AND T1.AvgScrRead = ( SELECT MAX(AvgScrRead) FROM satscores )",
+      "gold_sql": "SELECT T2.`FRPM Count (Ages 5-17)` FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode ORDER BY T1.AvgScrRead DESC LIMIT 1",
       "db_id": "california_schools",
       "exact_match": false,
       "exec_match": false,
       "pred_executes": false,
-      "error": "near \"<\": syntax error",
-      "question": "Among the schools with the average score in Math over 560 in the SAT test, how many schools are directly charter-funded?",
-      "index": 9
+      "error": "no such column: T2.FRPM_COUNT",
+      "question": "For the school with the highest average score in Reading in the SAT test, what is its FRPM count for students aged 5-17?",
+      "index": 10
+    },
+    {
+      "pred_sql": "SELECT DISTINCT CDSCode FROM frpm WHERE CAST(REPLACE(REPLACE(Enrollment (K-12), ',', ''), '+', '') AS REAL) + CAST(REPLACE(REPLACE(Enrollment (Ages 5-17), ',', ''), '+', '') AS REAL) > 500",
+      "gold_sql": "SELECT T2.CDSCode FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.`Enrollment (K-12)` + T2.`Enrollment (Ages 5-17)` > 500",
+      "db_id": "california_schools",
+      "exact_match": false,
+      "exec_match": false,
+      "pred_executes": false,
+      "error": "near \"5\": syntax error",
+      "question": "Please list the codes of the schools with a total enrollment of over 500.",
+      "index": 11
+    },
+    {
+      "pred_sql": "SELECT T2.`Free Meal Count (Ages 5-17)` / T2.`Enrollment (Ages 5-17)` FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.NumGE1500 / T1.NumTstTakr > 0.3 ORDER BY T2.`Free Meal Count (Ages 5-17)` / T2.`Enrollment (Ages 5-17)` DESC LIMIT 1",
+      "gold_sql": "SELECT MAX(CAST(T1.`Free Meal Count (Ages 5-17)` AS REAL) / T1.`Enrollment (Ages 5-17)`) FROM frpm AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE CAST(T2.NumGE1500 AS REAL) / T2.NumTstTakr > 0.3",
+      "db_id": "california_schools",
+      "exact_match": false,
+      "exec_match": false,
+      "pred_executes": false,
+      "error": "no such column: T2.Free Meal Count (Ages 5-17)",
+      "question": "Among the schools with an SAT excellence rate of over 0.3, what is the highest eligible free rate for students aged 5-17?",
+      "index": 12
+    },
+    {
+      "pred_sql": "SELECT T1.NCESSchool, T1.Enrollment (Ages 5-17) FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode ORDER BY T1.Enrollment (Ages 5-17) DESC LIMIT 5",
+      "gold_sql": "SELECT T1.NCESSchool FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode ORDER BY T2.`Enrollment (Ages 5-17)` DESC LIMIT 5",
+      "db_id": "california_schools",
+      "exact_match": false,
+      "exec_match": false,
+      "pred_executes": false,
+      "error": "near \"(\": syntax error",
+      "question": "List the top five schools, by descending order, from the highest to the lowest, the most number of Enrollment (Ages 5-17). Please give their NCES school identification number.",
+      "index": 14
+    },
+    {
+      "pred_sql": "SELECT T1.School, T1.rtype FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrRead >= 1500 AND T1.AvgScrMath >= 1500 AND T1.AvgScrWrite >= 1500 AND T1.NumGE1500 >= 1500 AND T1.Percent (%) Eligible Free (K-12) > 0.1",
+      "gold_sql": "SELECT T2.`School Name` FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE CAST(T2.`Free Meal Count (K-12)` AS REAL) / T2.`Enrollment (K-12)` > 0.1 AND T1.NumGE1500 > 0",
+      "db_id": "california_schools",
+      "exact_match": false,
+      "exec_match": false,
+      "pred_executes": false,
+      "error": "near \"(\": syntax error",
+      "question": "Give the names of the schools with the percent eligible for free meals in K-12 is more than 0.1 and test takers whose test score is greater than or equal to 1500?",
+      "index": 24
+    },
+    {
+      "pred_sql": "SELECT T1.School, T1.Street, T1.City, T1.State, T1.Zip FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.`Free Meal Count (Ages 5-17)` > 800 AND T2.`Percent (%) Eligible Free (Ages 5-17)` > 0 AND T2.`Percent (%) Eligible FRPM (Ages 5-17)` > 0 AND T2.`Free Meal Count (K-12)` > 800 AND T2.`Percent (%) Eligible Free (K-12)` > 0 AND T2.`Percent (%) Eligible FRPM (K-12)` > 0 AND T2.`Enrollment (K-12)` > 800 AND T2.`Percent (%) Eligible Free (K-12)` > 0 AND T2.`Percent (%) Eligible FRPM (K-12)` > 0 AND T2.`Enrollment (Ages 5-17)` > 800 AND T2.`Percent (%) Eligible Free (Ages",
+      "gold_sql": "SELECT T1.`School Name`, T2.Street, T2.City, T2.State, T2.Zip FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Monterey' AND T1.`Free Meal Count (Ages 5-17)` > 800 AND T1.`School Type` = 'High Schools (Public)'",
+      "db_id": "california_schools",
+      "exact_match": false,
+      "exec_match": false,
+      "pred_executes": false,
+      "error": "unrecognized token: \"`Percent (%) Eligible Free (Ages\"",
+      "question": "State the names and full communication address of high schools in Monterey which has more than 800 free or reduced price meals for ages 15-17?",
+      "index": 26
     }
   ],
-  "sample_successes": []
+  "sample_successes": [
+    {
+      "pred_sql": "SELECT T1.School FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T2.NumTstTakr > 500 AND T1.Magnet = 1",
+      "gold_sql": "SELECT T2.School FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Magnet = 1 AND T1.NumTstTakr > 500",
+      "db_id": "california_schools",
+      "exact_match": false,
+      "exec_match": true,
+      "pred_executes": true,
+      "error": null,
+      "question": "Among the schools with the SAT test takers of over 500, please list the schools that are magnet schools or offer a magnet program.",
+      "index": 6
+    },
+    {
+      "pred_sql": "SELECT T1.School, T1.Street FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.`Enrollment (K-12)` - T2.`Enrollment (Ages 5-17)` > 30",
+      "gold_sql": "SELECT T1.School, T1.Street FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.`Enrollment (K-12)` - T2.`Enrollment (Ages 5-17)` > 30",
+      "db_id": "california_schools",
+      "exact_match": true,
+      "exec_match": true,
+      "pred_executes": true,
+      "error": null,
+      "question": "List the names of schools with more than 30 difference in enrollements between K-12 and ages 5-17? Please also give the full street adress of the schools.",
+      "index": 23
+    },
+    {
+      "pred_sql": "SELECT COUNT(T1.cds) FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.City = 'Lakeport' AND T1.AvgScrRead + T1.AvgScrMath + T1.AvgScrWrite >= 1500",
+      "gold_sql": "SELECT COUNT(T1.cds) FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.MailCity = 'Lakeport' AND (T1.AvgScrRead + T1.AvgScrMath + T1.AvgScrWrite) >= 1500",
+      "db_id": "california_schools",
+      "exact_match": false,
+      "exec_match": true,
+      "pred_executes": true,
+      "error": null,
+      "question": "What is the total number of schools whose total SAT scores are greater or equal to 1500 whose mailing city is Lakeport?",
+      "index": 52
+    },
+    {
+      "pred_sql": "SELECT T1.Phone, T1.Ext, T1.School FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.Zip = '95203-3704'",
+      "gold_sql": "SELECT Phone, Ext, School FROM schools WHERE Zip = '95203-3704'",
+      "db_id": "california_schools",
+      "exact_match": false,
+      "exec_match": true,
+      "pred_executes": true,
+      "error": null,
+      "question": "What is the phone number and extension number for the school with the zip code 95203-3704? Indicate the school's name.",
+      "index": 58
+    },
+    {
+      "pred_sql": "SELECT DISTINCT T1.Website FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.Virtual = 'P' AND T1.Charter = 1 AND T1.County = 'San Joaquin'",
+      "gold_sql": "SELECT Website FROM schools WHERE County = 'San Joaquin' AND Virtual = 'P' AND Charter = 1",
+      "db_id": "california_schools",
+      "exact_match": false,
+      "exec_match": true,
+      "pred_executes": true,
+      "error": null,
+      "question": "What are the websites for all the partially virtual chartered schools located in San Joaquin?",
+      "index": 60
+    }
+  ]
 }

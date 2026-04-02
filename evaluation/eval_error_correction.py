@@ -173,37 +173,24 @@ class ErrorCorrectionEvaluator:
 Given a database schema and a question, generate the correct SQL query.
 Only output the SQL query, nothing else."""
     
-    CORRECTION_PROMPT = """/think
-The following SQL query failed with an error. Analyze the error and fix the query.
+    # Simpler correction prompt - using no_think since model was trained that way
+    # Be very explicit about what to fix
+    CORRECTION_PROMPT = """/no_think
+FIX THIS SQL ERROR.
 
-## Database Schema
+The query below has an error: {error_message}
+
+SCHEMA:
 {schema}
 
-## Question
-{question}
+QUESTION: {question}
 
-## Evidence/Hint
-{evidence}
+BROKEN SQL: {failed_sql}
 
-## Failed SQL
-```sql
-{failed_sql}
-```
+The error "{error_message}" means the column/table name is WRONG.
+Find the CORRECT name in the schema above. Column names with spaces need backticks.
 
-## Error Message
-{error_message}
-
-## Analysis Instructions
-1. Read the error message carefully - it tells you exactly what's wrong
-2. Find the problematic column/table name in the failed SQL
-3. Search the schema above for the CORRECT column name (exact spelling, case, spaces)
-4. If a column name has spaces or special characters, wrap it in backticks: `Column Name`
-5. Verify all table aliases (T1, T2) are used correctly
-6. Check JOIN conditions reference correct columns from each table
-
-## Corrected SQL
-Generate ONLY the corrected SQL query (no explanation):
-"""
+Write the FIXED SQL query:"""
     
     def __init__(
         self,
@@ -274,17 +261,16 @@ Generate ONLY the corrected SQL query (no explanation):
         failed_sql: str,
         error_message: str,
     ) -> str:
-        """Build prompt for error correction (with thinking mode)."""
+        """Build prompt for error correction."""
         user_content = self.CORRECTION_PROMPT.format(
             schema=schema,
             question=question,
-            evidence=evidence if evidence else "None",
             failed_sql=failed_sql,
             error_message=error_message,
         )
         
         messages = [
-            {"role": "system", "content": "You are an expert SQL debugger. Fix SQL errors based on schema and error messages."},
+            {"role": "system", "content": self.SYSTEM_PROMPT},
             {"role": "user", "content": user_content}
         ]
         
@@ -363,10 +349,17 @@ Generate ONLY the corrected SQL query (no explanation):
         
         input_len = inputs["input_ids"].shape[1]
         gen_ids = outputs[0][input_len:]
-        corrected_sql = self.tokenizer.decode(gen_ids, skip_special_tokens=True)
+        raw_output = self.tokenizer.decode(gen_ids, skip_special_tokens=True)
+        
+        # Debug: Log first few raw outputs to see what model generates
+        if self.stats["correction_attempts"] < 5:
+            logger.info(f"[DEBUG] Correction raw output #{self.stats['correction_attempts']+1}:")
+            logger.info(f"  Failed SQL: {failed_sql[:100]}...")
+            logger.info(f"  Error: {error_message}")
+            logger.info(f"  Raw output: {raw_output[:500]}...")
         
         self.stats["correction_attempts"] += 1
-        return normalize_sql(corrected_sql)
+        return normalize_sql(raw_output)
     
     def generate_corrections_batch(
         self,
@@ -810,6 +803,8 @@ def main():
                         help="Base model ID (e.g., Qwen/Qwen3-1.7B)")
     parser.add_argument("--adapter_dir", type=str, default="",
                         help="Path to LoRA adapter directory (optional)")
+    parser.add_argument("--use_base_for_correction", action="store_true",
+                        help="Use base model (without LoRA) for correction instead of SFT model")
     
     # Data arguments
     parser.add_argument("--bird_dev_json", type=str, required=True,
@@ -862,7 +857,7 @@ def main():
     
     # Load model
     logger.info(f"Loading model: {args.model_id}")
-    model = AutoModelForCausalLM.from_pretrained(
+    base_model = AutoModelForCausalLM.from_pretrained(
         args.model_id,
         torch_dtype=torch.bfloat16,
         trust_remote_code=True,
@@ -875,11 +870,26 @@ def main():
     if args.adapter_dir and os.path.isdir(args.adapter_dir):
         logger.info(f"Loading LoRA adapter: {args.adapter_dir}")
         from peft import PeftModel
-        model = PeftModel.from_pretrained(model, args.adapter_dir)
+        model = PeftModel.from_pretrained(base_model, args.adapter_dir)
         logger.info("Adapter loaded successfully")
+        
+        if args.use_base_for_correction:
+            # Keep base model for correction, use SFT for initial
+            logger.info("Will use BASE model for correction (not SFT)")
+            correction_model = base_model
+        else:
+            correction_model = model
+    else:
+        model = base_model
+        correction_model = model
     
     model = model.to("cuda")
     model.eval()
+    
+    # If using separate correction model, move it too
+    if args.use_base_for_correction and args.adapter_dir:
+        correction_model = correction_model.to("cuda")
+        correction_model.eval()
     
     # Create evaluator
     evaluator = ErrorCorrectionEvaluator(
