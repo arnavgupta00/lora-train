@@ -520,14 +520,13 @@ python3 -u training/train_lora.py \
     --num_train_epochs "$EPOCHS" \
     --per_device_train_batch_size "$BATCH_SIZE" \
     --gradient_accumulation_steps "$GRAD_ACC" \
-    --max_seq_length "$SEQ_LEN" \
+    --max_seq_len "$SEQ_LEN" \
     --learning_rate "$LR" \
     --lora_r "$LORA_R" \
     --lora_alpha "$LORA_ALPHA" \
     --save_steps 500 \
     --logging_steps 50 \
-    --gradient_checkpointing \
-    --bf16 2>&1 | tee "$SFT_LOG"
+    --gradient_checkpointing 2>&1 | tee "$SFT_LOG"
 
 SFT_EXIT_CODE=${PIPESTATUS[0]}
 
@@ -636,10 +635,8 @@ else
         --model_id "$MODEL_ID" \
         --bird_dev_json "$BIRD_DEV_JSON" \
         --db_dir "$DB_DIR" \
-        --output_file "$EVAL_RESULTS_DIR/baseline_results.json" \
-        --batch_size "$EVAL_BATCH_SIZE" \
-        --temperature 0.0 \
-        --use_greedy 2>&1 | tee "$BASELINE_LOG"
+        --output_dir "$EVAL_RESULTS_DIR/baseline" \
+        --batch_size "$EVAL_BATCH_SIZE" 2>&1 | tee "$BASELINE_LOG"
     
     echo ""
     
@@ -649,13 +646,11 @@ else
     
     python3 -u evaluation/eval_bird.py \
         --model_id "$MODEL_ID" \
-        --adapter_path "$SFT_OUTPUT_DIR" \
+        --adapter_dir "$SFT_OUTPUT_DIR" \
         --bird_dev_json "$BIRD_DEV_JSON" \
         --db_dir "$DB_DIR" \
-        --output_file "$EVAL_RESULTS_DIR/sft_results.json" \
-        --batch_size "$EVAL_BATCH_SIZE" \
-        --temperature 0.0 \
-        --use_greedy 2>&1 | tee "$SFT_EVAL_LOG"
+        --output_dir "$EVAL_RESULTS_DIR/sft" \
+        --batch_size "$EVAL_BATCH_SIZE" 2>&1 | tee "$SFT_EVAL_LOG"
     
     echo ""
     
@@ -666,13 +661,11 @@ else
         
         python3 -u evaluation/eval_bird.py \
             --model_id "$MODEL_ID" \
-            --adapter_path "$GRPO_OUTPUT_DIR" \
+            --adapter_dir "$GRPO_OUTPUT_DIR" \
             --bird_dev_json "$BIRD_DEV_JSON" \
             --db_dir "$DB_DIR" \
-            --output_file "$EVAL_RESULTS_DIR/grpo_results.json" \
-            --batch_size "$EVAL_BATCH_SIZE" \
-            --temperature 0.0 \
-            --use_greedy 2>&1 | tee "$GRPO_EVAL_LOG"
+            --output_dir "$EVAL_RESULTS_DIR/grpo" \
+            --batch_size "$EVAL_BATCH_SIZE" 2>&1 | tee "$GRPO_EVAL_LOG"
         
         echo ""
     fi
@@ -684,14 +677,13 @@ else
         
         python3 -u evaluation/eval_self_consistency.py \
             --model_id "$MODEL_ID" \
-            --adapter_path "$BEST_MODEL" \
+            --adapter_dir "$BEST_MODEL" \
             --bird_dev_json "$BIRD_DEV_JSON" \
             --db_dir "$DB_DIR" \
-            --output_file "$EVAL_RESULTS_DIR/${BEST_MODEL_NAME,,}_sc_results.json" \
+            --output_dir "$EVAL_RESULTS_DIR/sc_${BEST_MODEL_NAME,,}" \
             --n_samples "$N_SAMPLES" \
             --temperature 0.7 \
-            --top_p 0.95 \
-            --batch_size 4 2>&1 | tee "$SC_EVAL_LOG"
+            --top_p 0.95 2>&1 | tee "$SC_EVAL_LOG"
         
         echo ""
     fi

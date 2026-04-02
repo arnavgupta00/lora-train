@@ -225,7 +225,7 @@ echo ""
 evaluate_model_sc() {
     local adapter_path="$1"
     local model_name=$(basename "$adapter_path")
-    local output_file="$RESULTS_DIR/${model_name}_sc_results.json"
+    local output_dir="$RESULTS_DIR/${model_name}_sc"
     local log_file="$RESULTS_DIR/${model_name}_sc_eval.log"
     
     echo ""
@@ -236,29 +236,28 @@ evaluate_model_sc() {
     echo "N Samples:   $N_SAMPLES"
     echo "Temperature: $TEMPERATURE"
     echo "Top-P:       $TOP_P"
-    echo "Output:      $output_file"
+    echo "Output:      $output_dir"
     echo "Started:     $(date)"
     echo ""
     
     python3 -u evaluation/eval_self_consistency.py \
         --model_id "$MODEL_ID" \
-        --adapter_path "$adapter_path" \
+        --adapter_dir "$adapter_path" \
         --bird_dev_json "$BIRD_DEV_JSON" \
         --db_dir "$DB_DIR" \
-        --output_file "$output_file" \
+        --output_dir "$output_dir" \
         --n_samples "$N_SAMPLES" \
         --temperature "$TEMPERATURE" \
         --top_p "$TOP_P" \
         --max_new_tokens "$MAX_NEW_TOKENS" \
-        --sql_workers "$SQL_WORKERS" \
-        --batch_size "$BATCH_SIZE" 2>&1 | tee "$log_file"
+        --num_workers "$SQL_WORKERS" 2>&1 | tee "$log_file"
     
     echo ""
     echo ">>> $model_name SC evaluation complete: $(date)"
     
     # Extract accuracy from results
-    if [[ -f "$output_file" ]]; then
-        accuracy=$(python3 -c "import json; d=json.load(open('$output_file')); print(f'{d.get(\"accuracy\", 0)*100:.2f}%')" 2>/dev/null || echo "N/A")
+    if [[ -f "$output_dir/results.json" ]]; then
+        accuracy=$(python3 -c "import json; d=json.load(open('$output_dir/results.json')); print(f'{d.get(\"accuracy\", 0)*100:.2f}%')" 2>/dev/null || echo "N/A")
         echo ">>> $model_name SC Accuracy: $accuracy"
     fi
 }

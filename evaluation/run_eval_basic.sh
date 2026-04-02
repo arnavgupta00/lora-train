@@ -220,10 +220,10 @@ evaluate_model() {
         adapter_arg=""
     else
         model_name=$(basename "$adapter_path")
-        adapter_arg="--adapter_path $adapter_path"
+        adapter_arg="--adapter_dir $adapter_path"
     fi
     
-    local output_file="$RESULTS_DIR/${model_name}_results.json"
+    local output_dir="$RESULTS_DIR/${model_name}"
     local log_file="$RESULTS_DIR/${model_name}_eval.log"
     
     echo ""
@@ -231,7 +231,7 @@ evaluate_model() {
     echo ">>> Evaluating: $model_name"
     echo "=============================================="
     echo "Adapter: ${adapter_path}"
-    echo "Output:  $output_file"
+    echo "Output:  $output_dir"
     echo "Started: $(date)"
     echo ""
     
@@ -240,18 +240,16 @@ evaluate_model() {
         $adapter_arg \
         --bird_dev_json "$BIRD_DEV_JSON" \
         --db_dir "$DB_DIR" \
-        --output_file "$output_file" \
+        --output_dir "$output_dir" \
         --batch_size "$BATCH_SIZE" \
-        --max_new_tokens "$MAX_NEW_TOKENS" \
-        --temperature 0.0 \
-        --use_greedy 2>&1 | tee "$log_file"
+        --max_new_tokens "$MAX_NEW_TOKENS" 2>&1 | tee "$log_file"
     
     echo ""
     echo ">>> $model_name evaluation complete: $(date)"
     
     # Extract accuracy from results
-    if [[ -f "$output_file" ]]; then
-        accuracy=$(python3 -c "import json; d=json.load(open('$output_file')); print(f'{d.get(\"accuracy\", 0)*100:.2f}%')" 2>/dev/null || echo "N/A")
+    if [[ -f "$output_dir/results.json" ]]; then
+        accuracy=$(python3 -c "import json; d=json.load(open('$output_dir/results.json')); print(f'{d.get(\"accuracy\", 0)*100:.2f}%')" 2>/dev/null || echo "N/A")
         echo ">>> $model_name Accuracy: $accuracy"
     fi
 }
