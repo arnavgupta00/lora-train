@@ -550,8 +550,13 @@ def main():
     logger.info(f"Loading model: {args.model_id}")
     logger.info("Downloading model weights (this may take a few minutes)...")
     
-    # Enable HF progress bars for downloads
     import os
+    from transformers.utils import logging as hf_logging
+    
+    # Set verbose logging for transformers to capture download info
+    hf_logging.set_verbosity_debug()
+    
+    # Enable HF progress bars - they show in terminal, our logging shows in files
     os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '0'
     
     model = AutoModelForCausalLM.from_pretrained(
