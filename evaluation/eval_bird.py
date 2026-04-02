@@ -37,6 +37,16 @@ from typing import Any, Dict, List, Optional, Tuple
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+# Auto-detect HuggingFace cache location (same as training scripts)
+# This prevents re-downloading models that are already cached
+if "HF_HOME" not in os.environ:
+    for cache_path in ["/workspace/hf", "/runpod-volume/hf", os.path.expanduser("~/.cache/huggingface")]:
+        if os.path.isdir(cache_path):
+            os.environ["HF_HOME"] = cache_path
+            os.environ["TRANSFORMERS_CACHE"] = os.path.join(cache_path, "transformers")
+            os.environ["HF_DATASETS_CACHE"] = os.path.join(cache_path, "datasets")
+            break
+
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -47,6 +57,10 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
+
+# Log HF cache location for debugging
+if "HF_HOME" in os.environ:
+    logger.info(f"Using HuggingFace cache: {os.environ['HF_HOME']}")
 
 # Ensure logs are flushed immediately for real-time visibility
 import sys
