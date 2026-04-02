@@ -398,8 +398,11 @@ fi
 
 # Check dataset
 TRAIN_JSONL="${TRAIN_JSONL:-$ROOT_DIR/data/training/t9/train_v4.jsonl}"
+DEV_JSONL="${DEV_JSONL:-$ROOT_DIR/data/training/t9/dev_v4.jsonl}"
+
 if [[ "$USE_LITE" == "1" ]]; then
     TRAIN_JSONL="$ROOT_DIR/data/training/t9/train_lite.jsonl"
+    # Dev set doesn't have a lite version, use full
 fi
 
 echo -n "Training Data: "
@@ -408,6 +411,15 @@ if [[ -f "$TRAIN_JSONL" ]]; then
     echo "$TRAIN_JSONL ($TRAIN_COUNT examples)"
 else
     echo "FAILED - $TRAIN_JSONL not found"
+    PREFLIGHT_PASSED=0
+fi
+
+echo -n "Dev Data: "
+if [[ -f "$DEV_JSONL" ]]; then
+    DEV_COUNT=$(wc -l < "$DEV_JSONL")
+    echo "$DEV_JSONL ($DEV_COUNT examples)"
+else
+    echo "FAILED - $DEV_JSONL not found"
     PREFLIGHT_PASSED=0
 fi
 
@@ -503,6 +515,7 @@ export BIRD_DEV_JSON
 python3 -u training/train_lora.py \
     --model_id "$MODEL_ID" \
     --train_jsonl "$TRAIN_JSONL" \
+    --dev_jsonl "$DEV_JSONL" \
     --output_dir "$SFT_OUTPUT_DIR" \
     --num_train_epochs "$EPOCHS" \
     --per_device_train_batch_size "$BATCH_SIZE" \
