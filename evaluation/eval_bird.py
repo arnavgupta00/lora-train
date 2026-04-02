@@ -472,20 +472,32 @@ def main():
     
     # Load tokenizer
     logger.info(f"Loading tokenizer: {args.model_id}")
-    tokenizer = AutoTokenizer.from_pretrained(args.model_id, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.model_id, 
+        trust_remote_code=True,
+        resume_download=True,  # Enable resume for interrupted downloads
+    )
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "left"
     
-    # Load model
+    # Load model with progress tracking
     logger.info(f"Loading model: {args.model_id}")
+    logger.info("Downloading model weights (this may take a few minutes)...")
+    
+    # Enable HF progress bars for downloads
+    import os
+    os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '0'
+    
     model = AutoModelForCausalLM.from_pretrained(
         args.model_id,
         torch_dtype=torch.bfloat16,
         trust_remote_code=True,
         attn_implementation="sdpa",
         low_cpu_mem_usage=True,
+        resume_download=True,  # Enable resume for interrupted downloads
     )
+    logger.info("Model weights loaded successfully")
     
     # Load adapter if provided
     if args.adapter_dir and os.path.isdir(args.adapter_dir):
