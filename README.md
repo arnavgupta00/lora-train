@@ -44,6 +44,24 @@ tail -f pipeline.log
 
 See [`docs/TRAINING_GUIDE.md`](docs/TRAINING_GUIDE.md) for detailed commands and options.
 
+### Monitoring Evaluation Progress
+
+After training completes, evaluate the model:
+
+```bash
+# Basic BIRD evaluation (no LoRA)
+python3 evaluation/eval_bird.py \
+    --model_id Qwen/Qwen2.5-1.5B-Instruct \
+    --bird_dev_json ./bird_eval/dev.json \
+    --db_dir ./bird_eval/dev_databases \
+    --output_dir ./eval_results_base
+
+# Expected: ~8 minutes (2-5 min download + 2-3 min generation + 30s evaluation)
+# Expected accuracy: ~35-42%
+```
+
+**⚠️ Progress Tracking:** See [`docs/QUICK_EVAL_GUIDE.md`](docs/QUICK_EVAL_GUIDE.md) for how to monitor download speed, generation progress, and evaluation metrics in real-time.
+
 ---
 
 ## 🏆 Previous Best: Qwen2.5-7B (v1-3)
@@ -98,7 +116,11 @@ lora-train/
 │           └── SOTA_METHODS_ANALYSIS.md
 │
 ├── docs/                           # Documentation ✅ NEW
-│   └── TRAINING_GUIDE.md          # Complete training & eval guide
+│   ├── TRAINING_GUIDE.md          # Complete training & eval guide
+│   ├── CUDA_TROUBLESHOOTING.md    # GPU/CUDA setup issues
+│   ├── EVALUATION_STRATEGY.md     # Parallel eval strategies
+│   ├── QUICK_EVAL_GUIDE.md        # Quick reference for progress monitoring
+│   └── EVAL_PROGRESS_MONITORING.md # Detailed progress tracking guide
 │
 └── tools/                          # Dataset generation scripts
     └── create_t7_dataset.py       # Creates t7 dataset
