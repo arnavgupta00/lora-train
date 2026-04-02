@@ -200,6 +200,7 @@ Only output the SQL query, nothing else."""
         batch_size: int = 16,
         max_new_tokens: int = 256,
         num_workers: int = 4,
+        thinking_mode: str = "no_think",
     ):
         self.model = model
         self.tokenizer = tokenizer
@@ -207,6 +208,7 @@ Only output the SQL query, nothing else."""
         self.batch_size = batch_size
         self.max_new_tokens = max_new_tokens
         self.num_workers = num_workers
+        self.thinking_mode = thinking_mode
         
         # Pre-cache schemas
         self.schema_cache: Dict[str, str] = {}
@@ -227,6 +229,10 @@ Only output the SQL query, nothing else."""
         if evidence:
             user_content += f"Hint: {evidence}\n\n"
         user_content += f"Question: {question}"
+        if self.thinking_mode == "no_think":
+            user_content = "/no_think\n" + user_content
+        elif self.thinking_mode == "think":
+            user_content = "/think\n" + user_content
         
         messages = [
             {"role": "system", "content": self.SYSTEM_PROMPT},
@@ -530,6 +536,9 @@ def main():
                         help="Maximum tokens to generate")
     parser.add_argument("--num_workers", type=int, default=4,
                         help="Number of parallel workers for SQL execution")
+    parser.add_argument("--thinking_mode", type=str, default="no_think",
+                        choices=["auto", "no_think", "think"],
+                        help="Thinking control for Qwen3 models")
     
     # Misc arguments
     parser.add_argument("--limit", type=int, default=0,
@@ -599,6 +608,7 @@ def main():
         batch_size=args.batch_size,
         max_new_tokens=args.max_new_tokens,
         num_workers=args.num_workers,
+        thinking_mode=args.thinking_mode,
     )
     
     # Run evaluation
