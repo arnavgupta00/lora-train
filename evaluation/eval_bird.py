@@ -40,13 +40,45 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-# Configure logging
+# Configure logging with unbuffered output
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
+
+# Ensure logs are flushed immediately for real-time visibility
+import sys
+sys.stdout = sys.stderr  # Send logs to stderr for tee compatibility
+
+
+class DownloadProgressTracker:
+    """Track and log file downloads from HuggingFace."""
+    
+    def __init__(self):
+        self.start_time = None
+        self.last_log_time = 0
+        
+    def log_progress(self, filename: str, downloaded: int, total: int) -> None:
+        """Log download progress if total size is available."""
+        if total <= 0:
+            return
+        
+        elapsed = time.time() - self.start_time if self.start_time else 0
+        percent = (downloaded / total) * 100
+        mb_downloaded = downloaded / (1024 * 1024)
+        mb_total = total / (1024 * 1024)
+        
+        if elapsed > 0:
+            speed = downloaded / (1024 * 1024) / elapsed  # MB/s
+            remaining = (total - downloaded) / elapsed / 60 if elapsed > 0 else 0  # minutes
+            logger.info(f"  {filename}: {mb_downloaded:.1f}/{mb_total:.1f}MB ({percent:.1f}%) @ {speed:.1f}MB/s ETA: {remaining:.1f}min")
+        else:
+            logger.info(f"  {filename}: {mb_downloaded:.1f}/{mb_total:.1f}MB ({percent:.1f}%)")
+
+
+download_tracker = DownloadProgressTracker()
 
 
 def get_ddl_schema_from_db(db_path: str) -> str:
@@ -498,8 +530,16 @@ def main():
     logger.info(f"Loading model: {args.model_id}")
     logger.info("Downloading model weights (this may take a few minutes)...")
     
-    # Enable HF progress bars for downloads
     import os
+    from transformers.utils import logging as hf_logging
+    
+    # Set verbose logging for transformers to capture download info
+    hf_logging.set_verbosity_debug()
+    
+    # Track download start time
+    download_tracker.start_time = time.time()
+    
+    # Enable HF progress bars - they show in terminal, our logging shows in files
     os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '0'
     
     model = AutoModelForCausalLM.from_pretrained(
