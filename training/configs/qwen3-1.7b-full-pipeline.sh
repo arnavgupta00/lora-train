@@ -373,13 +373,15 @@ if [[ $INSTALL_REQUIRED -eq 1 ]]; then
     if [[ -f "$ROOT_DIR/requirements.txt" ]]; then
         echo "Installing other dependencies from requirements.txt..."
         # Install all except torch (already installed)
-        grep -v "^torch" "$ROOT_DIR/requirements.txt" | pip3 install -r /dev/stdin -q
+        # Use Tsinghua mirror for faster downloads (safe for non-CUDA packages)
+        grep -v "^torch" "$ROOT_DIR/requirements.txt" | grep -v "^#" | grep -v "^$" | \
+            pip3 install -r /dev/stdin -i https://pypi.tuna.tsinghua.edu.cn/simple -q
     else
         echo "Installing other packages individually..."
-        # Other packages
+        # Other packages - use mirror for speed
         for pkg in "${MISSING_PACKAGES[@]}"; do
             if [[ "$pkg" != "torch" ]]; then
-                pip3 install "$pkg" -q
+                pip3 install "$pkg" -i https://pypi.tuna.tsinghua.edu.cn/simple -q
             fi
         done
     fi
