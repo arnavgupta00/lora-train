@@ -234,19 +234,21 @@ Only output the SQL query, nothing else."""
         candidates = []
         
         with torch.no_grad():
-            for _ in range(self.n_samples):
-                outputs = self.model.generate(
-                    **inputs,
-                    max_new_tokens=self.max_new_tokens,
-                    do_sample=True,
-                    temperature=self.temperature,
-                    top_p=self.top_p,
-                    eos_token_id=self.tokenizer.eos_token_id,
-                    pad_token_id=self.tokenizer.pad_token_id,
-                    num_beams=1,
-                )
-                
-                gen_ids = outputs[0][inputs["input_ids"].shape[1]:]
+            outputs = self.model.generate(
+                **inputs,
+                max_new_tokens=self.max_new_tokens,
+                do_sample=True,
+                temperature=self.temperature,
+                top_p=self.top_p,
+                eos_token_id=self.tokenizer.eos_token_id,
+                pad_token_id=self.tokenizer.pad_token_id,
+                num_beams=1,
+                num_return_sequences=self.n_samples,
+            )
+
+            input_len = inputs["input_ids"].shape[1]
+            for output in outputs:
+                gen_ids = output[input_len:]
                 gen_text = self.tokenizer.decode(gen_ids, skip_special_tokens=True)
                 candidates.append(normalize_sql(gen_text))
         
