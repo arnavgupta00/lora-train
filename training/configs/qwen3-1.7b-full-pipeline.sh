@@ -326,28 +326,44 @@ if [[ $INSTALL_REQUIRED -eq 1 ]]; then
         
         # Detect Python version for correct wheel
         PYTHON_VERSION=$(python3 -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
+        TORCH_WHEEL="torch-2.5.1+cu121-${PYTHON_VERSION}-${PYTHON_VERSION}-linux_x86_64.whl"
+        TORCH_URL="https://download.pytorch.org/whl/cu121/${TORCH_WHEEL}"
         
-        # Try pip install with timeout first (fast if CDN is good)
-        echo "Attempting pip install (will timeout if too slow)..."
-        timeout 60 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 -q 2>/dev/null
-        
-        if [[ $? -ne 0 ]]; then
-            echo "Pip install too slow, using direct download method..."
-            
-            # Download wheel directly (uses full bandwidth like wget)
-            TORCH_WHEEL="torch-2.5.1+cu121-${PYTHON_VERSION}-${PYTHON_VERSION}-linux_x86_64.whl"
-            TORCH_URL="https://download.pytorch.org/whl/cu121/${TORCH_WHEEL}"
-            
-            echo "Downloading PyTorch wheel directly..."
-            if wget -q --show-progress "$TORCH_URL" 2>&1 | grep -q "ERROR"; then
-                echo "Wget failed, falling back to regular pip (this may take time)..."
-                pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-            else
-                echo "Installing from local wheel..."
+        # Try aria2c first (fastest - parallel download)
+        if command -v aria2c >/dev/null 2>&1; then
+            echo "Using aria2c for fast parallel download..."
+            aria2c -x 16 -s 16 "$TORCH_URL"
+            if [[ -f "$TORCH_WHEEL" ]]; then
                 pip3 install "$TORCH_WHEEL" -q
                 rm -f "$TORCH_WHEEL"
+                echo "PyTorch installed successfully!"
+            else
+                echo "aria2c download failed, trying wget..."
             fi
         fi
+        
+        # If aria2c not available or failed, try wget
+        if ! python3 -c "import torch" 2>/dev/null; then
+            if command -v wget >/dev/null 2>&1; then
+                echo "Downloading PyTorch with wget..."
+                wget -q --show-progress "$TORCH_URL"
+                if [[ -f "$TORCH_WHEEL" ]]; then
+                    pip3 install "$TORCH_WHEEL" -q
+                    rm -f "$TORCH_WHEEL"
+                    echo "PyTorch installed successfully!"
+                else
+                    echo "wget download failed, trying pip..."
+                fi
+            fi
+        fi
+        
+        # Fall back to pip if both aria2c and wget failed
+        if ! python3 -c "import torch" 2>/dev/null; then
+            echo "Falling back to pip install (may be slow)..."
+            echo "Installing torch only (skipping torchvision/torchaudio for speed)..."
+            pip3 install torch==2.5.1+cu121 --index-url https://download.pytorch.org/whl/cu121
+        fi
+        
         echo ""
     fi
     

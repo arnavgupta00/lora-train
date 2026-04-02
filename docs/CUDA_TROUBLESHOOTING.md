@@ -26,20 +26,28 @@ nvidia-smi
 # 3. Reinstall PyTorch with matching CUDA version
 pip uninstall torch torchvision torchaudio -y
 
-# OPTION A: Fast download with wget (recommended if pip is slow)
+# OPTION A: Ultra-fast with aria2c (16 parallel connections - FASTEST!)
+apt-get update && apt-get install -y aria2
+PYTHON_VER=$(python3 -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
+aria2c -x 16 -s 16 https://download.pytorch.org/whl/cu121/torch-2.5.1%2Bcu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+rm torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+
+# OPTION B: Download with wget (if aria2c not available)
 PYTHON_VER=$(python3 -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
 wget https://download.pytorch.org/whl/cu121/torch-2.5.1%2Bcu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
 pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
 rm torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
 
-# OPTION B: Regular pip (may be slow ~100 KB/s from some regions)
-# For CUDA 12.1 (most common on cloud GPUs)
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-# For CUDA 11.8 (older systems)
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# OPTION C: Install only torch (smaller, skips torchvision/torchaudio)
+pip install torch==2.5.1+cu121 --index-url https://download.pytorch.org/whl/cu121
 
-# OPTION C: Use mirror (faster in Asia)
-pip install torch torchvision torchaudio -i https://pypi.tuna.tsinghua.edu.cn/simple
+# OPTION D: Regular pip (may be slow ~100 KB/s from some regions)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# OPTION E: Use mirror (WARNING: usually installs wrong CUDA version!)
+# Only use if you verify CUDA version matches afterward
+pip install torch -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 # 4. Verify GPU is detected
 python3 -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}'); print(f'GPU: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"None\"}')"
@@ -72,17 +80,18 @@ nvidia-smi | grep "CUDA Version"
 
 ## Slow PyTorch Download Issue
 
-**Symptom:** `pip install torch` downloading at ~100-200 KB/s despite fast internet (e.g., 1 Gbps connection)
+**Symptom:** `pip install torch` or `wget` downloading at ~100-500 KB/s despite fast internet (e.g., 1 Gbps connection)
 
 **Cause:** PyTorch's CDN (`download.pytorch.org`) can be extremely slow from certain geographic regions, especially Asia
 
-**Solution - Fast Download with wget:**
+**FASTEST Solution - aria2c with Parallel Connections:**
 ```bash
-# This uses your full bandwidth (like downloading BIRD data)
-PYTHON_VER=$(python3 -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
+# Install aria2c (multi-connection download tool)
+apt-get update && apt-get install -y aria2
 
-# Download wheel directly (will use full 40+ MB/s)
-wget https://download.pytorch.org/whl/cu121/torch-2.5.1%2Bcu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+# Download with 16 parallel connections (5-10x faster!)
+PYTHON_VER=$(python3 -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
+aria2c -x 16 -s 16 https://download.pytorch.org/whl/cu121/torch-2.5.1%2Bcu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
 
 # Install from local file (instant)
 pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
@@ -91,24 +100,35 @@ pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
 rm torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
 ```
 
-**Alternative - Use PyPI Mirrors:**
+**Alternative - Smaller Download (torch only):**
 ```bash
-# Tsinghua mirror (fast in Asia - China, Singapore, etc.)
-pip install torch torchvision torchaudio -i https://pypi.tuna.tsinghua.edu.cn/simple
+# Skip torchvision/torchaudio (not needed for training) - only 780 MB instead of 2+ GB
+pip install torch==2.5.1+cu121 --index-url https://download.pytorch.org/whl/cu121
+```
 
-# Aliyun mirror (also fast in Asia)
-pip install torch torchvision torchaudio -i https://mirrors.aliyun.com/pypi/simple/
+**Alternative - wget (if aria2c unavailable):**
+```bash
+PYTHON_VER=$(python3 -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
+wget https://download.pytorch.org/whl/cu121/torch-2.5.1%2Bcu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+rm torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
+```
 
-# USTC mirror
-pip install torch torchvision torchaudio -i https://pypi.mirrors.ustc.edu.cn/simple/
+**⚠️ WARNING - PyPI Mirrors:**
+```bash
+# These are FAST but usually install WRONG CUDA version (13.0 instead of 12.1)
+# Your GPU won't work! Only use if you verify CUDA version afterward.
+pip install torch -i https://pypi.tuna.tsinghua.edu.cn/simple  # ❌ Installs CUDA 13.0
+pip install torch -i https://mirrors.aliyun.com/pypi/simple/   # ❌ Installs CUDA 13.0
 ```
 
 **Speed Comparison:**
 - Default pip: ~100-200 KB/s (1-2 hours for 780 MB)
-- wget + local install: ~40-50 MB/s (20 seconds for 780 MB) ✅
-- PyPI mirrors: ~10-30 MB/s (30-80 seconds)
+- wget: ~500 KB/s - 5 MB/s (3-25 minutes)
+- aria2c (16 connections): ~20-50 MB/s (15-40 seconds) ✅ **FASTEST**
+- torch only (no vision/audio): ~50% smaller download ✅ **RECOMMENDED**
 
-**Note:** The training pipeline script automatically detects slow downloads and switches to wget method.
+**Note:** The training pipeline script automatically tries aria2c → wget → pip in order of speed.
 
 ---
 
