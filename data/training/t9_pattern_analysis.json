@@ -1,0 +1,300 @@
+{
+  "targets": {
+    "join": 74.3,
+    "order_by": 24.3,
+    "distinct": 22.3,
+    "limit": 18.5,
+    "subquery": 15.2,
+    "case": 13.3,
+    "group_by": 11.9,
+    "cte": 6.6,
+    "window": 4.4
+  },
+  "results": [
+    {
+      "name": "BIRD Train (raw)",
+      "total": 9428,
+      "patterns": {
+        "join": {
+          "count": 7212,
+          "pct": 76.5
+        },
+        "inner_join": {
+          "count": 7175,
+          "pct": 76.1
+        },
+        "distinct": {
+          "count": 1079,
+          "pct": 11.44
+        },
+        "limit": {
+          "count": 1804,
+          "pct": 19.13
+        },
+        "subquery": {
+          "count": 738,
+          "pct": 7.83
+        },
+        "backtick": {
+          "count": 988,
+          "pct": 10.48
+        },
+        "aggregation": {
+          "count": 4484,
+          "pct": 47.56
+        },
+        "order_by": {
+          "count": 1722,
+          "pct": 18.26
+        },
+        "group_by": {
+          "count": 1009,
+          "pct": 10.7
+        },
+        "case": {
+          "count": 781,
+          "pct": 8.28
+        },
+        "in_clause": {
+          "count": 151,
+          "pct": 1.6
+        },
+        "like": {
+          "count": 617,
+          "pct": 6.54
+        },
+        "union": {
+          "count": 30,
+          "pct": 0.32
+        },
+        "left_join": {
+          "count": 43,
+          "pct": 0.46
+        },
+        "cte": {
+          "count": 18,
+          "pct": 0.19
+        },
+        "having": {
+          "count": 139,
+          "pct": 1.47
+        },
+        "window": {
+          "count": 5,
+          "pct": 0.05
+        }
+      }
+    },
+    {
+      "name": "BIRD Train (ChatML)",
+      "total": 9428,
+      "patterns": {
+        "join": {
+          "count": 7212,
+          "pct": 76.5
+        },
+        "inner_join": {
+          "count": 7175,
+          "pct": 76.1
+        },
+        "distinct": {
+          "count": 1079,
+          "pct": 11.44
+        },
+        "limit": {
+          "count": 1804,
+          "pct": 19.13
+        },
+        "subquery": {
+          "count": 738,
+          "pct": 7.83
+        },
+        "backtick": {
+          "count": 988,
+          "pct": 10.48
+        },
+        "aggregation": {
+          "count": 4484,
+          "pct": 47.56
+        },
+        "order_by": {
+          "count": 1722,
+          "pct": 18.26
+        },
+        "group_by": {
+          "count": 1009,
+          "pct": 10.7
+        },
+        "case": {
+          "count": 781,
+          "pct": 8.28
+        },
+        "in_clause": {
+          "count": 151,
+          "pct": 1.6
+        },
+        "like": {
+          "count": 617,
+          "pct": 6.54
+        },
+        "union": {
+          "count": 30,
+          "pct": 0.32
+        },
+        "left_join": {
+          "count": 43,
+          "pct": 0.46
+        },
+        "cte": {
+          "count": 18,
+          "pct": 0.19
+        },
+        "having": {
+          "count": 139,
+          "pct": 1.47
+        },
+        "window": {
+          "count": 5,
+          "pct": 0.05
+        }
+      }
+    },
+    {
+      "name": "Spider+BIRD",
+      "total": 0,
+      "patterns": {}
+    },
+    {
+      "name": "Complex Patterns",
+      "total": 9500,
+      "patterns": {
+        "case": {
+          "count": 1500,
+          "pct": 15.79
+        },
+        "join": {
+          "count": 2999,
+          "pct": 31.57
+        },
+        "order_by": {
+          "count": 2618,
+          "pct": 27.56
+        },
+        "window": {
+          "count": 1984,
+          "pct": 20.88
+        },
+        "subquery": {
+          "count": 4333,
+          "pct": 45.61
+        },
+        "cte": {
+          "count": 2000,
+          "pct": 21.05
+        },
+        "aggregation": {
+          "count": 3747,
+          "pct": 39.44
+        },
+        "group_by": {
+          "count": 1822,
+          "pct": 19.18
+        },
+        "limit": {
+          "count": 318,
+          "pct": 3.35
+        },
+        "exists": {
+          "count": 532,
+          "pct": 5.6
+        },
+        "in_clause": {
+          "count": 510,
+          "pct": 5.37
+        },
+        "left_join": {
+          "count": 704,
+          "pct": 7.41
+        }
+      }
+    },
+    {
+      "name": "T8 Train",
+      "total": 22782,
+      "patterns": {
+        "order_by": {
+          "count": 10736,
+          "pct": 47.12
+        },
+        "group_by": {
+          "count": 3317,
+          "pct": 14.56
+        },
+        "aggregation": {
+          "count": 10530,
+          "pct": 46.22
+        },
+        "join": {
+          "count": 11096,
+          "pct": 48.71
+        },
+        "inner_join": {
+          "count": 9444,
+          "pct": 41.45
+        },
+        "limit": {
+          "count": 7371,
+          "pct": 32.35
+        },
+        "subquery": {
+          "count": 2065,
+          "pct": 9.06
+        },
+        "cte": {
+          "count": 1162,
+          "pct": 5.1
+        },
+        "window": {
+          "count": 1102,
+          "pct": 4.84
+        },
+        "distinct": {
+          "count": 2483,
+          "pct": 10.9
+        },
+        "case": {
+          "count": 5329,
+          "pct": 23.39
+        },
+        "left_join": {
+          "count": 473,
+          "pct": 2.08
+        },
+        "backtick": {
+          "count": 1682,
+          "pct": 7.38
+        },
+        "having": {
+          "count": 337,
+          "pct": 1.48
+        },
+        "like": {
+          "count": 994,
+          "pct": 4.36
+        },
+        "in_clause": {
+          "count": 230,
+          "pct": 1.01
+        },
+        "union": {
+          "count": 58,
+          "pct": 0.25
+        },
+        "exists": {
+          "count": 30,
+          "pct": 0.13
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "total_examples": 10597,
+  "sources": {
+    "bird": 9311,
+    "t8_join": 1248,
+    "complex_subquery": 38
+  },
+  "pattern_distribution": {
+    "join": {
+      "count": 8398,
+      "pct": 79.25
+    },
+    "order_by": {
+      "count": 2906,
+      "pct": 27.42
+    },
+    "limit": {
+      "count": 2323,
+      "pct": 21.92
+    },
+    "subquery": {
+      "count": 791,
+      "pct": 7.46
+    },
+    "group_by": {
+      "count": 1686,
+      "pct": 15.91
+    },
+    "aggregation": {
+      "count": 5132,
+      "pct": 48.43
+    },
+    "distinct": {
+      "count": 1198,
+      "pct": 11.31
+    },
+    "backtick": {
+      "count": 989,
+      "pct": 9.33
+    },
+    "case": {
+      "count": 777,
+      "pct": 7.33
+    },
+    "cte": {
+      "count": 39,
+      "pct": 0.37
+    },
+    "window": {
+      "count": 13,
+      "pct": 0.12
+    }
+  }
+}

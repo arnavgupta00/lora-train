@@ -1,0 +1,95 @@
+{
+  "version": "T9",
+  "total_examples": 10995,
+  "train_examples": 10336,
+  "dev_examples": 659,
+  "pattern_distribution": {
+    "join": {
+      "count": 8629,
+      "pct": 78.48
+    },
+    "order_by": {
+      "count": 2952,
+      "pct": 26.85
+    },
+    "limit": {
+      "count": 2357,
+      "pct": 21.44
+    },
+    "subquery": {
+      "count": 961,
+      "pct": 8.74
+    },
+    "group_by": {
+      "count": 1796,
+      "pct": 16.33
+    },
+    "aggregation": {
+      "count": 5366,
+      "pct": 48.8
+    },
+    "distinct": {
+      "count": 1366,
+      "pct": 12.42
+    },
+    "backtick": {
+      "count": 1170,
+      "pct": 10.64
+    },
+    "case": {
+      "count": 784,
+      "pct": 7.13
+    },
+    "cte": {
+      "count": 39,
+      "pct": 0.35
+    },
+    "window": {
+      "count": 13,
+      "pct": 0.12
+    }
+  },
+  "sources": {
+    "core": 10597,
+    "backticks_augment": 200,
+    "subqueries_augment": 200
+  },
+  "targets": {
+    "join": [
+      72,
+      75
+    ],
+    "order_by": [
+      25,
+      30
+    ],
+    "distinct": [
+      20,
+      22
+    ],
+    "limit": [
+      20,
+      25
+    ],
+    "subquery": [
+      14,
+      16
+    ],
+    "case": [
+      12,
+      15
+    ],
+    "group_by": [
+      12,
+      14
+    ],
+    "cte": [
+      5,
+      7
+    ],
+    "window": [
+      4,
+      5
+    ]
+  }
+}
