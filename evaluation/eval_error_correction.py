@@ -173,9 +173,8 @@ class ErrorCorrectionEvaluator:
 Given a database schema and a question, generate the correct SQL query.
 Only output the SQL query, nothing else."""
     
-    # Simpler correction prompt - using no_think since model was trained that way
-    # Be very explicit about what to fix
-    CORRECTION_PROMPT = """/no_think
+    # Correction prompt for no_think mode - direct and simple
+    CORRECTION_PROMPT_NO_THINK = """/no_think
 FIX THIS SQL ERROR.
 
 The query below has an error: {error_message}
@@ -191,6 +190,30 @@ The error "{error_message}" means the column/table name is WRONG.
 Find the CORRECT name in the schema above. Column names with spaces need backticks.
 
 Write the FIXED SQL query:"""
+
+    # Correction prompt for think mode - allows chain-of-thought reasoning
+    CORRECTION_PROMPT_THINK = """/think
+The following SQL query failed with an error. Analyze the error and fix it.
+
+## Database Schema
+{schema}
+
+## Question
+{question}
+
+## Failed SQL
+{failed_sql}
+
+## Error Message
+{error_message}
+
+Think step by step:
+1. What does the error message tell us?
+2. Which column/table name is wrong?
+3. What is the correct name in the schema?
+4. Do we need backticks for special characters?
+
+Then write the CORRECTED SQL query."""
     
     def __init__(
         self,
@@ -202,6 +225,7 @@ Write the FIXED SQL query:"""
         correction_max_tokens: int = 1024,
         max_retries: int = 3,
         num_workers: int = 4,
+        thinking_mode: str = "no_think",
     ):
         self.model = model
         self.tokenizer = tokenizer
@@ -211,6 +235,7 @@ Write the FIXED SQL query:"""
         self.correction_max_tokens = correction_max_tokens
         self.max_retries = max_retries
         self.num_workers = num_workers
+        self.thinking_mode = thinking_mode
         
         # Pre-cache schemas
         self.schema_cache: Dict[str, str] = {}
@@ -237,8 +262,12 @@ Write the FIXED SQL query:"""
         return self.schema_cache[db_id]
     
     def _build_initial_prompt(self, question: str, schema: str, evidence: str = "") -> str:
-        """Build prompt for initial SQL generation (no_think mode)."""
-        user_content = "/no_think\n"
+        """Build prompt for initial SQL generation."""
+        # Use thinking mode setting
+        if self.thinking_mode == "think":
+            user_content = "/think\n"
+        else:
+            user_content = "/no_think\n"
         user_content += f"Schema:\n{schema}\n\n"
         if evidence:
             user_content += f"Hint: {evidence}\n\n"
@@ -262,7 +291,13 @@ Write the FIXED SQL query:"""
         error_message: str,
     ) -> str:
         """Build prompt for error correction."""
-        user_content = self.CORRECTION_PROMPT.format(
+        # Use appropriate template based on thinking mode
+        if self.thinking_mode == "think":
+            template = self.CORRECTION_PROMPT_THINK
+        else:
+            template = self.CORRECTION_PROMPT_NO_THINK
+        
+        user_content = template.format(
             schema=schema,
             question=question,
             failed_sql=failed_sql,
@@ -829,6 +864,9 @@ def main():
                         help="Maximum correction attempts per error")
     parser.add_argument("--num_workers", type=int, default=4,
                         help="Number of parallel workers for SQL execution")
+    parser.add_argument("--thinking_mode", type=str, default="no_think",
+                        choices=["no_think", "think"],
+                        help="Thinking mode for generation (default: no_think)")
     
     # Misc arguments
     parser.add_argument("--limit", type=int, default=0,
@@ -901,6 +939,7 @@ def main():
         correction_max_tokens=args.correction_max_tokens,
         max_retries=args.max_retries,
         num_workers=args.num_workers,
+        thinking_mode=args.thinking_mode,
     )
     
     # Run evaluation
