@@ -65,16 +65,41 @@ EPOCHS=2 BATCH_SIZE=8 SEQ_LEN=1024 SKIP_GRPO=1 \
 
 ## Understanding CUDA Versions
 
-| NVIDIA Driver Version | Compatible CUDA Toolkit | PyTorch Index URL |
-|----------------------|------------------------|-------------------|
-| 535.x or newer | CUDA 12.1 | `--index-url https://download.pytorch.org/whl/cu121` |
-| 520.x - 534.x | CUDA 11.8 | `--index-url https://download.pytorch.org/whl/cu118` |
+### ✅ CUDA Backward Compatibility
+
+**KEY CONCEPT:** CUDA is backward compatible - newer drivers can run older CUDA applications!
+
+```
+Example: Your driver supports CUDA 12.8
+✅ Can run: PyTorch CUDA 12.1 (older → works!)
+✅ Can run: PyTorch CUDA 12.0 (older → works!)
+✅ Can run: PyTorch CUDA 11.8 (older → works!)
+❌ Cannot run: PyTorch CUDA 13.0 (newer → fails!)
+
+Rule: PyTorch CUDA version MUST be ≤ Driver CUDA version
+```
+
+### Driver to PyTorch CUDA Mapping
+
+| NVIDIA Driver Version | Max CUDA Support | Recommended PyTorch |
+|----------------------|------------------|---------------------|
+| 535.x or newer | CUDA 12.1+ | `torch==2.5.1+cu121` |
+| 520.x - 534.x | CUDA 11.8 | `torch==2.5.1+cu118` |
 | Older | CUDA 11.7 or 11.6 | See PyTorch website |
 
-**Check your driver:**
+**Check your driver CUDA version:**
 ```bash
 nvidia-smi | grep "CUDA Version"
+# Example output: CUDA Version: 12.8
 ```
+
+**Then install PyTorch with EQUAL OR LOWER CUDA version:**
+```bash
+# Driver supports CUDA 12.8 → Install PyTorch CUDA 12.1 ✅
+pip install torch==2.5.1+cu121 --index-url https://download.pytorch.org/whl/cu121
+
+# Driver supports CUDA 11.8 → Install PyTorch CUDA 11.8 ✅
+pip install torch==2.5.1+cu118 --index-url https://download.pytorch.org/whl/cu118
 
 ---
 
@@ -114,12 +139,27 @@ pip install torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
 rm torch-2.5.1+cu121-${PYTHON_VER}-${PYTHON_VER}-linux_x86_64.whl
 ```
 
-**⚠️ WARNING - PyPI Mirrors:**
+**⚠️ WARNING - PyPI Mirrors Install Wrong CUDA Version:**
 ```bash
-# These are FAST but usually install WRONG CUDA version (13.0 instead of 12.1)
-# Your GPU won't work! Only use if you verify CUDA version afterward.
-pip install torch -i https://pypi.tuna.tsinghua.edu.cn/simple  # ❌ Installs CUDA 13.0
-pip install torch -i https://mirrors.aliyun.com/pypi/simple/   # ❌ Installs CUDA 13.0
+# ❌ DON'T USE THESE - They install CUDA 13.0 (too new for most drivers!)
+pip install torch -i https://pypi.tuna.tsinghua.edu.cn/simple  # ❌ CUDA 13.0
+pip install torch -i https://mirrors.aliyun.com/pypi/simple/   # ❌ CUDA 13.0
+
+# Problem: CUDA 13.0 > Your driver (12.8) → GPU won't work!
+# Always use PyTorch's official repository with specific CUDA version.
+```
+
+**Why mirrors fail:**
+1. Mirrors only have the latest PyTorch (CUDA 13.0)
+2. Your driver supports CUDA 12.8 (or lower)
+3. CUDA 13.0 > 12.8 → Backward compatibility breaks
+4. Result: `CUDA available: False` even with working GPU
+
+**Correct approach:**
+```bash
+# Always specify CUDA version explicitly from PyTorch repo
+pip install torch==2.5.1+cu121 --index-url https://download.pytorch.org/whl/cu121
+# This ensures CUDA 12.1 which works with drivers 12.1+
 ```
 
 **Speed Comparison:**
