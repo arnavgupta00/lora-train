@@ -38,6 +38,8 @@ tail -f pipeline.log
 
 **⚠️ Troubleshooting:** If training is stuck at 0% for >5 minutes, see [`docs/CUDA_TROUBLESHOOTING.md`](docs/CUDA_TROUBLESHOOTING.md)
 
+**⚠️ Slow Downloads?** If model downloads are <500 KB/s, use aria2c for 10-50x faster downloads. See [`docs/FAST_MODEL_DOWNLOAD.md`](docs/FAST_MODEL_DOWNLOAD.md)
+
 **Expected Results:**
 - **Fast mode (2-3 hrs):** ~55-60% BIRD accuracy
 - **Full mode (6-8 hrs):** ~60-67% BIRD accuracy with GRPO + Self-Consistency
@@ -120,7 +122,8 @@ lora-train/
 │   ├── CUDA_TROUBLESHOOTING.md    # GPU/CUDA setup issues
 │   ├── EVALUATION_STRATEGY.md     # Parallel eval strategies
 │   ├── QUICK_EVAL_GUIDE.md        # Quick reference for progress monitoring
-│   └── EVAL_PROGRESS_MONITORING.md # Detailed progress tracking guide
+│   ├── EVAL_PROGRESS_MONITORING.md # Detailed progress tracking guide
+│   └── FAST_MODEL_DOWNLOAD.md     # Speed up slow HF downloads with aria2c
 │
 └── tools/                          # Dataset generation scripts
     └── create_t7_dataset.py       # Creates t7 dataset
