@@ -1,0 +1,202 @@
+{
+  "dataset_version": "bird_dev_20240627",
+  "predictions_file": "runs/~1-2B/qwen3-1.7b/v1/eval_ec_test/predictions.json",
+  "timestamp": "2026-04-04T00:58:59",
+  "summary": {
+    "total_examples": 100,
+    "execution_accuracy": 9.0,
+    "execution_correct": 9,
+    "exact_match_accuracy": 1.0,
+    "exact_match_count": 1,
+    "prediction_errors": 48,
+    "gold_sql_errors": 0,
+    "tied_append_matches": 0
+  },
+  "per_difficulty": {
+    "simple": {
+      "total": 59,
+      "correct": 7,
+      "accuracy": 11.86
+    },
+    "moderate": {
+      "total": 35,
+      "correct": 2,
+      "accuracy": 5.71
+    },
+    "challenging": {
+      "total": 6,
+      "correct": 0,
+      "accuracy": 0.0
+    }
+  },
+  "per_database": [
+    {
+      "db_id": "california_schools",
+      "total": 89,
+      "correct": 7,
+      "errors": 44,
+      "accuracy": 7.87
+    },
+    {
+      "db_id": "financial",
+      "total": 11,
+      "correct": 2,
+      "errors": 4,
+      "accuracy": 18.18
+    }
+  ],
+  "sample_errors": [
+    {
+      "question_id": 0,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT MAX(T1.`Free Meal Count (K-12)` / T1.`Enrollment (K-12)`) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.`District Code` = T2.`District Code` WHERE T2.County = 'Alameda County'",
+      "gold_sql": "SELECT `Free Meal Count (K-12)` / `Enrollment (K-12)` FROM frpm WHERE `County Name` = 'Alameda' ORDER BY (CAST(`Free Meal Count (K-12)` AS REAL) / `Enrollment (K-12)`) DESC LIMIT 1",
+      "error": "no such column: T2.District Code"
+    },
+    {
+      "question_id": 1,
+      "db_id": "california_schools",
+      "difficulty": "moderate",
+      "predicted_sql": "SELECT DISTINCT T1.FreeMealCount FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.DistrictCode = T2.District WHERE T1.`Enrollment (Ages 5-17)` > 0 AND T1.`Free Meal Count (Ages 5-17)` > 0 ORDER BY T1.`Free Meal Count (Ages 5-17)` / T1.`Enrollment (Ages 5-17)` DESC LIMIT 3",
+      "gold_sql": "SELECT `Free Meal Count (Ages 5-17)` / `Enrollment (Ages 5-17)` FROM frpm WHERE `Educational Option Type` = 'Continuation School' AND `Free Meal Count (Ages 5-17)` / `Enrollment (Ages 5-17)` IS NOT NULL ORDER BY `Free Meal Count (Ages 5-17)` / `Enrollment (Ages 5-17)` ASC LIMIT 3",
+      "error": "no such column: T1.FreeMealCount"
+    },
+    {
+      "question_id": 3,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT T2.MailingStreet FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.`Free Meal Count (K-12)` = ( SELECT MAX(`Free Meal Count (K-12)` ) FROM frpm )",
+      "gold_sql": "SELECT T2.MailStreet FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode ORDER BY T1.`FRPM Count (K-12)` DESC LIMIT 1",
+      "error": "no such column: T2.MailingStreet"
+    },
+    {
+      "question_id": 5,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT COUNT(T1.cds) FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T2.AvgScrMath > 400 AND T1.Virtual = 'F'",
+      "gold_sql": "SELECT COUNT(DISTINCT T2.School) FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Virtual = 'F' AND T1.AvgScrMath > 400",
+      "error": "no such column: T1.cds"
+    },
+    {
+      "question_id": 8,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT COUNT(T1.cds) FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.rtype = 'K-12' GROUP BY T1.cds ORDER BY T1.FRPMCount DESC LIMIT 1",
+      "gold_sql": "SELECT NumTstTakr FROM satscores WHERE cds = ( SELECT CDSCode FROM frpm ORDER BY `FRPM Count (K-12)` DESC LIMIT 1 )",
+      "error": "no such column: T1.FRPMCount"
+    },
+    {
+      "question_id": 10,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT T2.FRPM_COUNT FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T1.rtype = 'Reading' AND T1.AvgScrRead = ( SELECT MAX(AvgScrRead) FROM satscores )",
+      "gold_sql": "SELECT T2.`FRPM Count (Ages 5-17)` FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode ORDER BY T1.AvgScrRead DESC LIMIT 1",
+      "error": "no such column: T2.FRPM_COUNT"
+    },
+    {
+      "question_id": 11,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT DISTINCT CDSCode FROM frpm WHERE CAST(REPLACE(REPLACE(Enrollment (K-12), ',', ''), '+', '') AS REAL) + CAST(REPLACE(REPLACE(Enrollment (Ages 5-17), ',', ''), '+', '') AS REAL) > 500",
+      "gold_sql": "SELECT T2.CDSCode FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.`Enrollment (K-12)` + T2.`Enrollment (Ages 5-17)` > 500",
+      "error": "near \"5\": syntax error"
+    },
+    {
+      "question_id": 12,
+      "db_id": "california_schools",
+      "difficulty": "moderate",
+      "predicted_sql": "SELECT T2.`Free Meal Count (Ages 5-17)` / T2.`Enrollment (Ages 5-17)` FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.NumGE1500 / T1.NumTstTakr > 0.3 ORDER BY T2.`Free Meal Count (Ages 5-17)` / T2.`Enrollment (Ages 5-17)` DESC LIMIT 1",
+      "gold_sql": "SELECT MAX(CAST(T1.`Free Meal Count (Ages 5-17)` AS REAL) / T1.`Enrollment (Ages 5-17)`) FROM frpm AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE CAST(T2.NumGE1500 AS REAL) / T2.NumTstTakr > 0.3",
+      "error": "no such column: T2.Free Meal Count (Ages 5-17)"
+    },
+    {
+      "question_id": 14,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT T1.NCESSchool, T1.Enrollment (Ages 5-17) FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode ORDER BY T1.Enrollment (Ages 5-17) DESC LIMIT 5",
+      "gold_sql": "SELECT T1.NCESSchool FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode ORDER BY T2.`Enrollment (Ages 5-17)` DESC LIMIT 5",
+      "error": "near \"(\": syntax error"
+    },
+    {
+      "question_id": 24,
+      "db_id": "california_schools",
+      "difficulty": "moderate",
+      "predicted_sql": "SELECT T1.School, T1.rtype FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrRead >= 1500 AND T1.AvgScrMath >= 1500 AND T1.AvgScrWrite >= 1500 AND T1.NumGE1500 >= 1500 AND T1.Percent (%) Eligible Free (K-12) > 0.1",
+      "gold_sql": "SELECT T2.`School Name` FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE CAST(T2.`Free Meal Count (K-12)` AS REAL) / T2.`Enrollment (K-12)` > 0.1 AND T1.NumGE1500 > 0",
+      "error": "near \"(\": syntax error"
+    }
+  ],
+  "sample_wrong_answers": [
+    {
+      "question_id": 2,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT DISTINCT T1.Zip FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.`Charter School (Y/N)` = 1 AND T1.County = 'Fresno County Office of Education'",
+      "gold_sql": "SELECT T2.Zip FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.`District Name` = 'Fresno County Office of Education' AND T1.`Charter School (Y/N)` = 1"
+    },
+    {
+      "question_id": 4,
+      "db_id": "california_schools",
+      "difficulty": "moderate",
+      "predicted_sql": "SELECT T1.Phone FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.`Charter School (Y/N)` = 1 AND T1.OpenDate > '2000-01-01'",
+      "gold_sql": "SELECT T2.Phone FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.`Charter Funding Type` = 'Directly funded' AND T1.`Charter School (Y/N)` = 1 AND T2.OpenDate > '2000-01-01'"
+    },
+    {
+      "question_id": 9,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT COUNT(T1.CDSCode) FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T2.AvgScrMath > 560 AND T1.FundingType = 'Charter'",
+      "gold_sql": "SELECT COUNT(T2.`School Code`) FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.`Charter Funding Type` = 'Directly funded'"
+    },
+    {
+      "question_id": 13,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT T1.Phone FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds ORDER BY T2.NumGE1500 / T2.NumTstTakr DESC LIMIT 3",
+      "gold_sql": "SELECT T1.Phone FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds ORDER BY CAST(T2.NumGE1500 AS REAL) / T2.NumTstTakr DESC LIMIT 3"
+    },
+    {
+      "question_id": 15,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT T2.District FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.rtype = 'District' GROUP BY T2.District ORDER BY AVG(T1.AvgScrRead) DESC LIMIT 1",
+      "gold_sql": "SELECT T1.District FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T1.StatusType = 'Active' ORDER BY T2.AvgScrRead DESC LIMIT 1"
+    },
+    {
+      "question_id": 16,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT COUNT(*) FROM satscores WHERE rtype = 'merged Alameda' AND enroll12 < 100",
+      "gold_sql": "SELECT COUNT(T1.CDSCode) FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T1.StatusType = 'Merged' AND T2.NumTstTakr < 100 AND T1.County = 'Lake'"
+    },
+    {
+      "question_id": 17,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT T1.School, T1.CharterNum, T2.AvgScrWrite FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T2.AvgScrWrite > 499 ORDER BY T2.AvgScrWrite DESC",
+      "gold_sql": "SELECT CharterNum, AvgScrWrite, RANK() OVER (ORDER BY AvgScrWrite DESC) AS WritingScoreRank FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T2.AvgScrWrite > 499 AND CharterNum is not null"
+    },
+    {
+      "question_id": 18,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT COUNT(T1.cds) FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.County = 'Fresno' AND T2.FundingType = 'Direct' AND T1.NumTstTakr <= 250",
+      "gold_sql": "SELECT COUNT(T1.CDSCode) FROM frpm AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T1.`Charter Funding Type` = 'Directly funded' AND T1.`County Name` = 'Fresno' AND T2.NumTstTakr <= 250"
+    },
+    {
+      "question_id": 19,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT T1.Phone FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T2.rtype = 'Math' GROUP BY T1.Phone ORDER BY COUNT(T2.cds) DESC LIMIT 1",
+      "gold_sql": "SELECT T1.Phone FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds ORDER BY T2.AvgScrMath DESC LIMIT 1"
+    },
+    {
+      "question_id": 20,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT COUNT(*) FROM frpm WHERE `Low Grade` = '9' AND `High Grade` = '12'",
+      "gold_sql": "SELECT COUNT(T1.`School Name`) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Amador' AND T1.`Low Grade` = 9 AND T1.`High Grade` = 12"
+    }
+  ]
+}
