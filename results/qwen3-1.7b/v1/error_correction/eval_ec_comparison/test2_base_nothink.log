@@ -1,0 +1,107 @@
+2026-04-02 22:31:01 [INFO] Using HuggingFace cache: /workspace/hf
+2026-04-02 22:31:01 [INFO] Loading BIRD data: ./bird_eval/dev.json
+2026-04-02 22:31:01 [INFO] Limited to 50 examples
+2026-04-02 22:31:01 [INFO] Loading tokenizer: Qwen/Qwen3-1.7B
+2026-04-02 22:31:06 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen3-1.7B/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-04-02 22:31:06 [WARNING] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-04-02 22:31:06 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen3-1.7B/70d244cc86ccca08cf5af4e1e306ecf908b1ad5e/config.json "HTTP/1.1 200 OK"
+2026-04-02 22:31:06 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen3-1.7B/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-04-02 22:31:07 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen3-1.7B/70d244cc86ccca08cf5af4e1e306ecf908b1ad5e/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-04-02 22:31:07 [INFO] HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen3-1.7B/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-04-02 22:31:08 [INFO] HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen3-1.7B/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-04-02 22:31:09 [INFO] HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen3-1.7B "HTTP/1.1 200 OK"
+2026-04-02 22:31:09 [INFO] Loading model: Qwen/Qwen3-1.7B
+2026-04-02 22:31:10 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen3-1.7B/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-04-02 22:31:11 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen3-1.7B/70d244cc86ccca08cf5af4e1e306ecf908b1ad5e/config.json "HTTP/1.1 200 OK"
+`torch_dtype` is deprecated! Use `dtype` instead!
+2026-04-02 22:31:13 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen3-1.7B/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-04-02 22:31:13 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen3-1.7B/70d244cc86ccca08cf5af4e1e306ecf908b1ad5e/config.json "HTTP/1.1 200 OK"
+Loading weights:   0%| | 0/311 [00:00<?, ?it/sLoading weights: 100%|█| 311/311 [00:00<00:00,
+2026-04-02 22:31:14 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen3-1.7B/resolve/main/generation_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-04-02 22:31:15 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen3-1.7B/70d244cc86ccca08cf5af4e1e306ecf908b1ad5e/generation_config.json "HTTP/1.1 200 OK"
+2026-04-02 22:31:16 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen3-1.7B/resolve/main/custom_generate/generate.py "HTTP/1.1 404 Not Found"
+2026-04-02 22:31:16 [INFO] Model weights loaded successfully
+2026-04-02 22:31:17 [INFO] Evaluating 50 examples with error-correction (max_retries=3)
+2026-04-02 22:31:17 [INFO] Pre-caching database schemas...
+2026-04-02 22:31:17 [INFO] Cached 1 schemas
+2026-04-02 22:31:17 [INFO] [PHASE 1] Initial SQL generation (batch_size=16, no_think mode)...
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+2026-04-02 22:31:21 [INFO]   [16/50] 32.0% - 3.9 ex/s - ETA: 0.1min
+2026-04-02 22:31:28 [INFO]   [32/50] 64.0% - 3.0 ex/s - ETA: 0.1min
+2026-04-02 22:31:37 [INFO]   [48/50] 96.0% - 2.4 ex/s - ETA: 0.0min
+2026-04-02 22:31:40 [INFO]   [50/50] 100.0% - 2.2 ex/s - ETA: 0.0min
+2026-04-02 22:31:40 [INFO] Initial generation complete: 0.4min
+2026-04-02 22:31:40 [INFO] [PHASE 2] Evaluating initial predictions...
+2026-04-02 22:31:44 [INFO] Initial evaluation: 4.4s
+2026-04-02 22:31:44 [INFO]   Correct: 2 (4.0%)
+2026-04-02 22:31:44 [INFO]   Errors (to fix): 30 (60.0%)
+2026-04-02 22:31:44 [INFO]   Wrong results: 18 (36.0%)
+2026-04-02 22:31:44 [INFO] [PHASE 3] Error correction loop (max_retries=3)...
+2026-04-02 22:31:44 [INFO]   Correction attempt 1/3: 30 errors...
+2026-04-02 22:31:48 [INFO]     Generated corrections [1-8]/30
+2026-04-02 22:31:54 [INFO]     Generated corrections [9-16]/30
+2026-04-02 22:32:03 [INFO]     Generated corrections [17-24]/30
+2026-04-02 22:32:06 [INFO]     Generated corrections [25-30]/30
+2026-04-02 22:32:07 [INFO]     Fixed: 3, Still errors: 27
+2026-04-02 22:32:07 [INFO]   Correction attempt 2/3: 27 errors...
+2026-04-02 22:32:10 [INFO]     Generated corrections [1-8]/27
+2026-04-02 22:32:16 [INFO]     Generated corrections [9-16]/27
+2026-04-02 22:32:26 [INFO]     Generated corrections [17-24]/27
+2026-04-02 22:32:28 [INFO]     Generated corrections [25-27]/27
+2026-04-02 22:32:28 [INFO]     Fixed: 1, Still errors: 26
+2026-04-02 22:32:28 [INFO]   Correction attempt 3/3: 26 errors...
+2026-04-02 22:32:32 [INFO]     Generated corrections [1-8]/26
+2026-04-02 22:32:38 [INFO]     Generated corrections [9-16]/26
+2026-04-02 22:32:48 [INFO]     Generated corrections [17-24]/26
+2026-04-02 22:32:50 [INFO]     Generated corrections [25-26]/26
+2026-04-02 22:32:50 [INFO]     Fixed: 0, Still errors: 26
+2026-04-02 22:32:50 [INFO] Correction loop complete: 1.1min
+2026-04-02 22:32:50 [INFO] [PHASE 4] Computing final metrics...
+
+======================================================================
+BIRD BENCHMARK - ERROR CORRECTION EVALUATION RESULTS
+======================================================================
+
+Total examples:           50
+
+BEFORE CORRECTION:
+  Execution accuracy:     2 (4.0%)
+  Execution errors:       30
+  Wrong results:          18
+
+AFTER CORRECTION:
+  Execution accuracy:     2 (4.0%)
+  Execution errors:       26 (52.0%)
+
+IMPROVEMENT:              +0.0%
+
+CORRECTION BREAKDOWN:
+  Errors attempted:       30
+  Fixed at attempt 1:     0
+  Fixed at attempt 2:     0
+  Fixed at attempt 3:     0
+  Total fixed:            0
+  Unfixable:              26
+
+ERROR CATEGORIES:
+  syntax_error: 14
+  column_not_found: 14
+  other: 2
+
+======================================================================
+TOP 5 DATABASES (AFTER CORRECTION)
+======================================================================
+  california_schools: 4.0% (2/50) [+0.0%]
+
+TIMING:
+  Initial generation:     0.38 min
+  Correction loop:        1.11 min
+  Total time:             1.56 min
+======================================================================
+2026-04-02 22:32:50 [INFO] Results saved to: ./eval_ec_comparison_20260402_222625/test2_base_nothink
+
+======================================================================
+FINAL RESULT: 4.0% accuracy
+Improvement: +0.0% from error correction
+======================================================================

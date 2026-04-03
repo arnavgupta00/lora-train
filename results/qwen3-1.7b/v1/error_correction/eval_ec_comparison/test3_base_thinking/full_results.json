@@ -1,0 +1,1425 @@
+[
+  {
+    "pred_sql": "SELECT with a CASE statement to calculate the ratio, then ORDER BY and LIMIT 1 to get the maximum. Alternatively, use a subquery to find the max.\n\nWait, the user wants the highest, so maybe using a subquery with MAX().\n\nBut how to structure the query. Let me think.\n\nSELECT MAX( (Free Meal Count (K-12) / Enrollment (K-12)) ) FROM frpm JOIN schools ON frpm.CDSCode = schools.CDSCode WHERE schools.County = 'Alameda County';",
+    "gold_sql": "SELECT `Free Meal Count (K-12)` / `Enrollment (K-12)` FROM frpm WHERE `County Name` = 'Alameda' ORDER BY (CAST(`Free Meal Count (K-12)` AS REAL) / `Enrollment (K-12)`) DESC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "What is the highest eligible free rate for K-12 students in the schools in Alameda County?",
+    "index": 0,
+    "initial_sql": "SELECT with a CASE statement to calculate the ratio, then ORDER BY and LIMIT 1 to get the maximum. Alternatively, use a subquery to find the max.\n\nWait, the user wants the highest, so maybe using a subquery with MAX().\n\nBut how to structure the query. Let me think.\n\nSELECT MAX( (Free Meal Count (K-12) / Enrollment (K-12)) ) FROM frpm JOIN schools ON frpm.CDSCode = schools.CDSCode WHERE schools.County = 'Alameda County';",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT MAX(Free Meal Count (K-12) / Enrollment (K-12)) FROM frpm JOIN schools ON frpm.CDSCode = schools.CDSCode WHERE schools.County = 'Alameda County';",
+        "executes": false,
+        "error": "near \"Meal\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT MAX(Free Meal Count (K-12) / Enrollment (K-12)) FROM frpm JOIN schools ON frpm.CDSCode = schools.CDSCode WHERE schools.County = 'Alameda County';",
+        "executes": false,
+        "error": "near \"Meal\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "",
+    "gold_sql": "SELECT `Free Meal Count (Ages 5-17)` / `Enrollment (Ages 5-17)` FROM frpm WHERE `Educational Option Type` = 'Continuation School' AND `Free Meal Count (Ages 5-17)` / `Enrollment (Ages 5-17)` IS NOT NULL ORDER BY `Free Meal Count (Ages 5-17)` / `Enrollment (Ages 5-17)` ASC LIMIT 3",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "Please list the lowest three eligible free rates for students aged 5-17 in continuation schools.",
+    "index": 1,
+    "initial_sql": "",
+    "correction_attempts": [],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the Zip code from the schools table.\n\nBut wait, the schools table's County is a TEXT field, so we need to make sure that the County value is 'Fresno'. Also, the frpm table's County Code is a foreign key to schools' County. But the user is asking about Fresno County Office of Education, so maybe the County in schools is 'Fresno'.\n\nSo the SQL query would be a JOIN between schools and frpm on CDSCode, filter where schools.County = 'Fresno' and frpm.Charter School (Y/N) = 1, then select schools.Zip.\n\nBut I need to make sure the column names are correct. The schools table has a Zip column, and the frpm table has a County Code. The foreign key is CDSCode references schools(CDSCode). So the join is on schools.CDSCode = frpm.CDSCode.\n\nSo the query would be:\n\nSELECT schools.Zip\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE schools.County = 'Fresno' AND frpm.Charter School (Y/N) = 1;",
+    "gold_sql": "SELECT T2.Zip FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.`District Name` = 'Fresno County Office of Education' AND T1.`Charter School (Y/N)` = 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "near \"code\": syntax error",
+    "error_category": "syntax_error",
+    "question": "Please list the zip code of all the charter schools in Fresno County Office of Education.",
+    "index": 2,
+    "initial_sql": "select the Zip code from the schools table.\n\nBut wait, the schools table's County is a TEXT field, so we need to make sure that the County value is 'Fresno'. Also, the frpm table's County Code is a foreign key to schools' County. But the user is asking about Fresno County Office of Education, so maybe the County in schools is 'Fresno'.\n\nSo the SQL query would be a JOIN between schools and frpm on CDSCode, filter where schools.County = 'Fresno' and frpm.Charter School (Y/N) = 1, then select schools.Zip.\n\nBut I need to make sure the column names are correct. The schools table has a Zip column, and the frpm table has a County Code. The foreign key is CDSCode references schools(CDSCode). So the join is on schools.CDSCode = frpm.CDSCode.\n\nSo the query would be:\n\nSELECT schools.Zip\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE schools.County = 'Fresno' AND frpm.Charter School (Y/N) = 1;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT schools.Zip\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE schools.County = 'Fresno' AND frpm.Charter School (Y/N) = 1;",
+        "executes": false,
+        "error": "near \"School\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT schools.Zip\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE schools.County = 'Fresno' AND frpm.Charter School (Y/N) = 1;",
+        "executes": false,
+        "error": "near \"School\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT schools.Zip\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE schools.County = 'Fresno' AND frpm.Charter School (Y/N) = 1;",
+        "executes": false,
+        "error": "near \"School\": syntax error",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "select the Zip code from the schools table.\n\nBut wait, the schools table's County is a TEXT field, so we need to make sure that the County value is 'Fresno'. Also, the frpm table's County Code is a foreign key to schools' County. But the user is asking about Fresno County Office of Education, so maybe the County in schools is 'Fresno'.\n\nSo the SQL query would be a JOIN between schools and frpm on CDSCode, filter where schools.County = 'Fresno' and frpm.Charter School (Y/N) = 1, then select schools.Zip.\n\nBut I need to make sure the column names are correct. The schools table has a Zip column, and the frpm table has a County Code. The foreign key is CDSCode references schools(CDSCode). So the join is on schools.CDSCode = frpm.CDSCode.\n\nSo the query would be:\n\nSELECT schools.Zip\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE schools.County = 'Fresno' AND frpm.Charter School (Y/N) = 1;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select that.\n\nSo the SQL query would be:\n\nSELECT s.Street\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.School Type = 'K-12'\nORDER BY f.FRPM Count (K-12) DESC\nLIMIT 1;",
+    "gold_sql": "SELECT T2.MailStreet FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode ORDER BY T1.`FRPM Count (K-12)` DESC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "near \"SQL\": syntax error",
+    "error_category": "syntax_error",
+    "question": "What is the unabbreviated mailing street address of the school with the highest FRPM count for K-12 students?",
+    "index": 3,
+    "initial_sql": "select that.\n\nSo the SQL query would be:\n\nSELECT s.Street\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.School Type = 'K-12'\nORDER BY f.FRPM Count (K-12) DESC\nLIMIT 1;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT that.\n\nWait, the user wrote \"SELECT that.\" which is incomplete. The actual query they tried was:\n\nSELECT s.Street\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.School Type = 'K-12'\nORDER BY f.FRPM Count (K-12) DESC\nLIMIT 1;",
+        "executes": false,
+        "error": "near \"wrote\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT s.Street\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.School Type = 'K-12'\nORDER BY f.FRPM Count (K-12) DESC\nLIMIT 1;",
+        "executes": false,
+        "error": "near \"Type\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT s.Street\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.School Type = 'K-12'\nORDER BY f.FRPM Count (K-12) DESC\nLIMIT 1;",
+        "executes": false,
+        "error": "near \"Type\": syntax error",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "select that.\n\nSo the SQL query would be:\n\nSELECT s.Street\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.School Type = 'K-12'\nORDER BY f.FRPM Count (K-12) DESC\nLIMIT 1;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "",
+    "gold_sql": "SELECT T2.Phone FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.`Charter Funding Type` = 'Directly funded' AND T1.`Charter School (Y/N)` = 1 AND T2.OpenDate > '2000-01-01'",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "Please list the phone numbers of the direct charter-funded schools that are opened after 2000/1/1.",
+    "index": 4,
+    "initial_sql": "",
+    "correction_attempts": [],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "SELECT COUNT(*) \nFROM schools \nJOIN satscores ON schools.CDSCode = satscores.cds \nWHERE schools.Virtual = 'F' AND satscores.AvgScrMath > 400;",
+    "gold_sql": "SELECT COUNT(DISTINCT T2.School) FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Virtual = 'F' AND T1.AvgScrMath > 400",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": true,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "How many schools with an average score in Math greater than 400 in the SAT test are exclusively virtual?",
+    "index": 5,
+    "initial_sql": "SELECT COUNT(*) \nFROM schools \nJOIN satscores ON schools.CDSCode = satscores.cds \nWHERE schools.Virtual = 'F' AND satscores.AvgScrMath > 400;",
+    "correction_attempts": [],
+    "final_sql": "SELECT COUNT(*) \nFROM schools \nJOIN satscores ON schools.CDSCode = satscores.cds \nWHERE schools.Virtual = 'F' AND satscores.AvgScrMath > 400;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "SELECT * FROM schools\nWHERE enroll12 > 500 AND Magnet = 1;",
+    "gold_sql": "SELECT T2.School FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Magnet = 1 AND T1.NumTstTakr > 500",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "no such column: enroll12",
+    "error_category": "column_not_found",
+    "question": "Among the schools with the SAT test takers of over 500, please list the schools that are magnet schools or offer a magnet program.",
+    "index": 6,
+    "initial_sql": "SELECT * FROM schools\nWHERE enroll12 > 500 AND Magnet = 1;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT * FROM schools WHERE enroll12 > 500 AND Magnet = 1;",
+        "executes": false,
+        "error": "no such column: enroll12",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT * FROM schools WHERE enroll12 > 500 AND Magnet = 1. But the error says no such column. So maybe the column name is different?\n\nWait, the user's schema shows for the 'schools' table, the 'enroll12' is a column. But maybe the actual column name is 'enroll12' but with a different case? Or maybe there's a typo. Let me check the schema again.\n\nIn the 'schools' table, the columns include 'enroll12' as a INTEGER not null. So the column exists. But the error is that 'enroll12' is not found. That's confusing. Wait, maybe the user's query is using a different table? Wait, the query is selecting from 'schools', so the 'enroll12' should be in the 'schools' table. But the error says no such column. So perhaps the column name is different. Let me check the schema again.\n\nWait, looking at the 'schools' table's columns: yes, 'enroll12' is present. So why the error? Maybe the column name is actually 'enroll12' but with a different case, like 'Enroll12' or something else? Or maybe the user made a typo in the column name?\n\nAlternatively, maybe the 'enroll12' is not in the 'schools' table but in the 'satscores' table. But the query is selecting from 'schools', so the 'enroll12' should be in the 'schools' table. But the error says it's not found. That's conflicting.\n\nWait, maybe the user's schema has a typo. Let me check again. The 'schools' table's columns include 'enroll12' as part of the columns. So the column exists. So why the error?\n\nWait, maybe the user's query is using a different table. Wait, the query is SELECT * FROM schools WHERE enroll12 > 500 AND Magnet = 1. But the error is that 'enroll12' is not found. So perhaps the actual column name is different. Let me check the schema again.\n\nLooking at the 'schools' table's columns: yes, 'enroll12' is present. So the column exists. Then why the error? Maybe the user's schema has a different column name. Wait, maybe the column is named 'enroll12' but with a different case, like 'Enroll12'? Or maybe the user made a typo in the column name.\n\nAlternatively, maybe the 'enroll12' is in the 'satscores' table, but the query is selecting from 'schools', so that's not possible. Unless the query is incorrect in the table name. But the user's query is SELECT * FROM schools, so that's the table.\n\nWait, maybe the column name is 'enroll12' but the user wrote 'enroll12' with a lowercase '1'? Or maybe the column is named 'enroll12' but the user wrote 'enroll12' with a different case. For example, if the column is 'Enroll12' (with uppercase 'E'), then the query would fail.\n\nBut according to the schema provided, the 'schools' table has 'enroll12' as a column. So the error must be elsewhere. Wait, maybe the user's schema has a typo. Let me check again.\n\nIn the 'schools",
+        "executes": false,
+        "error": "near \"But\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT * FROM schools WHERE enroll12 > 500 AND Magnet = 1. The error message says \"no such column,\" which suggests that the column 'enroll12' doesn't exist in the 'schools' table. But according to the schema provided, the 'schools' table does have an 'enroll12' column. So there's a contradiction here.\n\nWait, maybe there's a typo in the column name. Let me check the schema again. The 'schools' table has a column named 'enroll12' as an INTEGER not null. So the column exists. But the error says it's not found. That's confusing. Maybe the user made a typo in the column name, like 'Enroll12' with a capital E? Or perhaps the column is named differently, like 'Enrollment12'?\n\nAlternatively, maybe the query is using a different table. Wait, the query is selecting from 'schools', so that's the correct table. But the error is about 'enroll12' not being found. Hmm.\n\nWait, the error message also mentions \"near 'But': syntax error.\" That might indicate that the original query had a typo in the column name. For example, if the user wrote 'enroll12' but it's actually 'enroll12' with a different case, like 'Enroll12'. Or maybe there's a missing bracket or a typo in the column name.\n\nAnother possibility is that the 'enroll12' column is in the 'satscores' table instead of 'schools'. But the query is selecting from 'schools', so that's not possible unless there's a join. But the original query doesn't have a join, so that's unlikely.\n\nWait, looking back at the schema for the 'schools' table: the columns include 'enroll12' as part of the columns. So the column exists. Therefore, the error must be elsewhere. Maybe the user's schema has a typo, like 'enroll12' is actually 'enroll12' with a different case. For example, if the column is named 'Enroll12', then the query would fail.\n\nAlternatively, maybe the user's query has a typo in the column name. For instance, if they wrote 'enroll12' but it's actually 'enroll12' with a different case. But according to the schema, the column is named 'enroll12'.\n\nWait, the error message says \"no such column.\" So the column 'enroll12' is not present in the 'schools' table. But according to the schema provided, it is. This is conflicting. Maybe there's a mistake in the schema provided by the user? Or perhaps the user is using a different version of the schema?\n\nAlternatively, maybe the 'enroll12' column is in the 'satscores' table. Let me check the 'satscores' table's columns. The 'satscores' table has 'enroll12' as a column. So if the query is selecting from 'satscores', then the column exists. But the original query is selecting from 'schools', so that's not the case.\n\nWait, the original query is SELECT * FROM schools WHERE enroll12 > 500 AND Magnet = 1. The error is that 'enroll12' is not found. But according to the schema, it is. So why the error?\n\nMaybe the user made a typo in the column name. For example, if the column is named 'Enroll12' (with a capital E), then the query would fail. Alternatively, maybe the column is named 'Enrollment12' or something else.\n\nAlternatively, maybe the column is named 'enroll12' but the user wrote 'enroll12' with a different case. For example, if the column is 'Enroll12', then the query would fail.\n\nBut according to the schema provided, the column is 'enroll12'. So the error must be due to a different reason. Wait, maybe the user's schema has a typo, and the column is actually named 'enroll12' but with a different case. For example, 'Enroll12' with a capital E. Then the query would fail.\n\nAlternatively, maybe the user's query has a typo in the column name. For example, if they wrote 'enroll12' but it's actually 'enroll12' with a different case. But the error message says \"no such column,\" which suggests that the column is not present.\n\nWait, maybe the user's schema is different from what's provided. For example, maybe the 'en",
+        "executes": false,
+        "error": "near \"The\": syntax error",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT * FROM schools\nWHERE enroll12 > 500 AND Magnet = 1;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "Select the phone number from schools where the school is in that result.\n\nBut wait, the schools table has a foreign key to the satscores table via cds. So the join is on cds.\n\nSo the SQL query would be:\n\nSELECT s.phone\nFROM schools s\nJOIN satscores sc ON s.cds = sc.cds\nWHERE sc.AvgScrMath > 1500\nGROUP BY s.cds\nORDER BY COUNT(sc.NumTstTakr) DESC\nLIMIT 1;",
+    "gold_sql": "SELECT T2.Phone FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode ORDER BY T1.NumGE1500 DESC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "What is the phone number of the school that has the highest number of test takers with an SAT score of over 1500?",
+    "index": 7,
+    "initial_sql": "Select the phone number from schools where the school is in that result.\n\nBut wait, the schools table has a foreign key to the satscores table via cds. So the join is on cds.\n\nSo the SQL query would be:\n\nSELECT s.phone\nFROM schools s\nJOIN satscores sc ON s.cds = sc.cds\nWHERE sc.AvgScrMath > 1500\nGROUP BY s.cds\nORDER BY COUNT(sc.NumTstTakr) DESC\nLIMIT 1;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT s.phone\nFROM schools s\nJOIN satscores sc ON s.cds = sc.cds\nWHERE sc.AvgScrMath > 1500\nGROUP BY s.cds\nORDER BY COUNT(sc.NumTstTakr) DESC\nLIMIT 1;",
+        "executes": false,
+        "error": "no such column: s.cds",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT s.phone\nFROM schools s\nJOIN satscores sc ON s.CDSCode = sc.cds\nWHERE sc.AvgScrMath > 1500\nGROUP BY s.CDSCode\nORDER BY COUNT(sc.NumTstTakr) DESC\nLIMIT 1;",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT s.phone\nFROM schools s\nJOIN satscores sc ON s.CDSCode = sc.cds\nWHERE sc.AvgScrMath > 1500\nGROUP BY s.CDSCode\nORDER BY COUNT(sc.NumTstTakr) DESC\nLIMIT 1;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "",
+    "gold_sql": "SELECT NumTstTakr FROM satscores WHERE cds = ( SELECT CDSCode FROM frpm ORDER BY `FRPM Count (K-12)` DESC LIMIT 1 )",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "What is the number of SAT test takers of the schools with the highest FRPM count for K-12 students?",
+    "index": 8,
+    "initial_sql": "",
+    "correction_attempts": [],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "SELECT COUNT(*) FROM schools JOIN satscores ON schools.cds = satscores.cds WHERE satscores.AvgScrMath > 560 AND schools.Charter = 1;",
+    "gold_sql": "SELECT COUNT(T2.`School Code`) FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.`Charter Funding Type` = 'Directly funded'",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "column_not_found",
+    "question": "Among the schools with the average score in Math over 560 in the SAT test, how many schools are directly charter-funded?",
+    "index": 9,
+    "initial_sql": "SELECT COUNT(*) FROM schools JOIN satscores ON schools.cds = satscores.cds WHERE satscores.AvgScrMath > 560 AND schools.Charter = 1;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT COUNT(*) FROM schools JOIN satscores ON schools.CDSCode = satscores.cds WHERE satscores.AvgScrMath > 560 AND schools.Charter = 1;",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT COUNT(*) FROM schools JOIN satscores ON schools.CDSCode = satscores.cds WHERE satscores.AvgScrMath > 560 AND schools.Charter = 1;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select that column.\n\nBut first, I need to make sure that the school with the highest average reading score is correctly identified. So, I'll need to join the satscores and schools tables on CDSCode, then order by AvgScrRead in descending order and limit to 1.\n\nOnce I have that school's CDSCode, I can join with the frpm table to get the FRPM count.\n\nSo the SQL query would involve:\n\n- Joining satscores and schools on CDSCode.\n- Selecting the school's CDSCode, AvgScrRead, and FRPM Count (Ages 5-17).\n- Ordering by AvgScrRead descending.\n- Limiting to 1 row.\n- Then selecting the FRPM Count from that row.\n\nWait, but the frpm table has a column named FRPM Count (Ages 5-17), which is a REAL. So the column name in the frpm table is \"FRPM Count (Ages 5-17)\".\n\nSo the final query would be:\n\nSELECT frpm.FRPM Count (Ages 5-17)\nFROM satscores\nJOIN schools ON satscores.cds = schools.CDSCode\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE satscores.AvgScrRead = (SELECT MAX(AvgScrRead) FROM satscores)\nLIMIT 1;",
+    "gold_sql": "SELECT T2.`FRPM Count (Ages 5-17)` FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode ORDER BY T1.AvgScrRead DESC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "For the school with the highest average score in Reading in the SAT test, what is its FRPM count for students aged 5-17?",
+    "index": 10,
+    "initial_sql": "select that column.\n\nBut first, I need to make sure that the school with the highest average reading score is correctly identified. So, I'll need to join the satscores and schools tables on CDSCode, then order by AvgScrRead in descending order and limit to 1.\n\nOnce I have that school's CDSCode, I can join with the frpm table to get the FRPM count.\n\nSo the SQL query would involve:\n\n- Joining satscores and schools on CDSCode.\n- Selecting the school's CDSCode, AvgScrRead, and FRPM Count (Ages 5-17).\n- Ordering by AvgScrRead descending.\n- Limiting to 1 row.\n- Then selecting the FRPM Count from that row.\n\nWait, but the frpm table has a column named FRPM Count (Ages 5-17), which is a REAL. So the column name in the frpm table is \"FRPM Count (Ages 5-17)\".\n\nSo the final query would be:\n\nSELECT frpm.FRPM Count (Ages 5-17)\nFROM satscores\nJOIN schools ON satscores.cds = schools.CDSCode\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE satscores.AvgScrRead = (SELECT MAX(AvgScrRead) FROM satscores)\nLIMIT 1;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT frpm.\"FRPM Count (Ages 5-17)\"\nFROM satscores\nJOIN schools ON satscores.cds = schools.CDSCode\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE satscores.AvgScrRead = (SELECT MAX(AvgScrRead) FROM satscores)\nLIMIT 1;",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT frpm.\"FRPM Count (Ages 5-17)\"\nFROM satscores\nJOIN schools ON satscores.cds = schools.CDSCode\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE satscores.AvgScrRead = (SELECT MAX(AvgScrRead) FROM satscores)\nLIMIT 1;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the CDSCode from the schools table where (Enrollment (K-12) + Enrollment (Ages 5-17)) > 500. But wait, the user might have a typo, like maybe the enrollment numbers are in different tables. Wait, the frpm table has Enrollment (K-12) and Enrollment (Ages 5-17), but the schools table has those same columns. So the schools table is the right place to get the enrollments.\n\nSo the SQL query would be:\n\nSELECT CDSCode\nFROM schools\nWHERE Enrollment (K-12) + Enrollment (Ages 5-17) > 500;",
+    "gold_sql": "SELECT T2.CDSCode FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.`Enrollment (K-12)` + T2.`Enrollment (Ages 5-17)` > 500",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "near \"table\": syntax error",
+    "error_category": "syntax_error",
+    "question": "Please list the codes of the schools with a total enrollment of over 500.",
+    "index": 11,
+    "initial_sql": "select the CDSCode from the schools table where (Enrollment (K-12) + Enrollment (Ages 5-17)) > 500. But wait, the user might have a typo, like maybe the enrollment numbers are in different tables. Wait, the frpm table has Enrollment (K-12) and Enrollment (Ages 5-17), but the schools table has those same columns. So the schools table is the right place to get the enrollments.\n\nSo the SQL query would be:\n\nSELECT CDSCode\nFROM schools\nWHERE Enrollment (K-12) + Enrollment (Ages 5-17) > 500;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT the CDSCode from the schools table where (Enrollment (K-12) + Enrollment (Ages 5-17)) > 500. The error is near \"table\", which suggests that the query is trying to reference a table that doesn't exist or has a typo.\n\nWait, the user mentioned that the schools table is the right place to get the enrollments, but the error is about a table name. Maybe the query is trying to reference a table that's not present. But the schema shows that the schools table exists. Hmm.\n\nWait, the original query is written as \"select the CDSCode from the schools table...\" which is correct. But the error is \"near 'table'\", which is confusing. Maybe the query is missing a keyword or has a syntax error elsewhere.\n\nWait, maybe the user's query has a typo in the column names. For example, in the schools table, the columns are named Enrollment (K-12) and Enrollment (Ages 5-17). But in SQL, column names with spaces are usually enclosed in backticks. However, in the original query, the user wrote Enrollment (K-12) without backticks. But the error message says \"near 'table'\", which suggests that the query is trying to reference a table that's not present. Wait, maybe the query is trying to reference a table that's not in the database. But the user said the schools table exists.\n\nWait, maybe the error is because the user is using a syntax that's not allowed. For example, in SQLite, the syntax for a SELECT statement is SELECT column FROM table. The original query is correct in that sense. But the error message says \"near 'table'\", which might be because the query is missing a keyword. Wait, no, the query is correct. Unless there's a missing keyword like \"FROM\" or something else.\n\nWait, maybe the user's query is missing the \"FROM\" keyword. Let me check the original query again. The user wrote \"select the CDSCode from the schools table where ...\". That's correct. The \"from\" keyword is present.\n\nHmm. The error message is \"near 'table'\", which is confusing. Maybe the query is trying to reference a table that's not in the database. But the user said the schools table exists. Alternatively, maybe the query is using a reserved word as a column name, but that's not the case here.\n\nWait, looking back at the schema, the schools table has columns like Enrollment (K-12) and Enrollment (Ages 5-17). But in SQL, column names with spaces are usually enclosed in backticks. However, in the original query, the user wrote Enrollment (K-12) without backticks. But the error is about a table name, not a column name. So maybe the error is that the query is trying to reference a table that's not present. But the user said the schools table exists.\n\nWait, maybe the user's query is missing the \"FROM\" keyword. Let me check again. The original query is: SELECT ... FROM schools ... which is correct. So why the error?\n\nAlternatively, maybe the user's query is using a different table. Wait, the question says to list the codes of the schools with a total enrollment of over 500. The enrollments are in the schools table. So the query should be selecting from schools.\n\nBut the error is \"near 'table'\", which is strange. Maybe the query is written as \"select the CDSCode from the schools table where ...\", but the actual error is that the table name is misspelled. For example, if the user wrote \"schools\" with a typo, like \"school\" instead of \"schools\". But the user's query uses \"schools\" correctly.\n\nWait, maybe the error is because the user is using a reserved word as a column name. But the columns are named Enrollment (K-12) and Enrollment (Ages 5-17), which are not reserved words. So that's not the issue.\n\nAlternatively, maybe the user is using a syntax that's not allowed in SQLite. For example, using a space in the column name without backticks. But in SQLite, you can have spaces in column names if you enclose them in backticks. However, the original query doesn't use backticks, so maybe that's the issue. Wait, but the error is about a table name, not a column name. So that's not it.\n\nWait, maybe the user's query is missing a keyword. For example, if the query is written as \"select the CDSCode from the schools table where ...\", but the actual error is that the \"from\"",
+        "executes": false,
+        "error": "near \"table\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT the CDSCode from the schools table where (Enrollment (K-12) + Enrollment (Ages 5-17)) > 500.\n\nThe error is near \"table\", which means the SQL parser is having trouble with the table name. But according to the schema, the schools table exists. Wait, maybe the issue is that the table name is misspelled. Let me check the schema again. The schools table is created with the name \"schools\" (lowercase), but maybe the user wrote it with a different case, like \"Schools\" or \"SCHOOLS\". However, the user's query uses \"schools\" correctly.\n\nWait, another possibility: in SQLite, if a table name has a space, it needs to be enclosed in backticks. But in the original query, the table name is \"schools\", which doesn't have a space. So that's not the issue. Unless the user's query has a typo in the table name, but the error is near \"table\", which is part of the query.\n\nWait, maybe the query is missing the \"FROM\" keyword. Let me check the original query again. The user wrote \"SELECT ... from the schools table where ...\". The \"from\" keyword is present. So that's not the problem.\n\nHmm. The error is \"near 'table'\", which is confusing. Maybe the query is trying to reference a table that's not in the database. But the user said the schools table exists. Alternatively, maybe the query is using a reserved word as a column name, but the columns are named Enrollment (K-12) and Enrollment (Ages 5-17), which are not reserved words.\n\nWait, maybe the user's query is missing a comma or has a syntax error elsewhere. Let me check the structure. The SELECT statement is correct, the FROM clause is present, the WHERE clause is correct. The only thing left is the table name. If the table name is misspelled, but the user's query uses \"schools\" correctly, then maybe the error is elsewhere.\n\nWait, maybe the user's query is using a different table. For example, if the question is about the schools table, but the query is trying to reference another table. But the question says to list the codes of the schools, so it should be the schools table.\n\nAlternatively, maybe the user is using a different table, like \"satscores\" or \"frpm\", but the question is about schools. So that's not it.\n\nWait, maybe the error is because the user is using a reserved word as a column name. For example, if the column name is \"Enrollment (K-12)\", but that's not a reserved word. So that's not the issue.\n\nWait, maybe the error is because the user is using a syntax that's not allowed in SQLite. For example, using a space in the column name without backticks. But the original query doesn't use backticks, so that's not the case.\n\nAlternatively, maybe the user is using a different SQL dialect, but the problem states it's SQLite.\n\nWait, maybe the error is that the query is missing the \"FROM\" keyword. But the user's query has \"from the schools table\", which is correct.\n\nI'm stuck. The error is near \"table\", but the query seems correct. Maybe the error is in the column names. For example, if the columns are actually named with backticks, but the user didn't use them. Let me check the schema again.\n\nIn the schools table, the columns are: Enrollment (K-12) and Enrollment (Ages 5-17). These are column names with spaces. In SQL, if a column name has a space, it needs to be enclosed in backticks. However, in the original query, the user wrote Enrollment (K-12) without backticks. So that's the issue! The column names have spaces and are not enclosed in backticks, which is invalid in SQL. Therefore, the query is invalid because the column names are not properly quoted.\n\nSo the correct SQL should enclose the column names in backticks. The original query had:\n\nEnrollment (K-12) + Enrollment (Ages 5-17)\n\nBut since these are column names with spaces, they need to be in backticks. So the corrected query would be:\n\nSELECT CDSCode FROM schools WHERE (Enrollment (K-12) + Enrollment (Ages 5-17)) > 500\n\nBut the user's original query didn't use backticks, leading to a syntax error. Therefore, the error is due to the column names not being properly quoted.\n\nSo",
+        "executes": false,
+        "error": "near \"table\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT the CDSCode from the schools table where (Enrollment (K-12) + Enrollment (Ages 5-17)) > 500.\n\nThe error is near \"table\", which is part of the FROM clause. Wait, the query is written as \"from the schools table\". In SQL, the correct syntax is \"FROM schools\", not \"from the schools table\". The \"from\" keyword is optional if you're just specifying the table, but the user's query includes \"from the schools table\", which is incorrect. However, the error message is near \"table\", which might be pointing to the \"table\" in \"from the schools table\". But the user's query does have \"from the schools table\", which is a typo. The correct syntax is \"FROM schools\" without the \"the\".\n\nBut the user's original query has \"from the schools table\", which is incorrect. So the error is due to the incorrect syntax of the FROM clause. However, the user mentioned that the error is near \"table\", which might be a red herring. Alternatively, maybe the table name is misspelled. Let me check the schema again.\n\nThe schools table is created with the name \"schools\" (lowercase). The user's query uses \"schools\" correctly. So that's not the issue.\n\nAnother possibility: the columns Enrollment (K-12) and Enrollment (Ages 5-17) have spaces and are not properly quoted. In SQL, if a column name has a space, it needs to be enclosed in backticks. The original query doesn't use backticks, leading to a syntax error. However, the error message is about the table name, not the column names. So maybe the error is elsewhere.\n\nWait, the user's query is:\n\nSELECT the CDSCode from the schools table where (Enrollment (K-12) + Enrollment (Ages 5-17)) > 500.\n\nThe error is near \"table\", which is part of \"from the schools table\". The correct syntax is \"FROM schools\", so the error is in the \"from\" part. But the user's query has \"from the schools table\", which is incorrect. So the error is due to the incorrect syntax of the FROM clause.\n\nBut the user's original query has \"from the schools table\", which is a typo. The correct syntax is \"FROM schools\". So the error is in the FROM clause.\n\nHowever, the user mentioned that the error is near \"table\", which might be pointing to the \"table\" in \"from the schools table\". So the correct fix is to remove \"the\" and use \"FROM schools\".\n\nBut the user's question is about the schools table, so the main issue is the FROM clause. However, the initial analysis thought the error was due to column names, but that's not the case here. The error is in the FROM clause.\n\nWait, but the user's query is:\n\nSELECT the CDSCode from the schools table where (Enrollment (K-12) + Enrollment (Ages 5-17)) > 500.\n\nThe error is near \"table\", which is part of \"from the schools table\". The correct syntax is \"FROM schools\", so the error is in the \"from\" part. Therefore, the fix is to remove \"the\" and use \"FROM schools\".\n\nBut the user's original query has \"from the schools table\", which is incorrect. So the corrected query should be:\n\nSELECT CDSCode FROM schools WHERE (Enrollment (K-12) + Enrollment (Ages 5-17)) > 500;",
+        "executes": false,
+        "error": "near \"table\": syntax error",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "select the CDSCode from the schools table where (Enrollment (K-12) + Enrollment (Ages 5-17)) > 500. But wait, the user might have a typo, like maybe the enrollment numbers are in different tables. Wait, the frpm table has Enrollment (K-12) and Enrollment (Ages 5-17), but the schools table has those same columns. So the schools table is the right place to get the enrollments.\n\nSo the SQL query would be:\n\nSELECT CDSCode\nFROM schools\nWHERE Enrollment (K-12) + Enrollment (Ages 5-17) > 500;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "",
+    "gold_sql": "SELECT MAX(CAST(T1.`Free Meal Count (Ages 5-17)` AS REAL) / T1.`Enrollment (Ages 5-17)`) FROM frpm AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE CAST(T2.NumGE1500 AS REAL) / T2.NumTstTakr > 0.3",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "Among the schools with an SAT excellence rate of over 0.3, what is the highest eligible free rate for students aged 5-17?",
+    "index": 12,
+    "initial_sql": "",
+    "correction_attempts": [],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the schools with the highest rates. Then, retrieve their phone numbers. \n\nBut how do I handle the calculation? Let's think. For each school, I need to get the NumGE1500 and NumTstTakr from the satscores table. But the satscores table has multiple entries for different types (read, math, write). Wait, the rtype is a column in satscores. So, maybe the excellence rate is calculated for each test type? Or is it a combined rate? The question says \"SAT excellence rate\", which might refer to the overall rate across all test types. But the data has separate columns for each subject. \n\nHmm, the hint says Excellence rate = NumGE1500 / NumTstTakr. So, perhaps the NumGE1500 is the total number of students who scored 1500 or above in all test types, and NumTstTakr is the total number of tests taken. But the satscores table has multiple entries for different rtype (read, math, write). So, maybe the NumGE1500",
+    "gold_sql": "SELECT T1.Phone FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds ORDER BY CAST(T2.NumGE1500 AS REAL) / T2.NumTstTakr DESC LIMIT 3",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "near \"with\": syntax error",
+    "error_category": "syntax_error",
+    "question": "Please list the phone numbers of the schools with the top 3 SAT excellence rate.",
+    "index": 13,
+    "initial_sql": "select the schools with the highest rates. Then, retrieve their phone numbers. \n\nBut how do I handle the calculation? Let's think. For each school, I need to get the NumGE1500 and NumTstTakr from the satscores table. But the satscores table has multiple entries for different types (read, math, write). Wait, the rtype is a column in satscores. So, maybe the excellence rate is calculated for each test type? Or is it a combined rate? The question says \"SAT excellence rate\", which might refer to the overall rate across all test types. But the data has separate columns for each subject. \n\nHmm, the hint says Excellence rate = NumGE1500 / NumTstTakr. So, perhaps the NumGE1500 is the total number of students who scored 1500 or above in all test types, and NumTstTakr is the total number of tests taken. But the satscores table has multiple entries for different rtype (read, math, write). So, maybe the NumGE1500",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "select the schools with the highest rates. Then, retrieve their phone numbers.\" The user mentioned using a CTE to calculate the excellence rate. But the error is about the \"with\" keyword. \n\nWait, the original query might have been something like:\n\nWITH cte AS (\n    SELECT ...\n)\nSELECT ... FROM cte;",
+        "executes": false,
+        "error": "near \"with\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "select the top 3 schools and their phone numbers.\n\nBut how to structure the query. Let's think step by step.\n\nFirst, join the schools table with the satscores table on CDSCode. Then, calculate the average SAT scores for each school. Then, rank the schools based on these averages. Then, select the top 3 schools and their phone numbers.\n\nBut the exact calculation of the excellence rate might be needed. For example, maybe the excellence rate is the percentage of students scoring at or above 1500 in any of the SAT subjects. But the user's question is a bit unclear. However, the original query mentioned using a CTE, which is not allowed, so the correct approach is to use a subquery.\n\nSo the corrected SQL would be to calculate the average SAT scores, rank them, and then select the top 3.\n\nBut the user's original query had a CTE with a \"with\" clause, which is invalid in SQLite. So the correct query would be to use a subquery or a JOIN.\n\nLet me draft the SQL.\n\nFirst, join schools and satscores on CDSCode. Then, calculate the average SAT scores. Then, rank the schools based on these averages. Then, select the top 3.\n\nBut how to rank them. Maybe use a subquery with a window function to rank the schools.\n\nAlternatively, use a subquery to get the top 3 schools based on their average SAT scores.\n\nSo the query would be:\n\nSELECT s.Phone\nFROM schools s\nJOIN satscores sc ON s.CDSCode = sc.cds\nWHERE (sc.AvgScrRead + sc.AvgScrMath + sc.AvgScrWrite) / 3 > (SELECT AVG(AvgScrRead + AvgScrMath + AvgScrWrite) FROM satscores)\nORDER BY (sc.AvgScrRead + sc.AvgScrMath + sc.AvgScrWrite) / 3 DESC\nLIMIT 3;",
+        "executes": false,
+        "error": "near \"3\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT the top 3 schools and their phone numbers.\n\nBut the user tried to structure it by joining schools and satscores, calculating average SAT scores, ranking them, and selecting the top 3. However, the error is near the \"3\" in the ORDER BY clause.\n\nLooking at the original query, the user had something like:\n\nORDER BY (sc.AvgScrRead + sc.AvgScrMath + sc.AvgScrWrite) / 3 DESC\nLIMIT 3;",
+        "executes": false,
+        "error": "near \"3\": syntax error",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "select the schools with the highest rates. Then, retrieve their phone numbers. \n\nBut how do I handle the calculation? Let's think. For each school, I need to get the NumGE1500 and NumTstTakr from the satscores table. But the satscores table has multiple entries for different types (read, math, write). Wait, the rtype is a column in satscores. So, maybe the excellence rate is calculated for each test type? Or is it a combined rate? The question says \"SAT excellence rate\", which might refer to the overall rate across all test types. But the data has separate columns for each subject. \n\nHmm, the hint says Excellence rate = NumGE1500 / NumTstTakr. So, perhaps the NumGE1500 is the total number of students who scored 1500 or above in all test types, and NumTstTakr is the total number of tests taken. But the satscores table has multiple entries for different rtype (read, math, write). So, maybe the NumGE1500",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "SELECT CDSCode, Enrollment (Ages 5-17) FROM schools ORDER BY Enrollment (Ages 5-17) DESC LIMIT 5;",
+    "gold_sql": "SELECT T1.NCESSchool FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode ORDER BY T2.`Enrollment (Ages 5-17)` DESC LIMIT 5",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "List the top five schools, by descending order, from the highest to the lowest, the most number of Enrollment (Ages 5-17). Please give their NCES school identification number.",
+    "index": 14,
+    "initial_sql": "SELECT CDSCode, Enrollment (Ages 5-17) FROM schools ORDER BY Enrollment (Ages 5-17) DESC LIMIT 5;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT statement?\n\nLooking at the failed SQL query: SELECT CDSCode, Enrollment (Ages 5-17) FROM schools ORDER BY Enrollment (Ages 5-17) DESC LIMIT 5;",
+        "executes": false,
+        "error": "near \"?\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT CDSCode, `Enrollment (Ages 5-17)` FROM schools ORDER BY `Enrollment (Ages 5-17)` DESC LIMIT 5;",
+        "executes": false,
+        "error": "no such column: Enrollment (Ages 5-17)",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "SELECT s.District, AVG(sats.AvgScrRead) AS AvgReadingScore\nFROM schools s\nJOIN satscores sats ON s.District = sats.dname\nWHERE s.StatusType = 'Active'\nGROUP BY s.District\nORDER BY AvgReadingScore DESC\nLIMIT 1;",
+    "gold_sql": "SELECT T1.District FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T1.StatusType = 'Active' ORDER BY T2.AvgScrRead DESC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "Which active district has the highest average score in Reading?",
+    "index": 15,
+    "initial_sql": "SELECT s.District, AVG(sats.AvgScrRead) AS AvgReadingScore\nFROM schools s\nJOIN satscores sats ON s.District = sats.dname\nWHERE s.StatusType = 'Active'\nGROUP BY s.District\nORDER BY AvgReadingScore DESC\nLIMIT 1;",
+    "correction_attempts": [],
+    "final_sql": "SELECT s.District, AVG(sats.AvgScrRead) AS AvgReadingScore\nFROM schools s\nJOIN satscores sats ON s.District = sats.dname\nWHERE s.StatusType = 'Active'\nGROUP BY s.District\nORDER BY AvgReadingScore DESC\nLIMIT 1;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "",
+    "gold_sql": "SELECT COUNT(T1.CDSCode) FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T1.StatusType = 'Merged' AND T2.NumTstTakr < 100 AND T1.County = 'Lake'",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "How many schools in merged Alameda have number of test takers less than 100?",
+    "index": 16,
+    "initial_sql": "",
+    "correction_attempts": [],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select Charter.\n\nWait, but the satscores table's foreign key is to schools' CDSCode. So the join is on schools.CDSCode = satscores.cds.\n\nSo the SQL query would be a JOIN between schools and satscores on schools.CDSCode = satscores.cds. Then filter where satscores.AvgScrWrite > 499. Then order by satscores.AvgScrWrite DESC, and select Charter from schools.\n\nBut the user wants to rank schools by their writing score, so maybe order by AvgScrWrite DESC. Also, the charter numbers are in the schools table, so we need to include that.\n\nSo the query would be:\n\nSELECT schools.Charter, satscores.AvgScrWrite\nFROM schools\nJOIN satscores ON schools.CDSCode = satscores.cds\nWHERE satscores.AvgScrWrite > 499\nORDER BY satscores.AvgScrWrite DESC;",
+    "gold_sql": "SELECT CharterNum, AvgScrWrite, RANK() OVER (ORDER BY AvgScrWrite DESC) AS WritingScoreRank FROM schools AS T1  INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T2.AvgScrWrite > 499 AND CharterNum is not null",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "Rank schools by their average score in Writing where the score is greater than 499, showing their charter numbers.",
+    "index": 17,
+    "initial_sql": "select Charter.\n\nWait, but the satscores table's foreign key is to schools' CDSCode. So the join is on schools.CDSCode = satscores.cds.\n\nSo the SQL query would be a JOIN between schools and satscores on schools.CDSCode = satscores.cds. Then filter where satscores.AvgScrWrite > 499. Then order by satscores.AvgScrWrite DESC, and select Charter from schools.\n\nBut the user wants to rank schools by their writing score, so maybe order by AvgScrWrite DESC. Also, the charter numbers are in the schools table, so we need to include that.\n\nSo the query would be:\n\nSELECT schools.Charter, satscores.AvgScrWrite\nFROM schools\nJOIN satscores ON schools.CDSCode = satscores.cds\nWHERE satscores.AvgScrWrite > 499\nORDER BY satscores.AvgScrWrite DESC;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT schools.Charter, satscores.AvgScrWrite\nFROM schools\nJOIN satscores ON schools.CDSCode = satscores.cds\nWHERE satscores.AvgScrWrite > 499\nORDER BY satscores.AvgScrWrite DESC;",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT schools.Charter, satscores.AvgScrWrite\nFROM schools\nJOIN satscores ON schools.CDSCode = satscores.cds\nWHERE satscores.AvgScrWrite > 499\nORDER BY satscores.AvgScrWrite DESC;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "",
+    "gold_sql": "SELECT COUNT(T1.CDSCode) FROM frpm AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T1.`Charter Funding Type` = 'Directly funded' AND T1.`County Name` = 'Fresno' AND T2.NumTstTakr <= 250",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "How many schools in Fresno (directly funded) have number of test takers not more than 250?",
+    "index": 18,
+    "initial_sql": "",
+    "correction_attempts": [],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the phone number from the schools table where the average math score is the maximum.\n\nBut how to structure the query. Let's think.\n\nFirst, get the maximum average math score. Then, get the schools with that score and their phone numbers.\n\nSo, the query would be:\n\nSELECT schools.Phone\nFROM satscores JOIN schools ON satscores.cds = schools.CDSCode\nGROUP BY schools.CDSCode\nHAVING AVG(satscores.AvgScrMath) = (SELECT MAX(AvgScrMath) FROM satscores);",
+    "gold_sql": "SELECT T1.Phone FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds ORDER BY T2.AvgScrMath DESC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "What is the phone number of the school that has the highest average score in Math?",
+    "index": 19,
+    "initial_sql": "select the phone number from the schools table where the average math score is the maximum.\n\nBut how to structure the query. Let's think.\n\nFirst, get the maximum average math score. Then, get the schools with that score and their phone numbers.\n\nSo, the query would be:\n\nSELECT schools.Phone\nFROM satscores JOIN schools ON satscores.cds = schools.CDSCode\nGROUP BY schools.CDSCode\nHAVING AVG(satscores.AvgScrMath) = (SELECT MAX(AvgScrMath) FROM satscores);",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT schools.Phone FROM satscores JOIN schools ON satscores.cds = schools.CDSCode GROUP BY schools.CDSCode HAVING AVG(satscores.AvgScrMath) = (SELECT MAX(AvgScrMath) FROM satscores);",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT schools.Phone FROM satscores JOIN schools ON satscores.cds = schools.CDSCode GROUP BY schools.CDSCode HAVING AVG(satscores.AvgScrMath) = (SELECT MAX(AvgScrMath) FROM satscores);",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "SELECT COUNT(*) FROM frpm WHERE County Name =",
+    "gold_sql": "SELECT COUNT(T1.`School Name`) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Amador' AND T1.`Low Grade` = 9 AND T1.`High Grade` = 12",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "How many schools in Amador which the Low Grade is 9 and the High Grade is 12?",
+    "index": 20,
+    "initial_sql": "SELECT COUNT(*) FROM frpm WHERE County Name =",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT COUNT(*) FROM frpm WHERE `County Name` = 'Amador';",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT COUNT(*) FROM frpm WHERE `County Name` = 'Amador';",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select schools in Los Angeles where FRPM Count (K-12) is between 500 and 700. But I need to confirm. \n\nAlso, the schools table has a County column, which is \"Los Angeles\" in the",
+    "gold_sql": "SELECT COUNT(CDSCode) FROM frpm WHERE `County Name` = 'Los Angeles' AND `Free Meal Count (K-12)` > 500 AND `FRPM Count (K-12)`< 700",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "near \"Count\": syntax error",
+    "error_category": "syntax_error",
+    "question": "In Los Angeles how many schools have more than 500 free meals but less than 700 free or reduced price meals for K-12?",
+    "index": 21,
+    "initial_sql": "select schools in Los Angeles where FRPM Count (K-12) is between 500 and 700. But I need to confirm. \n\nAlso, the schools table has a County column, which is \"Los Angeles\" in the",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "select schools in Los Angeles where FRPM Count (K-12) is between 500 and 700.\" The problem here is that \"schools\" is not a column name. The user probably intended to select from the schools table, but the query is written incorrectly.\n\nThe correct approach would be to select the count of schools from the schools table, but the user's query is trying to filter based on a column named FRPM Count (K-12). However, the error is about the syntax near \"Count\", which suggests that the query is trying to use a column name that's not properly formatted.\n\nLooking at the schema, the frpm table has a column named \"FRPM Count (K-12)\". The user's query is trying to use \"FRPM Count (K-12)\" as a column, but the error is about \"Count\" being invalid. Wait, maybe the user is trying to use a column named \"FRPM Count (K-12)\" but the query is written incorrectly. Let me check the schema again.\n\nIn the frpm table, the column is named \"FRPM Count (K-12)\". So the correct column name is \"FRPM Count (K-12)\", which includes the space and parentheses. The user's query is using \"FRPM Count (K-12)\" as a column, but the error is about \"Count\" being invalid. Wait, maybe the user is trying to use a column named \"Count\" but it's actually \"FRPM Count (K-12)\".\n\nWait, the original query is: \"select schools in Los Angeles where FRPM Count (K-12) is between 500 and 700.\" The problem here is that \"schools\" is not a column. The user probably intended to select from the schools table, but the query is written incorrectly. Also, the column name in the frpm table is \"FRPM Count (K-12)\", so the correct column name is that, not \"Count\".\n\nSo the correct approach is to join the schools table with the frpm table on the CDSCode, filter the frpm table for the FRPM Count (K-12) between 500 and 700, and then count the number of schools that meet this condition. But the user's question is about the number of schools, so the query should count the number of rows in the frpm table that meet the criteria, but also ensure that the schools are in Los Angeles.\n\nWait, the user's question is \"In Los Angeles how many schools have more than 500 free meals...\" So the schools must be in Los Angeles. The schools table has a County column, which is \"Los Angeles\" in the example. So the query needs to filter the schools table where County is \"Los Angeles\".\n\nBut the original query is trying to select from schools, but the error is about \"Count\" being invalid. So the correct approach is to join the schools table with the frpm table, filter the frpm table for the required range, and then count the number of schools (i.e., the number of rows in the frpm table that meet the criteria, but ensuring that the schools are in Los Angeles).\n\nWait, but the user's question is about the number of schools, not the number of frpm entries. So the correct approach is to count the number of schools (rows) in the schools table that have a corresponding entry in the frpm table with the FRPM Count (K-12) between 500 and 700, and the County is \"Los Angeles\".\n\nBut the original query is trying to select schools in Los Angeles where FRPM Count (K-12) is between 500 and 700. The error is that \"schools\" is not a column. So the correct query would be to join the schools and frpm tables, filter on County = 'Los Angeles' and FRPM Count (K-12) between 500 and 700, and then count the number of schools.\n\nBut the user's question is about the number of schools, so the query should count the number of rows in the schools table that have a matching frpm entry. However, the user's original query is trying to select schools, which is not correct. So the correct SQL would be to join the tables and count the number of schools that meet the criteria.\n\nBut the user's error is about \"Count\" being invalid. So the",
+        "executes": false,
+        "error": "near \"Count\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "select schools in Los Angeles where FRPM Count (K-12) is between 500 and 700.\" The problem here is that \"schools\" is not a column. The user probably intended to select from the schools table, but the query is written incorrectly. Also, the column name in the frpm table is \"FRPM Count (K-12)\", so the correct column name is that, not \"Count\".\n\nSo the error is that the query is trying to use \"Count\" as a column name, but the correct column is \"FRPM Count (K-12)\". However, the error message is about \"Count\" being invalid. Wait, maybe the user is trying to use a column named \"Count\" but it's actually \"FRPM Count (K-12)\". But the error is about \"Count\" being invalid, which suggests that the query is trying to use a column named \"Count\" but it's not present.\n\nAlternatively, maybe the user is trying to use a column named \"Count\" but the correct column is \"FRPM Count (K-12)\". So the query should reference the correct column name.\n\nThe user's question is about the number of schools in Los Angeles that have more than 500 free meals but less than 700. So the correct approach is to join the schools table with the frpm table on CDSCode, filter the frpm table for the FRPM Count (K-12) between 500 and 700, and then count the number of schools (rows) that meet this condition, but only those in Los Angeles.\n\nBut the original query is trying to select \"schools in Los Angeles\" which is incorrect. The correct approach is to join the tables and count the number of schools that have entries in the frpm table meeting the criteria and are in Los Angeles.\n\nSo the corrected SQL should join schools and frpm on CDSCode, filter on County = 'Los Angeles' and FRPM Count (K-12) between 500 and 700, then count the number of schools. However, the user's original query was trying to select \"schools\" which is not a column, so the correct query would involve joining the tables.\n\nBut the user's error was about \"Count\" being invalid. So the original query had a syntax error because it was trying to use \"Count\" as a column name. The correct column name is \"FRPM Count (K-12)\", so the query should reference that.\n\nSo the corrected SQL would be to select the count of schools (rows) from the frpm table where the FRPM Count (K-12) is between 500 and 700 and the County is 'Los Angeles'. But since the schools table has the County information, we need to join the tables.\n\nWait, but the user's question is about the number of schools, not the number of frpm entries. So the correct approach is to count the number of schools (rows) in the schools table that have a corresponding entry in the frpm table with the required criteria and are in Los Angeles.\n\nSo the correct SQL would be a JOIN between schools and frpm on CDSCode, filter on County = 'Los Angeles' and FRPM Count (K-12) between 500 and 700, then count the number of schools.\n\nBut the user's original query was trying to select \"schools\" which is not a column. So the correct query would involve joining the tables.\n\nBut the user's error was about \"Count\" being invalid. So the original query had a syntax error because it was trying to use \"Count\" as a column name. The correct column is \"FRPM Count (K-12)\", so the query should reference that.\n\nTherefore, the corrected SQL would be:\n\nSELECT COUNT(*) \nFROM frpm \nJOIN schools ON frpm.CDSCode = schools.CDSCode \nWHERE schools.County = 'Los Angeles' \n  AND frpm.FRPM",
+        "executes": false,
+        "error": "near \"Count\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT COUNT(*)  \nFROM frpm  \nJOIN schools ON frpm.CDSCode = schools.CDSCode  \nWHERE schools.County = 'Los Angeles'  \n  AND frpm.FRPM Count (K-12) BETWEEN 500 AND 700;",
+        "executes": false,
+        "error": "near \"Count\": syntax error",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "select schools in Los Angeles where FRPM Count (K-12) is between 500 and 700. But I need to confirm. \n\nAlso, the schools table has a County column, which is \"Los Angeles\" in the",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "SELECT s.School, s.CDSCode, s.NCESDist, s.NCESSchool, s.StatusType, s.County, s.District, s.School, s.Street, s.StreetAbr, s.City, s.Zip, s.State, s.MailStreet, s.MailStrAbr, s.MailCity, s.MailZip, s",
+    "gold_sql": "SELECT sname FROM satscores WHERE cname = 'Contra Costa' AND sname IS NOT NULL ORDER BY NumTstTakr DESC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "no such column: s.School",
+    "error_category": "column_not_found",
+    "question": "Which school in Contra Costa has the highest number of test takers?",
+    "index": 22,
+    "initial_sql": "SELECT s.School, s.CDSCode, s.NCESDist, s.NCESSchool, s.StatusType, s.County, s.District, s.School, s.Street, s.StreetAbr, s.City, s.Zip, s.State, s.MailStreet, s.MailStrAbr, s.MailCity, s.MailZip, s",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT schools.School, schools.CDSCode, schools.NCESDist, schools.NCESSchool, schools.StatusType, schools.County, schools.District, schools.School, schools.Street, schools.StreetAbr, schools.City, schools.Zip, schools.State, schools.MailStreet, schools.MailStrAbr, schools.MailCity, schools.MailZip, schools FROM schools WHERE schools.County = 'Contra Costa';",
+        "executes": false,
+        "error": "no such column: schools",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "select from 'schools' but that column doesn't exist. Looking at the schema, the tables are 'frpm', 'satscores', and 'schools'. The query is selecting from 'schools' directly, but the error suggests that the column 'schools' isn't present. Wait, that doesn't make sense. The table is called 'schools', so the column name should be 'School' in the SELECT statement, not 'schools'.\n\nWait, the error message is \"no such column: schools\". That implies that the query is trying to select a column named 'schools' from the 'schools' table. But the table's columns are all lowercase, like 'CDSCode', 'County', etc. So the column name in the table is 'County', not 'schools'. Therefore, the error is because the query is using 'schools' as a column name, but the actual column is 'County'.\n\nWait, but the user's query is selecting from 'schools' and then listing columns like 'School', which is a column in the 'schools' table. But the error is about the column 'schools' not existing. That's confusing. Wait, maybe the user's query is trying to select a column named 'schools' from the 'schools' table, but the actual column is 'School' (lowercase). So the error is because the query is using 'schools' as a column name, but the correct column is 'School'.\n\nSo the corrected query should select the 'School' column from the 'schools' table. The original query had 'schools.School' which is correct, but maybe the error is elsewhere. Wait, the error message says \"no such column: schools\". That suggests that the query is trying to select a column named 'schools' from the 'schools' table. But the table's columns are 'School', so the correct column is 'School', not 'schools'.\n\nWait, maybe the user's query is missing the table alias? Let me check the original query again. The query is:\n\nSELECT schools.School, schools.CDSCode, schools.NCESDist, schools.NCESSchool, schools.StatusType, schools.County, schools.District, schools.School, schools.Street, schools.StreetAbr, schools.City, schools.Zip, schools.State, schools.MailStreet, schools.MailStrAbr, schools.MailCity, schools.MailZip, schools FROM schools WHERE schools.County = 'Contra Costa';",
+        "executes": false,
+        "error": "near \"from\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT from 'schools' but that column doesn't exist. Looking at the schema, the tables are 'frpm', 'satscores', and 'schools'. The query is selecting from 'schools' directly, but the error suggests that the column 'schools' isn't present. Wait, that doesn't make sense. The table is called 'schools', so the column name should be 'School' in the SELECT statement, not 'schools'.\n\nWait, the error message is \"no such column: schools\". That implies the query is trying to select a column named 'schools' from the 'schools' table. But the actual column is 'School' (lowercase). So the error is because the query is using 'schools' as a column name, but the correct column is 'School'.\n\nBut the user's query is selecting from 'schools' and then listing columns like 'School', which is correct. However, the error message is about the column 'schools' not existing. That's confusing. Maybe the user's query is missing a table alias or a comma?\n\nLooking at the original query again: the user wrote \"SELECT from 'schools' but that column doesn't exist.\" Then they tried to select from 'schools' and list columns like 'School'. The error is probably because the query is written as SELECT from 'schools' without specifying the columns, which is invalid. The correct syntax would be SELECT School FROM schools WHERE County = 'Contra Costa'.\n\nBut the user's original query might have had a typo. For example, maybe they wrote SELECT schools.School instead of SELECT School. But the error message says \"no such column: schools\", which suggests that the query is trying to select a column named 'schools' from the 'schools' table. However, the actual column is 'School'.\n\nWait, maybe the user's query is missing the table alias or there's a missing comma. Let me check the original query again. The user wrote:\n\nSELECT from 'schools' but that column doesn't exist. Looking at the schema, the tables are 'frpm', 'satscores', and 'schools'. The query is selecting from 'schools' directly, but the error suggests that the column 'schools' isn't present. Wait, that's not possible because the table is called 'schools', so the column name should be 'School'.\n\nAh, perhaps the user's query is trying to select a column named 'schools' from the 'schools' table, but the actual column is 'School'. So the correct column name is 'School', not 'schools'. Therefore, the query should be:\n\nSELECT School FROM schools WHERE County = 'Contra Costa';",
+        "executes": false,
+        "error": "near \"from\": syntax error",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT s.School, s.CDSCode, s.NCESDist, s.NCESSchool, s.StatusType, s.County, s.District, s.School, s.Street, s.StreetAbr, s.City, s.Zip, s.State, s.MailStreet, s.MailStrAbr, s.MailCity, s.MailZip, s",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select School Name and Street from the schools table where (Enrollment (K-12) - Enrollment (Ages 5-17)) > 30.\n\nBut wait, what if Enrollment (Ages 5-17) is higher than Enrollment (K-12)? Then the difference would be negative. But the user says \"more than 30 difference\", so maybe they mean the absolute value? But the hint says the difference is calculated as Enrollment (K-12) - Enrollment (Ages 5-17). So, the user is probably expecting that exact calculation. So, if the difference is positive and greater than 30, then include it. If the difference is negative, even if the absolute value is more than 30, but the calculated value is negative, it's not included.\n\nSo, the condition is (Enrollment (K-12) - Enrollment (Ages 5-17)) > 30.\n\nNow, the schools table has the necessary columns. The School Name is in the schools table under School, and Street is under Street.\n\nSo",
+    "gold_sql": "SELECT T1.School, T1.Street FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.`Enrollment (K-12)` - T2.`Enrollment (Ages 5-17)` > 30",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "near \"and\": syntax error",
+    "error_category": "syntax_error",
+    "question": "List the names of schools with more than 30 difference in enrollements between K-12 and ages 5-17? Please also give the full street adress of the schools.",
+    "index": 23,
+    "initial_sql": "select School Name and Street from the schools table where (Enrollment (K-12) - Enrollment (Ages 5-17)) > 30.\n\nBut wait, what if Enrollment (Ages 5-17) is higher than Enrollment (K-12)? Then the difference would be negative. But the user says \"more than 30 difference\", so maybe they mean the absolute value? But the hint says the difference is calculated as Enrollment (K-12) - Enrollment (Ages 5-17). So, the user is probably expecting that exact calculation. So, if the difference is positive and greater than 30, then include it. If the difference is negative, even if the absolute value is more than 30, but the calculated value is negative, it's not included.\n\nSo, the condition is (Enrollment (K-12) - Enrollment (Ages 5-17)) > 30.\n\nNow, the schools table has the necessary columns. The School Name is in the schools table under School, and Street is under Street.\n\nSo",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT School, Street FROM schools WHERE (Enrollment (K-12) - Enrollment (Ages 5-17)) > 30;",
+        "executes": false,
+        "error": "near \"5\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT School, Street FROM schools WHERE (Enrollment (K-12) - Enrollment (Ages 5-17)) > 30;",
+        "executes": false,
+        "error": "near \"5\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT School, Street FROM schools WHERE (Enrollment (K-12) - Enrollment (Ages 5-17)) > 30;",
+        "executes": false,
+        "error": "near \"5\": syntax error",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "select School Name and Street from the schools table where (Enrollment (K-12) - Enrollment (Ages 5-17)) > 30.\n\nBut wait, what if Enrollment (Ages 5-17) is higher than Enrollment (K-12)? Then the difference would be negative. But the user says \"more than 30 difference\", so maybe they mean the absolute value? But the hint says the difference is calculated as Enrollment (K-12) - Enrollment (Ages 5-17). So, the user is probably expecting that exact calculation. So, if the difference is positive and greater than 30, then include it. If the difference is negative, even if the absolute value is more than 30, but the calculated value is negative, it's not included.\n\nSo, the condition is (Enrollment (K-12) - Enrollment (Ages 5-17)) > 30.\n\nNow, the schools table has the necessary columns. The School Name is in the schools table under School, and Street is under Street.\n\nSo",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the schools where the percent eligible for free meals is >0.1, and then look at the satscores table for the average scores. But the question is a bit ambiguous. However, the user might be referring to the average scores. So, the query would need to join the schools and satscores tables on CDSCode, filter the schools where the percent eligible is >0.1, and then check if any of the average scores (like AvgScrRead, AvgScrMath, etc.) are >=1500. But the question says \"test takers\", which might imply individual test takers, but since the data might not have that, maybe the average is acceptable.\n\nSo the steps are:\n\n1. Join schools and satscores on CDSCode.\n2. Filter schools where Percent (%) Eligible",
+    "gold_sql": "SELECT T2.`School Name` FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE CAST(T2.`Free Meal Count (K-12)` AS REAL) / T2.`Enrollment (K-12)` > 0.1 AND T1.NumGE1500 > 0",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "Give the names of the schools with the percent eligible for free meals in K-12 is more than 0.1 and test takers whose test score is greater than or equal to 1500?",
+    "index": 24,
+    "initial_sql": "select the schools where the percent eligible for free meals is >0.1, and then look at the satscores table for the average scores. But the question is a bit ambiguous. However, the user might be referring to the average scores. So, the query would need to join the schools and satscores tables on CDSCode, filter the schools where the percent eligible is >0.1, and then check if any of the average scores (like AvgScrRead, AvgScrMath, etc.) are >=1500. But the question says \"test takers\", which might imply individual test takers, but since the data might not have that, maybe the average is acceptable.\n\nSo the steps are:\n\n1. Join schools and satscores on CDSCode.\n2. Filter schools where Percent (%) Eligible",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT s.School, s.Percent (%) Eligible Free (K-12), sc.AvgScrRead, sc.AvgScrMath, sc.AvgScrWrite\nFROM schools s\nJOIN satscores sc ON s.CDSCode = sc.cds\nWHERE s.Percent (%) Eligible Free (K-12) > 0.1\nAND sc.AvgScrRead >= 1500\nOR sc.AvgScrMath >= 1500\nOR sc.A",
+        "executes": false,
+        "error": "near \"(\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT s.School, s.Percent (%) Eligible Free (K-12), sc.AvgScrRead, sc.AvgScrMath, sc.AvgScrWrite\nFROM schools s\nJOIN satscores sc ON s.CDSCode = sc.cds\nWHERE s.Percent (%) Eligible Free (K-12) > 0.1\nAND (sc.AvgScrRead >= 1500 OR sc.AvgScrMath >= 1500 OR sc.AvgScrWrite >= 1500)",
+        "executes": false,
+        "error": "near \"(\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "",
+    "gold_sql": "SELECT T1.sname, T2.`Charter Funding Type` FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T2.`District Name` LIKE 'Riverside%' GROUP BY T1.sname, T2.`Charter Funding Type` HAVING CAST(SUM(T1.AvgScrMath) AS REAL) / COUNT(T1.cds) > 400",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?",
+    "index": 25,
+    "initial_sql": "",
+    "correction_attempts": [],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "",
+    "gold_sql": "SELECT T1.`School Name`, T2.Street, T2.City, T2.State, T2.Zip FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Monterey' AND T1.`Free Meal Count (Ages 5-17)` > 800 AND T1.`School Type` = 'High Schools (Public)'",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "State the names and full communication address of high schools in Monterey which has more than 800 free or reduced price meals for ages 15-17?",
+    "index": 26,
+    "initial_sql": "",
+    "correction_attempts": [],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the average of AvgScrWrite from satscores where the school meets the criteria, and then join with schools to get the school names and communication numbers.",
+    "gold_sql": "SELECT T2.School, T1.AvgScrWrite, T2.Phone FROM schools AS T2 LEFT JOIN satscores AS T1 ON T2.CDSCode = T1.cds WHERE strftime('%Y', T2.OpenDate) > '1991' OR strftime('%Y', T2.ClosedDate) < '2000'",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "near \"of\": syntax error",
+    "error_category": "syntax_error",
+    "question": "What is the average score in writing for the schools that were opened after 1991 or closed before 2000? List the school names along with the score. Also, list the communication number of the schools if there is any.",
+    "index": 27,
+    "initial_sql": "select the average of AvgScrWrite from satscores where the school meets the criteria, and then join with schools to get the school names and communication numbers.",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "select the average of AvgScrWrite from satscores where the school meets the criteria, and then join with schools to get the school names and communication numbers.\" Then they tried to join tables and select the school names and communication numbers.\n\nThe error is near \"of\" in the WHERE clause. Wait, the original query might have had a typo or incorrect syntax. Let me check the original query again. The user wrote \"where the school meets the criteria\" but maybe the actual query had a part like \"where schools.OpenDate > '1991-01-01' or schools.ClosedDate < '2000-01-01'\" but with a typo.\n\nWait, the error message is about \"of\" being a syntax error. Maybe the user used \"of\" in a place where it's not allowed. For example, in the WHERE clause, maybe they used \"of\" as a keyword. But in SQL, \"of\" is not a standard keyword. Wait, but in the original query, the user might have written something like \"where schools.OpenDate of '1991-01-01'\" which is invalid. So the error is because \"of\" is not a valid keyword in SQL.\n\nSo the problem is that the WHERE clause is using \"of\" incorrectly. The user probably intended to compare dates, but used \"of\" instead of \"between\" or \"greater than\" etc.\n\nSo the corrected query should use proper comparison operators. Also, the user needs to join the satscores and schools tables, and select the school names and communication numbers.\n\nSo the steps are:\n\n1. Identify the correct columns and tables. The satscores table has AvgScrWrite, and the schools table has CommunicationNumber (assuming that's the column name). Wait, looking at the schema for schools, there's a column called \"Communication Number\" (probably with a space, but in the schema it's written as \"Communication Number\" with a space). But in the schema, the column is named \"Communication Number\" with a space. In SQL, column names with spaces need backticks.\n\nSo the correct column names would be `Communication Number` and `OpenDate`, `ClosedDate`.\n\nSo the original query had a mistake in the WHERE clause using \"of\" instead of comparing dates. Also, the user might have missed joining the tables properly.\n\nSo the corrected query would involve joining satscores and schools on the cds column, then filtering the schools based on their OpenDate and ClosedDate, then selecting the average writing score and the school name and communication number.\n\nSo the corrected SQL would be:\n\nSELECT s.School, s.Communication Number, AVG(sats.AvgScrWrite) AS AvgWritingScore\nFROM satscores sats\nJOIN schools s ON s.cds = sats.cds\nWHERE s.OpenDate > '1991-01-01' OR s.ClosedDate < '2000-01-01'\nGROUP BY s.School;",
+        "executes": false,
+        "error": "near \"of\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT s.School, s.`Communication Number`, AVG(sats.AvgScrWrite) AS AvgWritingScore  \nFROM satscores sats  \nJOIN schools s ON s.cds = sats.cds  \nWHERE s.OpenDate > '1991-01-01' OR s.ClosedDate < '2000-01-01'  \nGROUP BY s.School;",
+        "executes": false,
+        "error": "no such column: s.Communication Number",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT s.School, s.Phone, AVG(sats.AvgScrWrite) AS AvgWritingScore  \nFROM satscores sats  \nJOIN schools s ON s.cds = sats.cds  \nWHERE s.OpenDate > '1991-01-01' OR s.ClosedDate < '2000-01-01'  \nGROUP BY s.School;",
+        "executes": false,
+        "error": "no such column: s.cds",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "select the average of AvgScrWrite from satscores where the school meets the criteria, and then join with schools to get the school names and communication numbers.",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select schools where their difference is above the average.\n\nBut how to compute the average? Let's think.\n\nFirst, calculate the difference for each school, then aggregate to find the average. Then, compare each school's difference to that average.\n\nSo, the SQL steps:\n\n- Join schools and frpm on CDSCode.\n\n- Calculate the difference (Enrollment_K12 -",
+    "gold_sql": "SELECT T2.School, T2.DOC FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.FundingType = 'Locally funded' AND (T1.`Enrollment (K-12)` - T1.`Enrollment (Ages 5-17)`) > (SELECT AVG(T3.`Enrollment (K-12)` - T3.`Enrollment (Ages 5-17)`) FROM frpm AS T3 INNER JOIN schools AS T4 ON T3.CDSCode = T4.CDSCode WHERE T4.FundingType = 'Locally funded')",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "Consider the average difference between K-12 enrollment and 15-17 enrollment of schools that are locally funded, list the names and DOC type of schools which has a difference above this average.",
+    "index": 28,
+    "initial_sql": "select schools where their difference is above the average.\n\nBut how to compute the average? Let's think.\n\nFirst, calculate the difference for each school, then aggregate to find the average. Then, compare each school's difference to that average.\n\nSo, the SQL steps:\n\n- Join schools and frpm on CDSCode.\n\n- Calculate the difference (Enrollment_K12 -",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT schools.School, schools.DOCType\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE (frpm.Enrollment_K12 - frpm.Enrollment_Ages_5_17) > (\n    SELECT AVG(frpm.Enrollment_K12 - frpm.Enrollment_Ages_5_17)\n    FROM schools\n    JOIN frpm ON schools.CDSCode = frpm.CDSCode\n    WHERE schools.FundingType = 'Locally Funded'\n);",
+        "executes": false,
+        "error": "no such column: frpm.Enrollment_K12",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT schools.School, schools.DOCType\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE (frpm.`Enrollment (K-12)` - frpm.`Enrollment (Ages 5-17)`) > (\n    SELECT AVG(frpm.`Enrollment (K-12)` - frpm.`Enrollment (Ages 5-17)`)\n    FROM schools\n    JOIN frpm ON schools.CDSCode = frpm.CDSCode\n    WHERE schools.FundingType = 'Locally Funded'\n);",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT schools.School, schools.DOCType\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE (frpm.`Enrollment (K-12)` - frpm.`Enrollment (Ages 5-17)`) > (\n    SELECT AVG(frpm.`Enrollment (K-12)` - frpm.`Enrollment (Ages 5-17)`)\n    FROM schools\n    JOIN frpm ON schools.CDSCode = frpm.CDSCode\n    WHERE schools.FundingType = 'Locally Funded'\n);",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "SELECT OpenDate\nFROM schools\nWHERE enroll12 = (SELECT MAX(enroll12) FROM schools);",
+    "gold_sql": "SELECT T2.OpenDate FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode ORDER BY T1.`Enrollment (K-12)` DESC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "no such column: enroll12",
+    "error_category": "column_not_found",
+    "question": "When did the first-through-twelfth-grade school with the largest enrollment open?",
+    "index": 29,
+    "initial_sql": "SELECT OpenDate\nFROM schools\nWHERE enroll12 = (SELECT MAX(enroll12) FROM schools);",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "select OpenDate from schools where enroll12 equals the max enroll12. But there's an error: no such column enroll12.\n\nFirst, the error message says there's no column named enroll12. Looking at the schema, the schools table has a column called enroll12. Wait, but the error says no such column. Wait, maybe the column name is different? Let me check the schema again.\n\nLooking at the schools table: the columns include enroll12 INTEGER not null. So the column is named enroll12. But the error message says no such column. Hmm. Wait, maybe the user's SQL is using a different case? Like maybe it's enroll12 with a lowercase 'l'? Or maybe there's a typo in the column name.\n\nWait, the original SQL uses enroll12, but the error says no such column. But according to the schema, the schools table does have enroll12. So why the error? Maybe the column name is different. Let me check again.\n\nWait, the schema for schools says: enroll12 INTEGER not null. So the column is named enroll12. So the SQL should be correct. But the error is happening. Maybe the user's database has a different column name? Or maybe there's a typo in the SQL.\n\nWait, the user's SQL is SELECT OpenDate FROM schools WHERE enroll12 = (SELECT MAX(enroll12) FROM schools);",
+        "executes": false,
+        "error": "near \"equals\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT OpenDate FROM schools WHERE enroll12 = (SELECT MAX(enroll12) FROM schools);",
+        "executes": false,
+        "error": "no such column: enroll12",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "select OpenDate from schools where enroll12 equals the max enroll12. But there's an error: no such column enroll12.\n\nFirst, the error message says there's no column named enroll12 in the schools table. Looking at the schema, the schools table has a column called enroll12. Wait, but the error says no such column. Wait, maybe the column name is different. Let me check the schema again.\n\nThe schools table has a column named enroll12. The user's query uses enroll12, but the error says no such column. Hmm. Wait, maybe the column is named differently. Let me check the schema again.\n\nLooking at the schools table's columns: yes, there's an enroll12 column. So why the error? Maybe the column is actually named something else. Wait, the user's query is selecting enroll12 from schools, but the error says no such column. That suggests that the column name in the schema is different. Wait, maybe the column is named enroll12 but the schema says it's enroll12? Wait, the user's schema shows enroll12 as a column in schools. So why the error?\n\nWait, maybe the user's query is using a different column name. Let me check the original question again. The question is about the enrollment of first-through-twelfth-grade schools. The schools table has an enroll12 column, which is supposed to be the enrollment for K-12. But the user's query is using enroll12, which exists. But the error says no such column. That's confusing.\n\nWait, maybe the column is named enroll12 but the schema says it's enroll12? Or maybe there's a typo. Let me check the schema again. The schools table's columns include enroll12. So the column exists. Then why the error? Maybe the user's query is correct, but the error is elsewhere. Wait, the error message is \"no such column: enroll12\". That suggests that the column doesn't exist. But according to the schema, it does. So maybe there's a mistake in the schema? Or maybe the user's query is incorrect.\n\nWait, maybe the column is named enroll12 but the schema says it's enroll12. Wait, the user's schema shows enroll12 as a column in schools. So the column exists. Then why the error? Maybe the user's query is correct, but the error is in another part. Wait, maybe the user's query is correct, but the error is in the database. But the error message is from the SQL execution, so the column must not exist. But according to the schema, it does. So there's a contradiction here.\n\nAlternatively, maybe the user's query is using a different column name. Let me check the original query again. The user's query is SELECT OpenDate FROM schools WHERE enroll12 = (SELECT MAX(enroll12) FROM schools);",
+        "executes": false,
+        "error": "near \"equals\": syntax error",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT OpenDate\nFROM schools\nWHERE enroll12 = (SELECT MAX(enroll12) FROM schools);",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the cities from the schools table where those enrollments are the lowest.\n\nWait, but how do I handle the sorting? The top 5 lowest would be the smallest values. So I need to order by Enrollment (K-12) in ascending order and take the first 5 rows. Then, get the City from the schools table for those rows.\n\nBut I need to make sure that the enrollment numbers are correctly filtered. The frpm table has the enrollment for each school, so joining on CDSCode should get the correct data.\n\nSo the SQL query would involve selecting the City from schools, joining with frpm on CDSCode, filtering where the Enrollment (K-12) is not null (since some fields might be null), ordering by Enrollment (K-12) in ascending order, and limiting to 5 rows. Then, selecting the City from those rows.\n\nWait, but the user wants the top 5 lowest enrollments. So ordering by Enrollment (K-12) ASC will put the lowest first. Then, taking the first 5 rows. But how to get the city names? The schools table has the City column, so that's straightforward.\n\nSo the query would be:\n\nSELECT schools.City\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE frpm.Enrollment (K-12) IS NOT NULL\nORDER BY frpm.Enrollment (K-12) ASC\nLIMIT 5;",
+    "gold_sql": "SELECT T2.City FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode GROUP BY T2.City ORDER BY SUM(T1.`Enrollment (K-12)`) ASC LIMIT 5",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "Which cities have the top 5 lowest enrollment number for students in grades 1 through 12?",
+    "index": 30,
+    "initial_sql": "select the cities from the schools table where those enrollments are the lowest.\n\nWait, but how do I handle the sorting? The top 5 lowest would be the smallest values. So I need to order by Enrollment (K-12) in ascending order and take the first 5 rows. Then, get the City from the schools table for those rows.\n\nBut I need to make sure that the enrollment numbers are correctly filtered. The frpm table has the enrollment for each school, so joining on CDSCode should get the correct data.\n\nSo the SQL query would involve selecting the City from schools, joining with frpm on CDSCode, filtering where the Enrollment (K-12) is not null (since some fields might be null), ordering by Enrollment (K-12) in ascending order, and limiting to 5 rows. Then, selecting the City from those rows.\n\nWait, but the user wants the top 5 lowest enrollments. So ordering by Enrollment (K-12) ASC will put the lowest first. Then, taking the first 5 rows. But how to get the city names? The schools table has the City column, so that's straightforward.\n\nSo the query would be:\n\nSELECT schools.City\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE frpm.Enrollment (K-12) IS NOT NULL\nORDER BY frpm.Enrollment (K-12) ASC\nLIMIT 5;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "select from the schools table and join with frpm. But the error says \"near 'table': syntax error\". That suggests that the SQL parser is having trouble with the table name.\n\nLooking at the schema, the schools table is correctly named. The frpm table is also present. But maybe the query is using a table that doesn't exist or has a different name. Wait, the user's original query was:\n\nSELECT the cities from the schools table where those enrollments are the lowest.\n\nBut the error is about a table name. The user's corrected query mentioned joining on frpm, but maybe the table name is misspelled. Let me check the schema again.\n\nThe frpm table is created with the following columns: CDSCode, Academic Year, County Code, District Code, School Code, etc. The schools table has CDSCode, NCESDist, NCESSchool, etc. So the join between schools and frpm is correct on CDSCode.\n\nBut the error is about a table name. The original query might have a typo. Wait, the user's corrected query had:\n\nSELECT schools.City\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE frpm.Enrollment (K-12) IS NOT NULL\nORDER BY frpm.Enrollment (K-12) ASC\nLIMIT 5;",
+        "executes": false,
+        "error": "near \"from\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT schools.City\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE frpm.Enrollment (K-12) IS NOT NULL\nORDER BY frpm.Enrollment (K-12) ASC\nLIMIT 5;",
+        "executes": false,
+        "error": "near \"(\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT schools.City\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE frpm.`Enrollment (K-12)` IS NOT NULL\nORDER BY frpm.`Enrollment (K-12)` ASC\nLIMIT 5;",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT schools.City\nFROM schools\nJOIN frpm ON schools.CDSCode = frpm.CDSCode\nWHERE frpm.`Enrollment (K-12)` IS NOT NULL\nORDER BY frpm.`Enrollment (K-12)` ASC\nLIMIT 5;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the 10th and 11th rows.\n\nAlternatively, use a",
+    "gold_sql": "SELECT CAST(`Free Meal Count (K-12)` AS REAL) / `Enrollment (K-12)` FROM frpm ORDER BY `Enrollment (K-12)` DESC LIMIT 9, 2",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "unrecognized token: \"10th\"",
+    "error_category": "unrecognized_token",
+    "question": "What is the eligible free rate of the 10th and 11th schools with the highest enrolment for students in grades 1 through 12?",
+    "index": 31,
+    "initial_sql": "select the 10th and 11th rows.\n\nAlternatively, use a",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "select the rows where the eligible free rate is the highest.\n\nWait, but the question says \"the 10th and 11th schools with the highest enrolment\". So maybe we need to get the top 10 schools, then take the 10th and 11th. But the exact query would involve ordering by enrolment, then using LIMIT 20 to get the top 20, then selecting the 10th and 11th rows. However, the user might want the 10th and 11th schools in terms of enrolment, not the 10th and 11th rows.\n\nAlternatively, maybe the user intended to use a subquery to get the top 20 schools by enrolment, then select the 10th and 11th from that list. But the error was about \"10th\" being an unrecognized token, so the original query probably had something like SELECT * FROM schools ORDER BY enrolment LIMIT 10, then SELECT * FROM schools ORDER BY enrolment LIMIT 11, but that's not correct.\n\nThe correct SQL would involve ordering by enrolment descending, then using LIMIT 20 to get the top 20 schools, then selecting the 10th and 11th rows. But the exact query would need to use a subquery or a window function.\n\nWait, the user's original query was \"select the 10th and 11th rows.\" But the error was about \"10th\" being an unrecognized token. So the correct approach is to use a subquery to get the top 20 schools by enrolment, then select the 10th and 11th rows from that list.\n\nSo the corrected SQL would be something like:\n\nSELECT * FROM (\n    SELECT *, ROW_NUMBER() OVER (ORDER BY enrolment DESC) as rank\n    FROM schools\n    ORDER BY enrolment DESC\n) tmp\nWHERE rank BETWEEN 10 AND 11;",
+        "executes": false,
+        "error": "near \"eligible\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT * FROM (\n    SELECT *, ROW_NUMBER() OVER (ORDER BY enroll12 DESC) as rank\n    FROM schools\n) tmp\nWHERE rank BETWEEN 10 AND 11;",
+        "executes": false,
+        "error": "no such column: enroll12",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT * FROM (\n    SELECT *, ROW_NUMBER() OVER (ORDER BY enroll12 DESC) as rank\n    FROM schools\n) tmp\nWHERE rank BETWEEN 10 AND 11;",
+        "executes": false,
+        "error": "no such column: enroll12",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "select the 10th and 11th rows.\n\nAlternatively, use a",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "",
+    "gold_sql": "SELECT CAST(T1.`FRPM Count (K-12)` AS REAL) / T1.`Enrollment (K-12)` FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.SOC = 66 ORDER BY T1.`FRPM Count (K-12)` DESC LIMIT 5",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "What is the eligible free or reduced price meal rate for the top 5 schools in grades 1-12 with the highest free or reduced price meal count of the schools with the ownership code 66?",
+    "index": 32,
+    "initial_sql": "",
+    "correction_attempts": [],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the school's website and name.\n\nWait, but the 'Enrollment (Ages 5-17)' is a REAL field. So, the conditions would be:\n\nFreeMealCount (K-12) >= 1900 AND <= 2000\n\nEnrollment (Ages 5-17) >= 1900 AND <= 2000\n\nBut the user might have meant the count of students, so the enrollment numbers. So, the query would be:\n\nSELECT s.Website, s.School\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.FreeMealCountK12 BETWEEN 1900 AND 2000\nAND f.EnrollmentAges",
+    "gold_sql": "SELECT T2.Website, T1.`School Name` FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.`Free Meal Count (Ages 5-17)` BETWEEN 1900 AND 2000 AND T2.Website IS NOT NULL",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "near \"'s website and name.\n\nWait, but the '\": syntax error",
+    "error_category": "syntax_error",
+    "question": "If there are any, what are the websites address of the schools with a free meal count of 1,900-2,000 to students aged 5-17? Include the name of the school.",
+    "index": 33,
+    "initial_sql": "select the school's website and name.\n\nWait, but the 'Enrollment (Ages 5-17)' is a REAL field. So, the conditions would be:\n\nFreeMealCount (K-12) >= 1900 AND <= 2000\n\nEnrollment (Ages 5-17) >= 1900 AND <= 2000\n\nBut the user might have meant the count of students, so the enrollment numbers. So, the query would be:\n\nSELECT s.Website, s.School\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.FreeMealCountK12 BETWEEN 1900 AND 2000\nAND f.EnrollmentAges",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT the school's website and name.\n\nBut the error message mentions a syntax error near \"'s website and name.\" So, the issue is probably with the way the columns are referenced. The user mentioned that the website and school name are in the schools table, but they might have used incorrect column names.\n\nLooking at the schema, the schools table has columns like 'Website' and 'School'. The error message suggests that the query is trying to reference a column that's not properly quoted. In SQLite, if a column name has a space or special character, it needs to be enclosed in backticks. However, in the original query, they might have used the wrong column names.\n\nThe user's attempt to write the query included the columns as 'Website' and 'School', which are correct. But the error message mentions a syntax error near \"'s website and name.\" Wait, that part is confusing. Maybe the original query had a typo in the column names, like using 'Website' with a space, which would require backticks. But the user's attempt didn't have that.\n\nWait, the user's original query was:\n\nSELECT the school's website and name.\n\nBut the error is about \"'s website and name.\" That suggests that the query might have been written with a typo, like using 'Website' without backticks, but the actual column name is 'Website' with a space. Wait, no, the schema shows 'Website' as a column in the schools table. So if the query is written as SELECT Website, School, then that's correct. But the error message says there's a syntax error near \"'s website and name.\" Maybe the user forgot to add the backticks around the column names, but the original query didn't have them. Wait, the user's original query was written as:\n\nSELECT the school's website and name.\n\nBut the actual SQL would be:\n\nSELECT Website, School FROM schools WHERE ...;",
+        "executes": false,
+        "error": "near \"'s website and name.\n\nBut the error message mentions a syntax error near \"'\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT `Website`, `School` FROM schools WHERE Free Meal Count (K-12) BETWEEN 1900 AND 2000 AND Enrollment (Ages 5-17) BETWEEN 5 AND 17;",
+        "executes": false,
+        "error": "near \"Meal\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "select from schools, but the columns they're using (Free Meal Count (K-12) and Enrollment (Ages 5-17)) are in the frpm table, not the schools table. So the query is incorrect because it's trying to access columns that don't exist in the schools table.\n\nBut the original question is about schools with those values. So the user probably intended to join the schools table with the frpm table. But the original query is selecting from schools, which is wrong. So the error is that the columns are not in the schools table. But the user's query is written as SELECT ... FROM schools WHERE ... which is incorrect.\n\nBut the error message is about \"Meal\" in the column name. Wait, the original query has \"Free Meal Count (K-12)\" and \"Enrollment (Ages 5-17)\" in the WHERE clause. But the error is near \"Meal\", which suggests that the column name is \"Meal\" but it's not present. However, the user's query is using \"Free Meal Count (K-12)\" and \"Enrollment (Ages 5-17)\" which are in the frpm table. So the problem is that the query is trying to select from schools, but the columns are in frpm. So the query is incorrect because it's selecting from the wrong table.\n\nBut the error message says \"near 'Meal': syntax error\". Maybe the user's query has a typo in the column names. For example, if the actual column name is \"Free Meal Count (K-12)\" but the query uses \"Free Meal Count (K-12)\" with a space, but the database uses a different syntax. Wait, but the error is about \"Meal\" being a syntax error. So maybe the column name is \"Meal\" but it's not present. But the user's query is using \"Free Meal Count (K-12)\" which is a column in the frpm table. So the error is that the query is trying to access columns that don't exist in the schools table. But the user's query is written as SELECT ... FROM schools, which is wrong. So the error is that the columns are not in the",
+        "executes": false,
+        "error": "near \"from\": syntax error",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "select the school's website and name.\n\nWait, but the 'Enrollment (Ages 5-17)' is a REAL field. So, the conditions would be:\n\nFreeMealCount (K-12) >= 1900 AND <= 2000\n\nEnrollment (Ages 5-17) >= 1900 AND <= 2000\n\nBut the user might have meant the count of students, so the enrollment numbers. So, the query would be:\n\nSELECT s.Website, s.School\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.FreeMealCountK12 BETWEEN 1900 AND 2000\nAND f.EnrollmentAges",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the Free Meal Count and Enrollment from frpm, divide them, and get the result.\n\nBut I need to make sure that the school name is exactly 'Kacey Gibson' and that the CDSCode is correctly linked. Also, check if the frpm table has the necessary columns. The frpm table has Free Meal Count (Ages 5-17) and Enrollment (Ages 5-17). So the calculation is straightforward.\n\nSo the SQL query would be a JOIN between schools and frpm on CDSCode, filter where School = 'Kacey Gibson', then compute the rate. But since the user wants the rate, maybe they need the actual value, not the calculation. Wait, the question says \"What is the free rate...\", so the answer is the result of the division. So the SQL should compute that.\n\nBut how to structure the query. Let's think:\n\nSELECT (Free Meal Count (Ages 5-17) / Enrollment (Ages 5-17)) AS FreeRate\nFROM frpm\nJOIN schools ON frpm.CDSCode = schools.CDSCode\nWHERE schools.School = 'Kacey Gibson';",
+    "gold_sql": "SELECT CAST(T2.`Free Meal Count (Ages 5-17)` AS REAL) / T2.`Enrollment (Ages 5-17)` FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.AdmFName1 = 'Kacey' AND T1.AdmLName1 = 'Gibson'",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "What is the free rate for students between the ages of 5 and 17 at the school run by Kacey Gibson?",
+    "index": 34,
+    "initial_sql": "select the Free Meal Count and Enrollment from frpm, divide them, and get the result.\n\nBut I need to make sure that the school name is exactly 'Kacey Gibson' and that the CDSCode is correctly linked. Also, check if the frpm table has the necessary columns. The frpm table has Free Meal Count (Ages 5-17) and Enrollment (Ages 5-17). So the calculation is straightforward.\n\nSo the SQL query would be a JOIN between schools and frpm on CDSCode, filter where School = 'Kacey Gibson', then compute the rate. But since the user wants the rate, maybe they need the actual value, not the calculation. Wait, the question says \"What is the free rate...\", so the answer is the result of the division. So the SQL should compute that.\n\nBut how to structure the query. Let's think:\n\nSELECT (Free Meal Count (Ages 5-17) / Enrollment (Ages 5-17)) AS FreeRate\nFROM frpm\nJOIN schools ON frpm.CDSCode = schools.CDSCode\nWHERE schools.School = 'Kacey Gibson';",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT `Free Meal Count (Ages 5-17)` / `Enrollment (Ages 5-17)` AS FreeRate\nFROM frpm\nJOIN schools ON frpm.CDSCode = schools.CDSCode\nWHERE schools.School = 'Kacey Gibson';",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT `Free Meal Count (Ages 5-17)` / `Enrollment (Ages 5-17)` AS FreeRate\nFROM frpm\nJOIN schools ON frpm.CDSCode = schools.CDSCode\nWHERE schools.School = 'Kacey Gibson';",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "SELECT s.AdmEmail1\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.Charter School (Y/N) = 1\nORDER BY f.Enrollment (K-12) ASC\nLIMIT 1;",
+    "gold_sql": "SELECT T2.AdmEmail1 FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.`Charter School (Y/N)` = 1 ORDER BY T1.`Enrollment (K-12)` ASC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "near \"School\": syntax error",
+    "error_category": "syntax_error",
+    "question": "What is the administrator's email address of the chartered school with the fewest students enrolled in grades 1 through 12?",
+    "index": 35,
+    "initial_sql": "SELECT s.AdmEmail1\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.Charter School (Y/N) = 1\nORDER BY f.Enrollment (K-12) ASC\nLIMIT 1;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT s.AdmEmail1\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.Charter School (Y/N) = 1\nORDER BY f.Enrollment (K-12) ASC\nLIMIT 1;",
+        "executes": false,
+        "error": "near \"School\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT s.AdmEmail1\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.Charter School (Y/N) = 1\nORDER BY f.Enrollment (K-12) ASC\nLIMIT 1;",
+        "executes": false,
+        "error": "near \"School\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT s.AdmEmail1\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.Charter School (Y/N) = 1\nORDER BY f.Enrollment (K-12) ASC\nLIMIT 1;",
+        "executes": false,
+        "error": "near \"School\": syntax error",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT s.AdmEmail1\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nWHERE f.Charter School (Y/N) = 1\nORDER BY f.Enrollment (K-12) ASC\nLIMIT 1;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the CDSCode from schools, then join with satscores, filter the SAT scores, find the max enroll12, then get the administrators' names.\n\nBut how to handle the maximum enroll12? Maybe use a sub",
+    "gold_sql": "SELECT T2.AdmFName1, T2.AdmLName1, T2.AdmFName2, T2.AdmLName2, T2.AdmFName3, T2.AdmLName3 FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode ORDER BY T1.NumGE1500 DESC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "Under whose administration is the school with the highest number of students scoring 1500 or more on the SAT? Indicate their full names.",
+    "index": 36,
+    "initial_sql": "select the CDSCode from schools, then join with satscores, filter the SAT scores, find the max enroll12, then get the administrators' names.\n\nBut how to handle the maximum enroll12? Maybe use a sub",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT s.SchoolName, s.AdmFName1, s.AdmLName1  \nFROM schools s  \nJOIN satscores sc ON s.CDSCode = sc.cds  \nWHERE sc.AvgScrRead >= 1500  \nAND sc.enroll12 = (SELECT MAX(enroll12) FROM satscores WHERE AvgScrRead >= 1500);",
+        "executes": false,
+        "error": "no such column: s.SchoolName",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT s.School, s.AdmFName1, s.AdmLName1  \nFROM schools s  \nJOIN satscores sc ON s.CDSCode = sc.cds  \nWHERE sc.AvgScrRead >= 1500  \nAND sc.enroll12 = (SELECT MAX(enroll12) FROM satscores WHERE AvgScrRead >= 1500);",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT s.School, s.AdmFName1, s.AdmLName1  \nFROM schools s  \nJOIN satscores sc ON s.CDSCode = sc.cds  \nWHERE sc.AvgScrRead >= 1500  \nAND sc.enroll12 = (SELECT MAX(enroll12) FROM satscores WHERE AvgScrRead >= 1500);",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the school with the lowest rate. Since it's a rate, the lowest would be the minimum value. So, order by excellence rate ascending and limit 1. \n\nBut wait, there might be multiple schools with the same lowest rate. The question says \"the school\", so maybe it's okay to just get the first one. \n\nAlso, the complete address includes Street, City, State, Zip. So, the final answer should include those fields from the schools table.\n\nPutting it all together: \n\nJoin schools and satscores on cds. Calculate the excellence rate. Order by that rate, limit 1. Select the relevant fields.\n\nNow, writing the SQL. \n\nSELECT s.Street, s.City, s.State, s.Zip \nFROM schools s \nJOIN satscores sc ON s.CDSCode = sc.cds \nORDER BY (sc.NumGE1500 / sc.NumTstTakr) ASC \nLIMIT 1;",
+    "gold_sql": "SELECT T2.Street, T2.City, T2.State, T2.Zip FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode ORDER BY CAST(T1.NumGE1500 AS REAL) / T1.NumTstTakr ASC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": true,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "What is the complete address of the school with the lowest excellence rate? Indicate the Street, City, Zip and State.",
+    "index": 37,
+    "initial_sql": "select the school with the lowest rate. Since it's a rate, the lowest would be the minimum value. So, order by excellence rate ascending and limit 1. \n\nBut wait, there might be multiple schools with the same lowest rate. The question says \"the school\", so maybe it's okay to just get the first one. \n\nAlso, the complete address includes Street, City, State, Zip. So, the final answer should include those fields from the schools table.\n\nPutting it all together: \n\nJoin schools and satscores on cds. Calculate the excellence rate. Order by that rate, limit 1. Select the relevant fields.\n\nNow, writing the SQL. \n\nSELECT s.Street, s.City, s.State, s.Zip \nFROM schools s \nJOIN satscores sc ON s.CDSCode = sc.cds \nORDER BY (sc.NumGE1500 / sc.NumTstTakr) ASC \nLIMIT 1;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT s.Street, s.City, s.State, s.Zip \nFROM schools s \nJOIN satscores sc ON s.CDSCode = sc.cds \nORDER BY (sc.NumGE1500 / sc.NumTstTakr) ASC \nLIMIT 1;",
+        "executes": true,
+        "error": null,
+        "exec_match": true
+      }
+    ],
+    "final_sql": "SELECT s.Street, s.City, s.State, s.Zip \nFROM schools s \nJOIN satscores sc ON s.CDSCode = sc.cds \nORDER BY (sc.NumGE1500 / sc.NumTstTakr) ASC \nLIMIT 1;",
+    "corrected": true,
+    "corrected_at_attempt": 1
+  },
+  {
+    "pred_sql": "SELECT schools.Website\nFROM schools\nJOIN satscores",
+    "gold_sql": "SELECT T2.Website FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.NumTstTakr BETWEEN 2000 AND 3000 AND T2.County = 'Los Angeles'",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "What are the webpages for the Los Angeles County school that has between 2,000 and 3,000 test takers?",
+    "index": 38,
+    "initial_sql": "SELECT schools.Website\nFROM schools\nJOIN satscores",
+    "correction_attempts": [],
+    "final_sql": "SELECT schools.Website\nFROM schools\nJOIN satscores",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select enroll12 from schools where County = 'Fresno' and OpenDate is between those dates. Then average that value.\n\nBut wait, the question says \"average number of test takers\". The satscores table has enroll12, which is the number of test takers. So the query should join schools with satscores on cds, filter the schools as per the conditions, then average enroll12.\n\nBut wait, the satscores table has a foreign key to schools (cds). So we need to join the two tables on cds. So the SQL would be:\n\nSELECT AVG(satscores.enroll12)\nFROM satscores\nJOIN schools ON satscores.cds = schools.CDSCode\nWHERE schools.County = 'Fresno'\nAND schools.OpenDate BETWEEN '1980-01-01' AND '1980-12-31';",
+    "gold_sql": "SELECT AVG(T1.NumTstTakr) FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE strftime('%Y', T2.OpenDate) = '1980' AND T2.County = 'Fresno'",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "What is the average number of test takers from Fresno schools that opened between 1/1/1980 and 12/31/1980?",
+    "index": 39,
+    "initial_sql": "select enroll12 from schools where County = 'Fresno' and OpenDate is between those dates. Then average that value.\n\nBut wait, the question says \"average number of test takers\". The satscores table has enroll12, which is the number of test takers. So the query should join schools with satscores on cds, filter the schools as per the conditions, then average enroll12.\n\nBut wait, the satscores table has a foreign key to schools (cds). So we need to join the two tables on cds. So the SQL would be:\n\nSELECT AVG(satscores.enroll12)\nFROM satscores\nJOIN schools ON satscores.cds = schools.CDSCode\nWHERE schools.County = 'Fresno'\nAND schools.OpenDate BETWEEN '1980-01-01' AND '1980-12-31';",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT AVG(satscores.enroll12)  \nFROM satscores  \nJOIN schools ON satscores.cds = schools.CDSCode  \nWHERE schools.County = 'Fresno'  \n  AND schools.OpenDate BETWEEN '1980-01-01' AND '1980-12-31';",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT AVG(satscores.enroll12)  \nFROM satscores  \nJOIN schools ON satscores.cds = schools.CDSCode  \nWHERE schools.County = 'Fresno'  \n  AND schools.OpenDate BETWEEN '1980-01-01' AND '1980-12-31';",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "",
+    "gold_sql": "SELECT T2.Phone FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.District = 'Fresno Unified' AND T1.AvgScrRead IS NOT NULL ORDER BY T1.AvgScrRead ASC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "What is the telephone number for the school with the lowest average score in reading in Fresno Unified?",
+    "index": 40,
+    "initial_sql": "",
+    "correction_attempts": [],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the school names from the schools table where their county is the same as the county in the grouped result, and their average reading score is in the top 5.\n\nBut wait, the problem says \"virtual schools that are among the top 5 in their respective counties\". So, for each virtual school, we need to check if it's in the top 5 of its county's average reading scores.\n\nSo, the approach would be:\n\n- Join schools and satscores on CDSCode.\n\n- Filter for Virtual = 'F'.\n\n- For each school, get the county and average reading score.\n\n- Group by county, order by average reading score descending, limit to 5.\n\n- Then, select the school names from schools where their county is in that group and their average reading score is in the top 5.\n\nBut how to structure the SQL query?\n\nLet me think. The main query would need to:\n\n- Join schools and satscores on CDSCode.\n\n- Filter for Virtual = 'F' and AvgScrRead is not null.\n\n- Then, group by County, order by AvgScrRead DESC, limit 5.\n\nBut then, how to get the school names? The schools table has School Name, so we need to join back.",
+    "gold_sql": "SELECT School FROM (SELECT T2.School,T1.AvgScrRead, RANK() OVER (PARTITION BY T2.County ORDER BY T1.AvgScrRead DESC) AS rnk FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Virtual = 'F' ) ranked_schools WHERE rnk <= 5",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "List the names of virtual schools that are among the top 5 in their respective counties based on average reading scores.",
+    "index": 41,
+    "initial_sql": "select the school names from the schools table where their county is the same as the county in the grouped result, and their average reading score is in the top 5.\n\nBut wait, the problem says \"virtual schools that are among the top 5 in their respective counties\". So, for each virtual school, we need to check if it's in the top 5 of its county's average reading scores.\n\nSo, the approach would be:\n\n- Join schools and satscores on CDSCode.\n\n- Filter for Virtual = 'F'.\n\n- For each school, get the county and average reading score.\n\n- Group by county, order by average reading score descending, limit to 5.\n\n- Then, select the school names from schools where their county is in that group and their average reading score is in the top 5.\n\nBut how to structure the SQL query?\n\nLet me think. The main query would need to:\n\n- Join schools and satscores on CDSCode.\n\n- Filter for Virtual = 'F' and AvgScrRead is not null.\n\n- Then, group by County, order by AvgScrRead DESC, limit 5.\n\nBut then, how to get the school names? The schools table has School Name, so we need to join back.",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT s.School\nFROM schools s\nJOIN satscores sc ON s.CDSCode = sc.cds\nWHERE s.Virtual = 1\nGROUP BY s.County\nORDER BY sc.AvgScrRead DESC\nLIMIT 5;",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT s.School\nFROM schools s\nJOIN satscores sc ON s.CDSCode = sc.cds\nWHERE s.Virtual = 1\nGROUP BY s.County\nORDER BY sc.AvgScrRead DESC\nLIMIT 5;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "SELECT schools.EducationType\nFROM schools\nJOIN satscores ON schools.CDSCode = satscores.cds\nWHERE satscores.AvgScrMath = (SELECT MAX(AvgScrMath) FROM satscores);",
+    "gold_sql": "SELECT T2.EdOpsName FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode ORDER BY T1.AvgScrMath DESC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "no such column: schools.EducationType",
+    "error_category": "column_not_found",
+    "question": "What is the type of education offered in the school who scored the highest average in Math?",
+    "index": 42,
+    "initial_sql": "SELECT schools.EducationType\nFROM schools\nJOIN satscores ON schools.CDSCode = satscores.cds\nWHERE satscores.AvgScrMath = (SELECT MAX(AvgScrMath) FROM satscores);",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT schools.SchoolType\nFROM schools\nJOIN satscores ON schools.CDSCode = satscores.cds\nWHERE satscores.AvgScrMath = (SELECT MAX(AvgScrMath) FROM satscores);",
+        "executes": false,
+        "error": "no such column: schools.SchoolType",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT schools.SchoolType\nFROM schools\nJOIN satscores ON schools.CDSCode = satscores.cds\nWHERE satscores.AvgScrMath = (SELECT MAX(AvgScrMath) FROM satscores);",
+        "executes": false,
+        "error": "no such column: schools.SchoolType",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT schools.SchoolType\nFROM schools\nJOIN satscores ON schools.CDSCode = satscores.cds\nWHERE satscores.AvgScrMath = (SELECT MAX(AvgScrMath) FROM satscores);",
+        "executes": false,
+        "error": "no such column: schools.SchoolType",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT schools.EducationType\nFROM schools\nJOIN satscores ON schools.CDSCode = satscores.cds\nWHERE satscores.AvgScrMath = (SELECT MAX(AvgScrMath) FROM satscores);",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the county.\n\nBut wait, the question says \"the school with the lowest average score for all subjects\". So, the total average is the sum of the three subject averages. So, the query would be:\n\nSELECT s.County, SUM(satscores.AvgScrMath) AS total_math\nFROM schools s\nJOIN satscores ON s.CDSCode = satscores.cds\nGROUP BY s.CDSCode\nORDER BY SUM(satscores.AvgScrMath) ASC\nLIMIT 1;",
+    "gold_sql": "SELECT T1.AvgScrMath, T2.County FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath IS NOT NULL ORDER BY T1.AvgScrMath + T1.AvgScrRead + T1.AvgScrWrite ASC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "What is the average math score of the school with the lowest average score for all subjects, and in which county is it located?",
+    "index": 43,
+    "initial_sql": "select the county.\n\nBut wait, the question says \"the school with the lowest average score for all subjects\". So, the total average is the sum of the three subject averages. So, the query would be:\n\nSELECT s.County, SUM(satscores.AvgScrMath) AS total_math\nFROM schools s\nJOIN satscores ON s.CDSCode = satscores.cds\nGROUP BY s.CDSCode\nORDER BY SUM(satscores.AvgScrMath) ASC\nLIMIT 1;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT the county.\n\nBut the correct query they wrote was:\n\nSELECT s.County, SUM(satscores.AvgScrMath) AS total_math\nFROM schools s\nJOIN satscores ON s.CDSCode = satscores.cds\nGROUP BY s.CDSCode\nORDER BY SUM(satscores.AvgScrMath) ASC\nLIMIT 1;",
+        "executes": false,
+        "error": "near \".\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT the county. The error is near \".\", so maybe the query was missing a part of a column name. The original query they wrote was:\n\nSELECT s.County, SUM(satscores.AvgScrMath) AS total_math\nFROM schools s\nJOIN satscores ON s.CDSCode = satscores.cds\nGROUP BY s.CDSCode\nORDER BY SUM(satscores.AvgScrMath) ASC\nLIMIT 1;",
+        "executes": false,
+        "error": "near \".\": syntax error",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT s.County, SUM(satscores.AvgScrMath) AS total_math\nFROM schools s\nJOIN satscores ON s.CDSCode = satscores.cds\nGROUP BY s.CDSCode\nORDER BY SUM(satscores.AvgScrMath) ASC\nLIMIT 1;",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT s.County, SUM(satscores.AvgScrMath) AS total_math\nFROM schools s\nJOIN satscores ON s.CDSCode = satscores.cds\nGROUP BY s.CDSCode\nORDER BY SUM(satscores.AvgScrMath) ASC\nLIMIT 1;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "",
+    "gold_sql": "SELECT T1.AvgScrWrite, T2.City FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode ORDER BY T1.NumGE1500 DESC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "What is the average writing score of the school who has the highest number of test takers whose total SAT sscores are greater or equal to 1500? Indicate the city to where the school is situated.",
+    "index": 44,
+    "initial_sql": "",
+    "correction_attempts": [],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select the school's CDSCode, and then the average writing score from satscores. But the user wants the average writing score for each school. So, we need to group by CDSCode and calculate the average.\n\nSo the query would be:\n\nSELECT schools.CDSCode, AVG(satscores.AvgScrWrite) as AvgWritingScore\nFROM schools\nJOIN satscores ON schools.CDSCode = satscores.cds\nWHERE schools.AdmFName1 = 'Ricci' AND schools.AdmLName1 = 'Ulrich'\nGROUP BY schools.CDSCode;",
+    "gold_sql": "SELECT T2.School, T1.AvgScrWrite FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.AdmFName1 = 'Ricci' AND T2.AdmLName1 = 'Ulrich'",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "What is the average writing score of each of the schools managed by Ricci Ulrich? List the schools and the corresponding average writing scores.",
+    "index": 45,
+    "initial_sql": "select the school's CDSCode, and then the average writing score from satscores. But the user wants the average writing score for each school. So, we need to group by CDSCode and calculate the average.\n\nSo the query would be:\n\nSELECT schools.CDSCode, AVG(satscores.AvgScrWrite) as AvgWritingScore\nFROM schools\nJOIN satscores ON schools.CDSCode = satscores.cds\nWHERE schools.AdmFName1 = 'Ricci' AND schools.AdmLName1 = 'Ulrich'\nGROUP BY schools.CDSCode;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT schools.CDSCode, AVG(satscores.AvgScrWrite) as AvgWritingScore\nFROM schools\nJOIN satscores ON schools.CDSCode = satscores.cds\nWHERE schools.AdmFName1 = 'Ricci' AND schools.AdmLName1 = 'Ulrich'\nGROUP BY schools.CDSCode;",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT schools.CDSCode, AVG(satscores.AvgScrWrite) as AvgWritingScore\nFROM schools\nJOIN satscores ON schools.CDSCode = satscores.cds\nWHERE schools.AdmFName1 = 'Ricci' AND schools.AdmLName1 = 'Ulrich'\nGROUP BY schools.CDSCode;",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "SELECT s.State, SUM(s.Enrollment (K-12",
+    "gold_sql": "SELECT T2.School FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.DOC = 31 ORDER BY T1.`Enrollment (K-12)` DESC LIMIT 1",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": false,
+    "error": "near \"(\": syntax error",
+    "error_category": "syntax_error",
+    "question": "Which state special schools have the highest number of enrollees from grades 1 through 12?",
+    "index": 46,
+    "initial_sql": "SELECT s.State, SUM(s.Enrollment (K-12",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT s.State, SUM(s.`Enrollment (K-12`) AS TotalEnrollment FROM schools s GROUP BY s.State ORDER BY TotalEnrollment DESC;",
+        "executes": false,
+        "error": "no such column: s.Enrollment (K-12",
+        "exec_match": false
+      },
+      {
+        "attempt": 2,
+        "sql": "SELECT s.State, SUM(s.`Enrollment (K-12`) AS TotalEnrollment FROM schools s GROUP BY s.State ORDER BY TotalEnrollment DESC;",
+        "executes": false,
+        "error": "no such column: s.Enrollment (K-12",
+        "exec_match": false
+      },
+      {
+        "attempt": 3,
+        "sql": "SELECT s.State, SUM(s.`Enrollment (K-12`) AS TotalEnrollment FROM schools s GROUP BY s.State ORDER BY TotalEnrollment DESC;",
+        "executes": false,
+        "error": "no such column: s.Enrollment (K-12",
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT s.State, SUM(s.Enrollment (K-12",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "",
+    "gold_sql": "SELECT CAST(COUNT(School) AS REAL) / 12 FROM schools WHERE DOC = 52 AND County = 'Alameda' AND strftime('%Y', OpenDate) = '1980'",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "What is the monthly average number of schools that opened in Alameda County under the jurisdiction of the Elementary School District in 1980?",
+    "index": 47,
+    "initial_sql": "",
+    "correction_attempts": [],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "",
+    "gold_sql": "SELECT CAST(SUM(CASE WHEN DOC = 54 THEN 1 ELSE 0 END) AS REAL) / SUM(CASE WHEN DOC = 52 THEN 1 ELSE 0 END) FROM schools WHERE StatusType = 'Merged' AND County = 'Orange'",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": null,
+    "question": "What is the ratio of merged Unified School District schools in Orange County to merged Elementary School District schools?",
+    "index": 48,
+    "initial_sql": "",
+    "correction_attempts": [],
+    "final_sql": "",
+    "corrected": false,
+    "corrected_at_attempt": null
+  },
+  {
+    "pred_sql": "select all schools from schools where County is that county and StatusType is 'Closed', along with ClosedDate.\n\nBut how to handle the subquery? Let's think.\n\nFirst, find the max count:\n\nSELECT County, COUNT(*) as count\nFROM schools\nWHERE StatusType = 'Closed'\nGROUP BY County\nORDER BY count DESC\nLIMIT 1;",
+    "gold_sql": "SELECT DISTINCT County, School, ClosedDate FROM schools WHERE County = ( SELECT County FROM schools WHERE StatusType = 'Closed' GROUP BY County ORDER BY COUNT(School) DESC LIMIT 1 ) AND StatusType = 'Closed' AND school IS NOT NULL",
+    "db_id": "california_schools",
+    "exact_match": false,
+    "exec_match": false,
+    "pred_executes": true,
+    "error": null,
+    "error_category": "syntax_error",
+    "question": "Which different county has the most number of closed schools? Please provide the name of each school as well as the closure date.",
+    "index": 49,
+    "initial_sql": "select all schools from schools where County is that county and StatusType is 'Closed', along with ClosedDate.\n\nBut how to handle the subquery? Let's think.\n\nFirst, find the max count:\n\nSELECT County, COUNT(*) as count\nFROM schools\nWHERE StatusType = 'Closed'\nGROUP BY County\nORDER BY count DESC\nLIMIT 1;",
+    "correction_attempts": [
+      {
+        "attempt": 1,
+        "sql": "SELECT s.School, s.ClosedDate\nFROM schools s\nWHERE s.StatusType = 'Closed'\nAND s.County = (\n    SELECT County\n    FROM schools\n    WHERE StatusType = 'Closed'\n    GROUP BY County\n    ORDER BY COUNT(*) DESC\n    LIMIT 1\n);",
+        "executes": true,
+        "error": null,
+        "exec_match": false
+      }
+    ],
+    "final_sql": "SELECT s.School, s.ClosedDate\nFROM schools s\nWHERE s.StatusType = 'Closed'\nAND s.County = (\n    SELECT County\n    FROM schools\n    WHERE StatusType = 'Closed'\n    GROUP BY County\n    ORDER BY COUNT(*) DESC\n    LIMIT 1\n);",
+    "corrected": false,
+    "corrected_at_attempt": null
+  }
+]
