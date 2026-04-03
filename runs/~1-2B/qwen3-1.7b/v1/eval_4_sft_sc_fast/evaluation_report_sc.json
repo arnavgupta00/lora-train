@@ -1,0 +1,37 @@
+{
+  "total_examples": 300,
+  "n_samples": 3,
+  "temperature": 0.7,
+  "exact_match": 6,
+  "exact_match_pct": 2.0,
+  "execution_match": 61,
+  "execution_accuracy": 20.33,
+  "voting_stats": {
+    "voting_used": 256,
+    "fallback_used": 44,
+    "avg_confidence": 0.599,
+    "avg_num_groups": 1.45
+  },
+  "total_time_min": 29.41,
+  "examples_per_sec": 0.17,
+  "by_database": [
+    {
+      "db_id": "financial",
+      "total": 106,
+      "exec_match": 22,
+      "accuracy": 20.8
+    },
+    {
+      "db_id": "toxicology",
+      "total": 105,
+      "exec_match": 30,
+      "accuracy": 28.6
+    },
+    {
+      "db_id": "california_schools",
+      "total": 89,
+      "exec_match": 9,
+      "accuracy": 10.1
+    }
+  ]
+}

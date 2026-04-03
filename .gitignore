@@ -13,7 +13,9 @@ results/**/*.safetensors
 results/**/*.bin
 results/**/checkpoint-*/
 training/outputs/
-
+*/adapter/*
+**/*adapter/
+**/*adapter/**
 # ============================================
 # Large datasets (download separately or regenerate)
 # ============================================
@@ -37,6 +39,11 @@ data/training/t8/
 # ============================================
 experiments/
 
+runs/10-14B/qwen2.5-14b/qwen2.5-14b-instruct-lora-20260330_205025
+data/bird_eval_datasets
+runs/~7-8B/qwen2.5-7b/v1-3/qwen2.5-7b-t7-bird-20260331_193013
+runs/~7-8B/qwen2.5-7b/v4-usest8/qwen2.5-7b-t8-bird-20260401_134325
+runs/~7-8B/qwen2.5-7b/v4-usest8/qwen2.5-7b-t8-bird-20260401_134325
 # ============================================
 # Services (separate repos)
 # ============================================
