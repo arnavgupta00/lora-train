@@ -1,25 +1,47 @@
 #!/bin/bash
 # Cloudflare R2 Sync Script (using rclone for faster incremental sync)
-# Syncs workspace directory to/from R2
+# Syncs any directory to/from R2
 #
 # Usage:
-#   ./scripts/sync_to_r2.sh          # Upload/sync to R2
-#   ./scripts/sync_to_r2.sh pull     # Download/sync from R2
-#   ./scripts/sync_to_r2.sh setup    # Setup rclone config
+#   ./scripts/sync_to_r2.sh [MODE] [DIRECTORY]
+#
+# Modes:
+#   push/upload    Upload/sync to R2 (default)
+#   pull/download  Download/sync from R2
+#   setup          Setup rclone config
+#   list           List R2 contents
+#   check          Check sync status
+#
+# Examples:
+#   ./scripts/sync_to_r2.sh                      # Upload current project
+#   ./scripts/sync_to_r2.sh push /workspace      # Upload remote workspace
+#   ./scripts/sync_to_r2.sh push lora-train      # Upload just lora-train folder
+#   ./scripts/sync_to_r2.sh pull /workspace      # Download to remote workspace
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKSPACE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+DEFAULT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 RCLONE_REMOTE="r2"
-R2_PATH="$RCLONE_REMOTE:model-training/lm-workspace"
 
+# Parse arguments
 MODE="${1:-push}"
+WORKSPACE_DIR="${2:-$DEFAULT_DIR}"
+
+# Convert to absolute path
+if [[ ! "$WORKSPACE_DIR" = /* ]]; then
+    WORKSPACE_DIR="$(cd "$WORKSPACE_DIR" 2>/dev/null && pwd || echo "$PWD/$WORKSPACE_DIR")"
+fi
+
+# Generate R2 path based on directory name
+DIR_NAME="$(basename "$WORKSPACE_DIR")"
+R2_PATH="$RCLONE_REMOTE:model-training/$DIR_NAME"
 
 echo "============================================================"
 echo "Cloudflare R2 Workspace Sync (via rclone)"
 echo "============================================================"
-echo "Workspace: $WORKSPACE_DIR"
+echo "Local Directory: $WORKSPACE_DIR"
+echo "R2 Path: $R2_PATH"
 echo "Mode: $MODE"
 echo "============================================================"
 echo ""
@@ -78,10 +100,17 @@ EOF
     
     echo ""
     echo "Now you can sync with:"
-    echo "  ./scripts/sync_to_r2.sh          # Upload"
-    echo "  ./scripts/sync_to_r2.sh pull     # Download"
+    echo "  ./scripts/sync_to_r2.sh                     # Upload current project"
+    echo "  ./scripts/sync_to_r2.sh push /workspace     # Upload remote workspace"
+    echo "  ./scripts/sync_to_r2.sh pull /workspace     # Download to remote"
     
     exit 0
+fi
+
+# Check if directory exists
+if [[ ! -d "$WORKSPACE_DIR" ]]; then
+    echo "Error: Directory does not exist: $WORKSPACE_DIR"
+    exit 1
 fi
 
 # Check if rclone is configured
@@ -95,30 +124,55 @@ fi
 
 # Define exclude patterns
 EXCLUDE_FILE="$WORKSPACE_DIR/.rsyncignore"
+CREATED_EXCLUDE=false
+
 if [[ ! -f "$EXCLUDE_FILE" ]]; then
     cat > "$EXCLUDE_FILE" <<'EOF'
+# Version control
 .git/
+.gitignore
+
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 .venv/
 venv/
-node_modules/
 .pytest_cache/
 .mypy_cache/
 *.egg-info/
+.ipynb_checkpoints/
+
+# Node
+node_modules/
+
+# System
 .DS_Store
-*.log
 *.tmp
 .cache/
-results/*/eval_*/
-*.safetensors
-*.bin
-*.pt
-*.pth
-models/
-checkpoints/
+
+# Logs (optional - comment out if you want to backup logs)
+*.log
+
+# Large model files (optional - comment out if you want to backup models)
+# *.safetensors
+# *.bin
+# *.pt
+# *.pth
+# models/
+# checkpoints/
+
+# HuggingFace cache (usually huge, can be re-downloaded)
+hf/
+.cache/huggingface/
+
+# Evaluation results (optional - comment out to backup)
+# results/*/eval_*/
 EOF
+    CREATED_EXCLUDE=true
     echo "Created .rsyncignore with default excludes"
+    echo "Edit $EXCLUDE_FILE to customize what gets excluded"
 fi
 
 if [[ "$MODE" == "push" || "$MODE" == "upload" ]]; then
@@ -214,11 +268,20 @@ else
     echo "Unknown mode: $MODE"
     echo ""
     echo "Usage:"
-    echo "  ./scripts/sync_to_r2.sh          # Upload/sync to R2"
-    echo "  ./scripts/sync_to_r2.sh pull     # Download/sync from R2"
-    echo "  ./scripts/sync_to_r2.sh setup    # Setup rclone config"
-    echo "  ./scripts/sync_to_r2.sh list     # List R2 contents"
-    echo "  ./scripts/sync_to_r2.sh check    # Check sync status"
+    echo "  ./scripts/sync_to_r2.sh [MODE] [DIRECTORY]"
+    echo ""
+    echo "Modes:"
+    echo "  push/upload    Upload/sync to R2 (default)"
+    echo "  pull/download  Download/sync from R2"
+    echo "  setup          Setup rclone config"
+    echo "  list           List R2 contents"
+    echo "  check          Check sync status"
+    echo ""
+    echo "Examples:"
+    echo "  ./scripts/sync_to_r2.sh                      # Upload current project"
+    echo "  ./scripts/sync_to_r2.sh push /workspace      # Upload remote workspace (all folders)"
+    echo "  ./scripts/sync_to_r2.sh push lora-train      # Upload just lora-train subfolder"
+    echo "  ./scripts/sync_to_r2.sh pull /workspace      # Download to remote workspace"
     exit 1
 fi
 

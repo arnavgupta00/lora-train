@@ -1,24 +1,61 @@
 #!/bin/bash
 # Cloudflare R2 Workspace Backup Script
-# Uploads the entire workspace to R2 for backup/resume on another machine
+# Creates timestamped tar.gz archives and uploads to R2
 #
-# Usage: ./scripts/backup_to_r2.sh [--download]
+# Usage: 
+#   ./scripts/backup_to_r2.sh [DIRECTORY]
+#   ./scripts/backup_to_r2.sh --download BACKUP_NAME [TARGET_DIR]
+#
+# Examples:
+#   ./scripts/backup_to_r2.sh                    # Backup current project
+#   ./scripts/backup_to_r2.sh /workspace         # Backup remote workspace
+#   ./scripts/backup_to_r2.sh lora-train         # Backup just lora-train
+#   ./scripts/backup_to_r2.sh --download workspace-20260402_123456.tar.gz
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKSPACE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-BACKUP_NAME="lm-workspace-$(date +%Y%m%d_%H%M%S).tar.gz"
+DEFAULT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 MODE="upload"
 if [[ "$1" == "--download" ]]; then
     MODE="download"
+    BACKUP_NAME="${2:-}"
+    TARGET_DIR="${3:-.}"
+    
+    if [[ -z "$BACKUP_NAME" ]]; then
+        echo "Error: Must specify backup name to download"
+        echo "Usage: $0 --download BACKUP_NAME [TARGET_DIR]"
+        exit 1
+    fi
+else
+    WORKSPACE_DIR="${1:-$DEFAULT_DIR}"
+    
+    # Convert to absolute path
+    if [[ ! "$WORKSPACE_DIR" = /* ]]; then
+        WORKSPACE_DIR="$(cd "$WORKSPACE_DIR" 2>/dev/null && pwd || echo "$PWD/$WORKSPACE_DIR")"
+    fi
+    
+    # Check if directory exists
+    if [[ ! -d "$WORKSPACE_DIR" ]]; then
+        echo "Error: Directory does not exist: $WORKSPACE_DIR"
+        exit 1
+    fi
+    
+    DIR_NAME="$(basename "$WORKSPACE_DIR")"
+    BACKUP_NAME="${DIR_NAME}-$(date +%Y%m%d_%H%M%S).tar.gz"
 fi
 
 echo "============================================================"
-echo "Cloudflare R2 Workspace Backup/Restore"
+echo "Cloudflare R2 Backup/Restore"
 echo "============================================================"
-echo "Workspace: $WORKSPACE_DIR"
+if [[ "$MODE" == "upload" ]]; then
+    echo "Directory: $WORKSPACE_DIR"
+    echo "Backup Name: $BACKUP_NAME"
+else
+    echo "Backup: $BACKUP_NAME"
+    echo "Target: $TARGET_DIR"
+fi
 echo "Mode: $MODE"
 echo "============================================================"
 echo ""
@@ -86,10 +123,11 @@ if [[ "$MODE" == "upload" ]]; then
     echo "============================================================"
     
     # Exclude large/temporary files
-    EXCLUDE_DIRS=(
+    EXCLUDE_PATTERNS=(
         ".git"
         "__pycache__"
         "*.pyc"
+        "*.pyo"
         ".venv"
         "venv"
         "node_modules"
@@ -97,11 +135,14 @@ if [[ "$MODE" == "upload" ]]; then
         ".mypy_cache"
         "*.egg-info"
         ".DS_Store"
+        "*.log"
+        "hf"
+        ".cache"
     )
     
     # Build tar exclude arguments
     TAR_EXCLUDES=""
-    for pattern in "${EXCLUDE_DIRS[@]}"; do
+    for pattern in "${EXCLUDE_PATTERNS[@]}"; do
         TAR_EXCLUDES="$TAR_EXCLUDES --exclude=$pattern"
     done
     
@@ -131,14 +172,13 @@ if [[ "$MODE" == "upload" ]]; then
     echo ""
     echo "✓ Upload complete!"
     echo ""
-    echo "To download on another machine:"
-    echo "  ./scripts/backup_to_r2.sh --download"
+    echo "Backup saved as: s3://$BUCKET/$BACKUP_NAME"
+    echo ""
+    echo "To restore on another machine:"
+    echo "  ./scripts/backup_to_r2.sh --download $BACKUP_NAME"
     echo ""
     
-    # Save metadata
-    echo "$BACKUP_NAME" > "$WORKSPACE_DIR/.last_backup"
-    
-    # Clean up
+    # Clean up local archive
     rm "$BACKUP_NAME"
     
 elif [[ "$MODE" == "download" ]]; then
@@ -146,43 +186,36 @@ elif [[ "$MODE" == "download" ]]; then
     # DOWNLOAD MODE
     # ============================================================
     echo "============================================================"
-    echo "Listing available backups..."
+    echo "Downloading backup..."
     echo "============================================================"
     
-    aws s3 ls "s3://$BUCKET/" \
-        --endpoint-url "$ENDPOINT" \
-        --no-verify-ssl | grep "lm-workspace-" || true
-    
+    echo "Downloading: $BACKUP_NAME"
+    echo "To: $TARGET_DIR"
     echo ""
-    read -p "Enter backup filename to restore: " BACKUP_TO_RESTORE
     
-    if [[ -z "$BACKUP_TO_RESTORE" ]]; then
-        echo "Error: No filename provided"
-        exit 1
-    fi
-    
-    echo ""
-    echo "Downloading: $BACKUP_TO_RESTORE"
+    mkdir -p "$TARGET_DIR"
+    cd "$TARGET_DIR"
     
     aws s3 cp \
-        "s3://$BUCKET/$BACKUP_TO_RESTORE" \
-        "./$BACKUP_TO_RESTORE" \
+        "s3://$BUCKET/$BACKUP_NAME" \
+        "./$BACKUP_NAME" \
         --endpoint-url "$ENDPOINT" \
         --no-verify-ssl
     
     echo ""
     echo "✓ Download complete!"
     echo ""
-    read -p "Extract archive? [y/N]: " EXTRACT
+    read -p "Extract archive now? [Y/n]: " EXTRACT
     
-    if [[ "$EXTRACT" =~ ^[Yy]$ ]]; then
+    if [[ ! "$EXTRACT" =~ ^[Nn]$ ]]; then
         echo "Extracting..."
-        tar xzf "$BACKUP_TO_RESTORE"
+        tar xzf "$BACKUP_NAME"
         echo "✓ Extracted!"
+        echo ""
         
-        read -p "Delete archive? [y/N]: " DELETE
-        if [[ "$DELETE" =~ ^[Yy]$ ]]; then
-            rm "$BACKUP_TO_RESTORE"
+        read -p "Delete archive file? [Y/n]: " DELETE
+        if [[ ! "$DELETE" =~ ^[Nn]$ ]]; then
+            rm "$BACKUP_NAME"
             echo "✓ Archive deleted"
         fi
     fi
