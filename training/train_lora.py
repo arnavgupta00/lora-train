@@ -484,7 +484,6 @@ def main() -> None:
         "weight_decay": args.weight_decay,
         "max_grad_norm": args.max_grad_norm,
         "logging_steps": args.logging_steps,
-        "eval_steps": args.eval_steps,
         "save_strategy": "steps",
         "save_steps": args.save_steps,
         "save_total_limit": args.save_total_limit,
@@ -511,13 +510,14 @@ def main() -> None:
         ta_kwargs["fp16"] = bool(torch.cuda.is_available() and not torch.cuda.is_bf16_supported())
 
     sig = inspect.signature(TrainingArguments.__init__)
+    eval_enabled = args.eval_steps is not None and args.eval_steps > 0
+    if eval_enabled:
+        ta_kwargs["eval_steps"] = args.eval_steps
+
     if "evaluation_strategy" in sig.parameters:
-        ta_kwargs["evaluation_strategy"] = "steps"
+        ta_kwargs["evaluation_strategy"] = "steps" if eval_enabled else "no"
     elif "eval_strategy" in sig.parameters:
-        ta_kwargs["eval_strategy"] = "steps"
-    else:
-        # Fall back to no periodic eval if the arg name is unknown.
-        pass
+        ta_kwargs["eval_strategy"] = "steps" if eval_enabled else "no"
 
     training_args = TrainingArguments(**ta_kwargs)
 
@@ -530,7 +530,7 @@ def main() -> None:
         model=model,
         args=training_args,
         train_dataset=train_ds,
-        eval_dataset=dev_ds,
+        eval_dataset=dev_ds if eval_enabled else None,
         data_collator=collator,
         callbacks=[grad_norm_callback],
     )
