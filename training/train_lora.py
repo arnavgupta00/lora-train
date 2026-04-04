@@ -3,6 +3,7 @@ import json
 import math
 import os
 import inspect
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -25,6 +26,15 @@ try:
     YAML_AVAILABLE = True
 except ImportError:
     YAML_AVAILABLE = False
+
+try:
+    from huggingface_hub import snapshot_download
+    from huggingface_hub.utils import logging as hf_logging
+    HUGGINGFACE_HUB_AVAILABLE = True
+except ImportError:
+    snapshot_download = None
+    hf_logging = None
+    HUGGINGFACE_HUB_AVAILABLE = False
 
 
 def _read_jsonl(path: str) -> List[Dict[str, Any]]:
@@ -252,6 +262,53 @@ def merge_config_with_args(config: Dict[str, Any], args: argparse.Namespace) -> 
     return args
 
 
+def prepare_model_source(model_id: str) -> str:
+    """
+    Resolve a model source path and make downloads explicit.
+
+    If model_id already points to a local directory, use it directly.
+    Otherwise, pre-download the full snapshot so Hugging Face's progress bar
+    shows transfer rate before transformers starts loading weights.
+    """
+    local_path = Path(model_id).expanduser()
+    if local_path.exists():
+        print(f"Using local model path: {local_path}")
+        return str(local_path)
+
+    if not HUGGINGFACE_HUB_AVAILABLE:
+        print(
+            "huggingface_hub is not installed; falling back to transformers "
+            "download path."
+        )
+        return model_id
+
+    try:
+        hf_logging.set_verbosity_info()
+        if hasattr(hf_logging, "enable_progress_bars"):
+            hf_logging.enable_progress_bars()
+    except Exception:
+        pass
+
+    cache_dir = (
+        os.environ.get("HF_HUB_CACHE")
+        or os.environ.get("TRANSFORMERS_CACHE")
+        or os.environ.get("HF_HOME")
+    )
+
+    print("Pre-downloading model snapshot...")
+    print(f"  repo_id: {model_id}")
+    if cache_dir:
+        print(f"  cache:   {cache_dir}")
+
+    start = time.time()
+    local_snapshot = snapshot_download(repo_id=model_id)
+    elapsed = time.time() - start
+
+    print(f"Model snapshot ready: {local_snapshot}")
+    print(f"Download/prep time: {elapsed / 60:.1f} min")
+    return local_snapshot
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     
@@ -356,7 +413,9 @@ def main() -> None:
         except Exception:
             pass
 
-    tokenizer = AutoTokenizer.from_pretrained(args.model_id, use_fast=True, trust_remote_code=True)
+    model_source = prepare_model_source(args.model_id)
+
+    tokenizer = AutoTokenizer.from_pretrained(model_source, use_fast=True, trust_remote_code=True)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
 
@@ -368,7 +427,7 @@ def main() -> None:
             )
         # 8-bit base load is still "LoRA" (not QLoRA); it just reduces memory for the frozen base weights.
         model = AutoModelForCausalLM.from_pretrained(
-            args.model_id,
+            model_source,
             load_in_8bit=True,
             device_map="auto",
             trust_remote_code=True,
@@ -377,7 +436,7 @@ def main() -> None:
         )
     else:
         model = AutoModelForCausalLM.from_pretrained(
-            args.model_id,
+            model_source,
             torch_dtype=torch.bfloat16,
             trust_remote_code=True,
             attn_implementation=args.attn_implementation,
