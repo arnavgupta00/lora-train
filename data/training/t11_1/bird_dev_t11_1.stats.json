@@ -1,0 +1,180 @@
+{
+  "source_file": "data/training/t10/bird_dev_t10.jsonl",
+  "t10_system_prompt_hash": "37082362804b17cd",
+  "total_examples": 1534,
+  "status_counts": {
+    "success": 1349,
+    "fallback": 153,
+    "widened": 32
+  },
+  "success_rate": 90.0,
+  "widened_rate": 2.1,
+  "fallback_rate": 10.0,
+  "avg_reduction_all": 53.7,
+  "avg_reduction_successful": 59.7,
+  "reduction_distribution": {
+    "0-20%": 220,
+    "20-40%": 245,
+    "40-60%": 310,
+    "60-80%": 490,
+    "80-100%": 269
+  },
+  "fallback_reasons": {
+    "over_compacted": 145,
+    "no_tables_matched": 8
+  },
+  "per_difficulty": {
+    "simple": {
+      "total": 925,
+      "success": 779,
+      "widened": 20,
+      "fallback": 126,
+      "avg_reduction": 53.1
+    },
+    "moderate": {
+      "total": 464,
+      "success": 430,
+      "widened": 9,
+      "fallback": 25,
+      "avg_reduction": 55.5
+    },
+    "challenging": {
+      "total": 145,
+      "success": 140,
+      "widened": 3,
+      "fallback": 2,
+      "avg_reduction": 51.6
+    }
+  },
+  "per_database": {
+    "california_schools": {
+      "total": 89,
+      "success": 80,
+      "widened": 2,
+      "fallback": 7,
+      "avg_reduction": 71.5
+    },
+    "financial": {
+      "total": 106,
+      "success": 96,
+      "widened": 5,
+      "fallback": 5,
+      "avg_reduction": 57.1
+    },
+    "toxicology": {
+      "total": 145,
+      "success": 145,
+      "widened": 0,
+      "fallback": 0,
+      "avg_reduction": 38.5
+    },
+    "card_games": {
+      "total": 191,
+      "success": 147,
+      "widened": 3,
+      "fallback": 41,
+      "avg_reduction": 63.3
+    },
+    "codebase_community": {
+      "total": 186,
+      "success": 139,
+      "widened": 11,
+      "fallback": 36,
+      "avg_reduction": 51.5
+    },
+    "superhero": {
+      "total": 129,
+      "success": 127,
+      "widened": 0,
+      "fallback": 2,
+      "avg_reduction": 39.6
+    },
+    "formula_1": {
+      "total": 174,
+      "success": 151,
+      "widened": 0,
+      "fallback": 23,
+      "avg_reduction": 53.0
+    },
+    "european_football_2": {
+      "total": 129,
+      "success": 120,
+      "widened": 0,
+      "fallback": 9,
+      "avg_reduction": 35.5
+    },
+    "thrombosis_prediction": {
+      "total": 163,
+      "success": 153,
+      "widened": 8,
+      "fallback": 2,
+      "avg_reduction": 78.2
+    },
+    "student_club": {
+      "total": 158,
+      "success": 132,
+      "widened": 3,
+      "fallback": 23,
+      "avg_reduction": 43.4
+    },
+    "debit_card_specializing": {
+      "total": 64,
+      "success": 59,
+      "widened": 0,
+      "fallback": 5,
+      "avg_reduction": 66.0
+    }
+  },
+  "sample_success": [
+    {
+      "question_id": 0,
+      "db_id": "california_schools",
+      "reduction_percent": 69.7,
+      "primary_table": "frpm",
+      "tables_kept": [
+        "frpm",
+        "schools"
+      ],
+      "status": "success"
+    },
+    {
+      "question_id": 1,
+      "db_id": "california_schools",
+      "reduction_percent": 71.7,
+      "primary_table": "frpm",
+      "tables_kept": [
+        "frpm",
+        "schools"
+      ],
+      "status": "success"
+    },
+    {
+      "question_id": 2,
+      "db_id": "california_schools",
+      "reduction_percent": 76.6,
+      "primary_table": "schools",
+      "tables_kept": [
+        "frpm",
+        "schools"
+      ],
+      "status": "success"
+    }
+  ],
+  "sample_fallback": [
+    {
+      "question_id": 5,
+      "db_id": "california_schools",
+      "fallback_reason": "Over-compacted after widening: Compact too small (356 chars) for large schema (3937 chars)"
+    },
+    {
+      "question_id": 6,
+      "db_id": "california_schools",
+      "fallback_reason": "Over-compacted after widening: Compact too small (356 chars) for large schema (3937 chars)"
+    },
+    {
+      "question_id": 13,
+      "db_id": "california_schools",
+      "fallback_reason": "Over-compacted after widening: Reduction too aggressive (86.2%) for large schema (3937 chars)"
+    }
+  ]
+}
