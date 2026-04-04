@@ -1,0 +1,61 @@
+{
+  "version": "T11.1",
+  "timestamp": "2026-04-04T20:16:54.253361Z",
+  "changes_from_t11": [
+    "Wider safety margins (\u22648 small-table, 5 extras, primary-table bonus, min 4 cols)",
+    "Over-compaction guards (reject >80% reduction, <300 chars on large schemas)",
+    "Re-widen retry before full-schema fallback (extras 5\u21928, min cols 4\u21925)",
+    "Hash-based 55% compact assignment (post-fallback target ~50%)",
+    "Target 65-80% average reduction (down from T11 91%)"
+  ],
+  "train_count": 14034,
+  "dev_count": 665,
+  "full_schema_count": 7381,
+  "compact_schema_count": 7318,
+  "compact_ratio": 0.49785699707463094,
+  "compaction_status_breakdown": {
+    "success": 7318,
+    "success_widened": 1,
+    "fallback_parse_error": 383,
+    "fallback_empty_result": 54,
+    "fallback_sql_coverage": 258,
+    "fallback_over_compacted": 75,
+    "not_applicable_full": 7381
+  },
+  "avg_full_schema_len": 5190.5,
+  "avg_compact_schema_len": 597.8,
+  "avg_reduction_pct_all_attempts": 88.5,
+  "avg_reduction_pct_successful": 91.7,
+  "train_stats": {
+    "total": 14034,
+    "full_schema": 7048,
+    "compact_schema": 6986,
+    "compaction_success": 6986,
+    "compaction_success_widened": 1,
+    "fallback_parse_error": 375,
+    "fallback_empty_result": 51,
+    "fallback_sql_coverage": 247,
+    "fallback_over_compacted": 74
+  },
+  "dev_stats": {
+    "total": 665,
+    "full_schema": 333,
+    "compact_schema": 332,
+    "compaction_success": 332,
+    "compaction_success_widened": 0,
+    "fallback_parse_error": 8,
+    "fallback_empty_result": 3,
+    "fallback_sql_coverage": 11,
+    "fallback_over_compacted": 1
+  },
+  "example_before_after": {
+    "db_id": "shipping",
+    "question": "How many shipments with weight of no more than 1,000 pounds were shipped by the oldest truck?",
+    "full_schema_snippet": "CREATE TABLE city\n(\n    city_id    INTEGER\n            primary key,\n    city_name  TEXT,\n    state      TEXT,\n    population INTEGER,\n    area       REAL\n);\nCREATE TABLE customer\n(\n    cust_id        INTEGER\n            primary key,\n    cust_name      TEXT,\n    annual_revenue INTEGER,\n    cust_type      TEXT,\n    address        TEXT,\n    city           TEXT,\n    state          TEXT,\n    zip            REAL,\n    phone          TEXT\n);\nCREATE TABLE driver\n(\n    driver_id  INTEGER\n            prima...",
+    "compact_schema_snippet": "CREATE TABLE truck\n(\n    truck_id INTEGER primary key,\n    make TEXT,\n    model_year INTEGER\n);\nCREATE TABLE shipment\n(\n    ship_id INTEGER primary key,\n    cust_id INTEGER,\n    weight REAL,\n    truck_id INTEGER,\n    driver_id INTEGER,\n    city_id INTEGER,\n    ship_date TEXT,\n    foreign key (truck_id) references truck(truck_id)\n);",
+    "gold_sql": "SELECT COUNT(*) FROM truck AS T1 INNER JOIN shipment AS T2 ON T1.truck_id = T2.truck_id WHERE T2.weight < 1000 ORDER BY T1.model_year ASC LIMIT 1",
+    "original_len": 1201,
+    "compact_len": 333,
+    "widened": false
+  }
+}

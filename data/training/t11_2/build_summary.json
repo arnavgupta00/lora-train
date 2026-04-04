@@ -1,0 +1,83 @@
+{
+  "version": "T11.1-recommended",
+  "timestamp": "2026-04-04T21:00:34.710317Z",
+  "changes_from_t11": [
+    "Stronger safety margins (<=10 small-table, 6 extras, larger primary-table bonus, column floors)",
+    "Hard over-compaction guards (reject >80% reduction; reject tiny compact schemas on large originals)",
+    "Retry with wider margin before full-schema fallback",
+    "Hash-based 55% compact assignment (post-fallback target ~50%)",
+    "Distribution stats added to monitor compact-schema sharpness"
+  ],
+  "train_count": 14034,
+  "dev_count": 665,
+  "full_schema_count": 11063,
+  "compact_schema_count": 3636,
+  "compact_ratio": 0.24736376624260153,
+  "compaction_status_breakdown": {
+    "success": 3636,
+    "success_widened": 96,
+    "fallback_parse_error": 0,
+    "fallback_uncertain_extraction": 0,
+    "fallback_empty_result": 409,
+    "fallback_sql_coverage": 113,
+    "fallback_over_compacted": 3930,
+    "not_applicable_full": 11063
+  },
+  "avg_full_schema_len": 1355.0,
+  "avg_compact_schema_len": 453.0,
+  "avg_reduction_pct_compact_examples": 61.5,
+  "avg_reduction_pct_all_attempts": 61.5,
+  "avg_reduction_pct_successful": 61.5,
+  "reduction_pct_distribution": {
+    "p50": 67.7,
+    "p75": 74.5,
+    "p90": 78.0,
+    "p95": 78.9
+  },
+  "compact_len_distribution": {
+    "p50": 420.0,
+    "p90": 764.0,
+    "p95": 868.2
+  },
+  "over_compaction_tail": {
+    "count_reduction_gt_75": 797,
+    "count_reduction_gt_80": 0,
+    "count_compact_len_lt_500": 2406,
+    "count_compact_len_lt_800_for_large_originals": 369
+  },
+  "train_stats": {
+    "total": 14034,
+    "full_schema": 10580,
+    "compact_schema": 3454,
+    "compaction_success": 3454,
+    "compaction_success_widened": 87,
+    "fallback_parse_error": 0,
+    "fallback_uncertain_extraction": 0,
+    "fallback_empty_result": 398,
+    "fallback_sql_coverage": 107,
+    "fallback_over_compacted": 3774
+  },
+  "dev_stats": {
+    "total": 665,
+    "full_schema": 483,
+    "compact_schema": 182,
+    "compaction_success": 182,
+    "compaction_success_widened": 9,
+    "fallback_parse_error": 0,
+    "fallback_uncertain_extraction": 0,
+    "fallback_empty_result": 11,
+    "fallback_sql_coverage": 6,
+    "fallback_over_compacted": 156
+  },
+  "example_before_after": {
+    "db_id": "shipping",
+    "question": "How many shipments with weight of no more than 1,000 pounds were shipped by the oldest truck?",
+    "full_schema_snippet": "CREATE TABLE city\n(\n    city_id    INTEGER\n            primary key,\n    city_name  TEXT,\n    state      TEXT,\n    population INTEGER,\n    area       REAL\n);\nCREATE TABLE customer\n(\n    cust_id        INTEGER\n            primary key,\n    cust_name      TEXT,\n    annual_revenue INTEGER,\n    cust_type      TEXT,\n    address        TEXT,\n    city           TEXT,\n    state          TEXT,\n    zip            REAL,\n    phone          TEXT\n);\nCREATE TABLE driver\n(\n    driver_id  INTEGER\n            prima...",
+    "compact_schema_snippet": "CREATE TABLE truck\n(\n    truck_id INTEGER primary key,\n    make TEXT,\n    model_year INTEGER\n);\nCREATE TABLE shipment\n(\n    ship_id INTEGER primary key,\n    cust_id INTEGER,\n    weight REAL,\n    truck_id INTEGER,\n    driver_id INTEGER,\n    city_id INTEGER,\n    ship_date TEXT,\n    foreign key (truck_id) references truck(truck_id)\n);",
+    "gold_sql": "SELECT COUNT(*) FROM truck AS T1 INNER JOIN shipment AS T2 ON T1.truck_id = T2.truck_id WHERE T2.weight < 1000 ORDER BY T1.model_year ASC LIMIT 1",
+    "original_len": 1201,
+    "compact_len": 333,
+    "compaction_reduction_pct": null,
+    "widened": false
+  }
+}

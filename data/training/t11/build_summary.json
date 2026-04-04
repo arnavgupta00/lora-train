@@ -1,0 +1,41 @@
+{
+  "timestamp": "2026-04-04T19:24:20.093720Z",
+  "train_count": 14034,
+  "dev_count": 665,
+  "full_schema_count": 8022,
+  "compact_schema_count": 6677,
+  "compact_ratio": 0.4542485883393428,
+  "compaction_status_breakdown": {
+    "success": 6677,
+    "fallback_parse_error": 358,
+    "fallback_empty_result": 47,
+    "fallback_sql_coverage": 228,
+    "not_applicable": 8022
+  },
+  "avg_full_schema_len": 5090.3,
+  "avg_compact_schema_len": 446.9,
+  "avg_reduction_pct": 91.2,
+  "train_stats": {
+    "total": 14034,
+    "full_schema": 7654,
+    "compact_schema": 6380,
+    "compaction_success": 6380,
+    "fallback_sql_coverage": 218
+  },
+  "dev_stats": {
+    "total": 665,
+    "full_schema": 368,
+    "compact_schema": 297,
+    "compaction_success": 297,
+    "fallback_sql_coverage": 10
+  },
+  "example_before_after": {
+    "db_id": "professional_basketball",
+    "question": "Please list out the first name and last name of player who attended California college and have been selected as all stars?",
+    "full_schema_snippet": "CREATE TABLE awards_players\n(\n    playerID TEXT not null,\n    award    TEXT not null,\n    year     INTEGER          not null,\n    lgID     TEXT null,\n    note     TEXT null,\n    pos      TEXT null,\n    primary key (playerID, year, award),\n    foreign key (playerID) references players (playerID)\n            on update cascade on delete cascade\n);\nCREATE TABLE coaches\n(\n    coachID     TEXT not null,\n    year        INTEGER          not null,\n    tmID        TEXT not null,\n    lgID        TEXT null...",
+    "compact_schema_snippet": "CREATE TABLE player_allstar\n(\n    playerID TEXT not null,\n    last_name TEXT null,\n    first_name TEXT null,\n    season_id INTEGER not null,\n    primary key (playerID, season_id),\n    foreign key (playerID) references players(playerID)\n);\nCREATE TABLE players\n(\n    playerID TEXT not null primary key,\n    firstName TEXT null,\n    lastName TEXT null,\n    college TEXT null\n);",
+    "gold_sql": "SELECT DISTINCT T1.firstName, T1.lastName FROM players AS T1 INNER JOIN player_allstar AS T2 ON T1.playerID = T2.playerID WHERE T1.college = 'California'",
+    "original_len": 8191,
+    "compact_len": 375
+  }
+}
