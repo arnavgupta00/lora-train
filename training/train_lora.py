@@ -4,6 +4,7 @@ import math
 import os
 import inspect
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import torch
@@ -14,9 +15,16 @@ from transformers import (
     AutoTokenizer,
     Trainer,
     TrainingArguments,
+    TrainerCallback,
     set_seed,
 )
 from transformers.utils import is_bitsandbytes_available
+
+try:
+    import yaml
+    YAML_AVAILABLE = True
+except ImportError:
+    YAML_AVAILABLE = False
 
 
 def _read_jsonl(path: str) -> List[Dict[str, Any]]:
@@ -186,13 +194,77 @@ class CausalLMCollator:
         return {"input_ids": input_ids, "attention_mask": attention_mask, "labels": labels}
 
 
+class GradientNormLoggingCallback(TrainerCallback):
+    """Callback to log gradient norms during training."""
+    
+    def on_step_end(self, args, state, control, **kwargs):
+        """Log gradient norm at the end of each step."""
+        model = kwargs.get("model")
+        if model is not None and state.global_step > 0:
+            # Compute gradient norm
+            total_norm = 0.0
+            for p in model.parameters():
+                if p.grad is not None:
+                    param_norm = p.grad.data.norm(2)
+                    total_norm += param_norm.item() ** 2
+            total_norm = total_norm ** 0.5
+            
+            # Log to the trainer's log history
+            if hasattr(state, 'log_history'):
+                # Add to current step's logs
+                if state.log_history and state.log_history[-1].get('step') == state.global_step:
+                    state.log_history[-1]['grad_norm'] = total_norm
+        
+        return control
+
+
+def load_config_from_yaml(yaml_path: str) -> Dict[str, Any]:
+    """Load training configuration from YAML file."""
+    if not YAML_AVAILABLE:
+        raise ImportError("PyYAML is not installed. Install with: pip install pyyaml")
+    
+    with open(yaml_path, 'r') as f:
+        config = yaml.safe_load(f)
+    
+    return config
+
+
+def merge_config_with_args(config: Dict[str, Any], args: argparse.Namespace) -> argparse.Namespace:
+    """Merge YAML config with command-line arguments (CLI takes precedence)."""
+    # Convert config to flat dict
+    flat_config = {}
+    
+    # Handle nested target_modules
+    if 'target_modules' in config and isinstance(config['target_modules'], list):
+        flat_config['target_modules'] = ','.join(config['target_modules'])
+    
+    # Flatten other configs
+    for key, value in config.items():
+        if key != 'target_modules' and not isinstance(value, dict):
+            flat_config[key] = value
+    
+    # Merge into args (only set if not explicitly provided via CLI)
+    for key, value in flat_config.items():
+        if hasattr(args, key) and getattr(args, key) == argparse.Namespace.__dict__.get(key):
+            # Use config value if arg wasn't explicitly set
+            setattr(args, key, value)
+    
+    return args
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model_id", required=True)
-    ap.add_argument("--train_jsonl", required=True)
-    ap.add_argument("--dev_jsonl", required=True)
-    ap.add_argument("--output_dir", required=True)
+    
+    # Config file support
+    ap.add_argument("--config", type=str, default="", help="Path to YAML config file")
+    
+    # Required arguments (can be overridden by config)
+    ap.add_argument("--model_id", default=None)
+    ap.add_argument("--train_jsonl", default=None)
+    ap.add_argument("--dev_jsonl", default=None)
+    ap.add_argument("--output_dir", default=None)
 
+    # Training hyperparameters
     ap.add_argument("--max_seq_len", type=int, default=1024)
     ap.add_argument("--per_device_train_batch_size", type=int, default=1)
     ap.add_argument("--per_device_eval_batch_size", type=int, default=1)
@@ -200,13 +272,23 @@ def main() -> None:
     ap.add_argument("--learning_rate", type=float, default=1e-4)
     ap.add_argument("--num_train_epochs", type=float, default=2.0)
     ap.add_argument("--warmup_ratio", type=float, default=0.03)
+    ap.add_argument("--weight_decay", type=float, default=0.0)
+    ap.add_argument("--max_grad_norm", type=float, default=1.0)
+    ap.add_argument("--lr_scheduler_type", type=str, default="cosine")
     ap.add_argument("--logging_steps", type=int, default=10)
     ap.add_argument("--eval_steps", type=int, default=100)
     ap.add_argument("--save_steps", type=int, default=100)
+    ap.add_argument("--save_total_limit", type=int, default=2)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--dataloader_num_workers", type=int, default=4)
+    
+    # Precision and optimization
+    ap.add_argument("--bf16", action="store_true", help="Use bfloat16 precision")
+    ap.add_argument("--fp16", action="store_true", help="Use float16 precision")
     ap.add_argument("--tf32", action="store_true", help="Enable TF32 matmul (speed on Ampere+)")
+    ap.add_argument("--load_in_4bit", action="store_true", help="Load model in 4-bit (QLoRA)")
 
+    # LoRA parameters
     ap.add_argument("--lora_r", type=int, default=8)
     ap.add_argument("--lora_alpha", type=int, default=32)
     ap.add_argument("--lora_dropout", type=float, default=0.05)
@@ -216,6 +298,8 @@ def main() -> None:
         default="q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj",
         help="Comma-separated module names",
     )
+    
+    # Model optimization
     ap.add_argument("--gradient_checkpointing", action="store_true")
     ap.add_argument("--pack", action="store_true")
     ap.add_argument("--attn_implementation", type=str, default="sdpa")
@@ -224,13 +308,42 @@ def main() -> None:
         action="store_true",
         help="Load the base model in 8-bit (bitsandbytes) to fit smaller VRAM GPUs. This is LoRA (not QLoRA).",
     )
+    
+    # Training control
     ap.add_argument(
         "--resume_from_checkpoint",
         type=str,
         default="",
         help="Path to a Trainer checkpoint directory (e.g. .../checkpoint-300) to resume from.",
     )
+    ap.add_argument("--run_name", type=str, default="", help="Run name for logging")
+    ap.add_argument("--method", type=str, default="lora_sft", help="Training method name")
+    
     args = ap.parse_args()
+    
+    # Load config from YAML if provided
+    if args.config:
+        config = load_config_from_yaml(args.config)
+        # Merge config with args (CLI args take precedence)
+        for key, value in config.items():
+            if key == 'target_modules' and isinstance(value, list):
+                value = ','.join(value)
+            if not hasattr(args, key) or getattr(args, key) == ap.get_default(key):
+                setattr(args, key, value)
+    
+    # Validate required arguments
+    if not args.model_id:
+        raise ValueError("--model_id is required (either via CLI or config file)")
+    if not args.train_jsonl:
+        raise ValueError("--train_jsonl is required (either via CLI or config file)")
+    if not args.dev_jsonl:
+        raise ValueError("--dev_jsonl is required (either via CLI or config file)")
+    if not args.output_dir:
+        raise ValueError("--output_dir is required (either via CLI or config file)")
+    
+    # Set run_name if not provided
+    if not args.run_name:
+        args.run_name = Path(args.output_dir).name
 
     os.makedirs(args.output_dir, exist_ok=True)
     set_seed(args.seed)
@@ -309,22 +422,34 @@ def main() -> None:
         "learning_rate": args.learning_rate,
         "num_train_epochs": args.num_train_epochs,
         "warmup_ratio": args.warmup_ratio,
+        "weight_decay": args.weight_decay,
+        "max_grad_norm": args.max_grad_norm,
         "logging_steps": args.logging_steps,
         "eval_steps": args.eval_steps,
         "save_strategy": "steps",
         "save_steps": args.save_steps,
-        "save_total_limit": 2,
-        # Use bf16 when supported, otherwise fp16.
-        "bf16": bool(torch.cuda.is_available() and torch.cuda.is_bf16_supported()),
-        "fp16": bool(torch.cuda.is_available() and not torch.cuda.is_bf16_supported()),
+        "save_total_limit": args.save_total_limit,
         "report_to": [],
         "remove_unused_columns": False,
         "dataloader_num_workers": int(args.dataloader_num_workers),
-        "lr_scheduler_type": "cosine",
+        "lr_scheduler_type": args.lr_scheduler_type,
         "optim": "adamw_torch",
-        "weight_decay": 0.0,
-        "run_name": os.path.basename(args.output_dir),
+        "run_name": args.run_name,
+        "logging_first_step": True,
+        "logging_nan_inf_filter": False,  # Don't filter NaN/Inf to see actual gradient issues
     }
+    
+    # Handle precision flags
+    if args.bf16:
+        ta_kwargs["bf16"] = True
+        ta_kwargs["fp16"] = False
+    elif args.fp16:
+        ta_kwargs["bf16"] = False
+        ta_kwargs["fp16"] = True
+    else:
+        # Auto-detect: use bf16 when supported, otherwise fp16
+        ta_kwargs["bf16"] = bool(torch.cuda.is_available() and torch.cuda.is_bf16_supported())
+        ta_kwargs["fp16"] = bool(torch.cuda.is_available() and not torch.cuda.is_bf16_supported())
 
     sig = inspect.signature(TrainingArguments.__init__)
     if "evaluation_strategy" in sig.parameters:
@@ -338,6 +463,9 @@ def main() -> None:
     training_args = TrainingArguments(**ta_kwargs)
 
     collator = CausalLMCollator(pad_token_id=tokenizer.pad_token_id)
+    
+    # Add gradient norm logging callback
+    grad_norm_callback = GradientNormLoggingCallback()
 
     trainer = Trainer(
         model=model,
@@ -345,7 +473,49 @@ def main() -> None:
         train_dataset=train_ds,
         eval_dataset=dev_ds,
         data_collator=collator,
+        callbacks=[grad_norm_callback],
     )
+    
+    # Print training configuration
+    print("\n" + "=" * 80)
+    print("TRAINING CONFIGURATION")
+    print("=" * 80)
+    print(f"Run name:              {args.run_name}")
+    print(f"Model:                 {args.model_id}")
+    print(f"Method:                {args.method}")
+    print(f"Output dir:            {args.output_dir}")
+    print()
+    print(f"Training examples:     {len(train_ds)}")
+    print(f"Dev examples:          {len(dev_ds)}")
+    print(f"Max sequence length:   {args.max_seq_len}")
+    print()
+    print(f"Batch size:            {args.per_device_train_batch_size}")
+    print(f"Gradient accum:        {args.gradient_accumulation_steps}")
+    print(f"Effective batch size:  {args.per_device_train_batch_size * args.gradient_accumulation_steps}")
+    print()
+    print(f"Learning rate:         {args.learning_rate}")
+    print(f"LR scheduler:          {args.lr_scheduler_type}")
+    print(f"Warmup ratio:          {args.warmup_ratio}")
+    print(f"Weight decay:          {args.weight_decay}")
+    print(f"Max grad norm:         {args.max_grad_norm}")
+    print()
+    print(f"Epochs:                {args.num_train_epochs}")
+    print(f"Estimated steps:       {total_train_steps}")
+    print()
+    print(f"LoRA r:                {args.lora_r}")
+    print(f"LoRA alpha:            {args.lora_alpha}")
+    print(f"LoRA dropout:          {args.lora_dropout}")
+    print(f"Target modules:        {[m.strip() for m in args.target_modules.split(',') if m.strip()]}")
+    print()
+    print(f"Precision:             {'bf16' if ta_kwargs.get('bf16') else 'fp16' if ta_kwargs.get('fp16') else 'fp32'}")
+    print(f"Gradient checkpointing: {args.gradient_checkpointing}")
+    print(f"Packing:               {args.pack}")
+    print()
+    print(f"Logging steps:         {args.logging_steps}")
+    print(f"Eval steps:            {args.eval_steps}")
+    print(f"Save steps:            {args.save_steps}")
+    print("=" * 80)
+    print()
 
     resume = args.resume_from_checkpoint.strip() or None
     if resume:
@@ -374,14 +544,22 @@ def main() -> None:
                     "target_modules": [m.strip() for m in args.target_modules.split(",") if m.strip()],
                 },
                 "training": {
+                    "run_name": args.run_name,
+                    "method": args.method,
                     "per_device_train_batch_size": args.per_device_train_batch_size,
                     "gradient_accumulation_steps": args.gradient_accumulation_steps,
+                    "effective_batch_size": args.per_device_train_batch_size * args.gradient_accumulation_steps,
                     "learning_rate": args.learning_rate,
+                    "lr_scheduler_type": args.lr_scheduler_type,
                     "num_train_epochs": args.num_train_epochs,
                     "warmup_ratio": args.warmup_ratio,
+                    "weight_decay": args.weight_decay,
+                    "max_grad_norm": args.max_grad_norm,
                     "eval_steps": args.eval_steps,
                     "save_steps": args.save_steps,
                     "estimated_train_steps": total_train_steps,
+                    "precision": "bf16" if ta_kwargs.get("bf16") else "fp16" if ta_kwargs.get("fp16") else "fp32",
+                    "gradient_checkpointing": args.gradient_checkpointing,
                 },
             },
             f,

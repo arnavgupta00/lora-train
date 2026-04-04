@@ -28,6 +28,7 @@ pandas>=2.0.0
 # Utilities
 tqdm>=4.65.0
 huggingface-hub>=0.20.0
+PyYAML>=6.0.0  # For training config files
 
 # Optional: faster HuggingFace downloads
 hf-transfer>=0.1.0

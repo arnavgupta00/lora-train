@@ -1,0 +1,231 @@
+{
+  "train_sanitized": [
+    {
+      "example_id": "train_428",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_954",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_1159",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_1256",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_1568",
+      "old_hint": "This is not;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_1603",
+      "old_hint": "This is not;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_1612",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_1653",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_1713",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_1902",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_2110",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_2175",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_2296",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_2549",
+      "old_hint": ";",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_2552",
+      "old_hint": "This is not",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_3063",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_3503",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_3713",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_3825",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_4210",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_4280",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_4705",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_4828",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_4886",
+      "old_hint": "This is not;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_4971",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_5190",
+      "old_hint": "This is not;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_6391",
+      "old_hint": "This is not;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_6459",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_6775",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_7234",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_7655",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_7745",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_7786",
+      "old_hint": "false",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_8083",
+      "old_hint": "This is not",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_8301",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_8865",
+      "old_hint": "This is not;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_8961",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_9394",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_9700",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_9890",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_9982",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_10222",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    },
+    {
+      "example_id": "train_10428",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    }
+  ],
+  "dev_sanitized": [
+    {
+      "example_id": "dev_636",
+      "old_hint": "FALSE;",
+      "new_hint": "None"
+    }
+  ],
+  "summary": {
+    "train_count": 43,
+    "dev_count": 1,
+    "total": 44
+  }
+}

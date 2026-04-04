@@ -1,0 +1,477 @@
+{"example_id": "train_0", "hint": "None"}
+{"example_id": "train_3", "hint": "- Derived metric: \"number of sales made\" = COUNT of rows in sales table per salesperson"}
+{"example_id": "train_4", "hint": "- Categorical value mapping: \"Italian food\" refers to cuisine = 'Italian' in restaurants\n- Derived metric: \"unique customers\" requires COUNT(DISTINCT customer_id)"}
+{"example_id": "train_6", "hint": "- Disambiguating column meaning: \"assigned as Manager\" refers to role in assignments table, not manager_id in employees\n- Categorical value mapping: \"Manager\" maps to role = 'Manager' in assignments"}
+{"example_id": "train_7", "hint": "- Categorical value mapping: gender = 'M' or 'Male' for male\n- Derived metric: 1970s means dob between '1970-01-01' and '1979-12-31'"}
+{"example_id": "train_11", "hint": "- Derived metric: use NTILE(4) window function over salary to create quartiles"}
+{"example_id": "train_17", "hint": "- Derived metric: 2024 means diagnosis_date year is 2024"}
+{"example_id": "train_18", "hint": "- Join key mapping: Orders table needed, joins Employees via EmployeeID\n- Disambiguating column meaning: title means combining FirstName and LastName, or job title if exists"}
+{"example_id": "train_19", "hint": "- Categorical value mapping: avg_revenue = 2 for 'average earnings of 2', d_quality = 3 for 'quality of 3'\n- Join key mapping: directors to movies via movies2directors table (not shown)"}
+{"example_id": "train_20", "hint": "- Derived metric: compound appears as both reactant_id and product_id in reactions table"}
+{"example_id": "train_21", "hint": "- Disambiguating column meaning: phone number not in schema; may need email or schema is incomplete"}
+{"example_id": "train_26", "hint": "None"}
+{"example_id": "train_29", "hint": "- Derived metric: popularity can be measured by COUNT of orders per restaurant"}
+{"example_id": "train_30", "hint": "- Derived metric: next scheduled test is MIN(test_date) WHERE test_date > current date"}
+{"example_id": "train_36", "hint": "- Derived metric: seasonal patterns derived from MONTH or QUARTER of order_date"}
+{"example_id": "train_38", "hint": "- Derived metric: GDP per capita = GDP / Population\n- Disambiguating column meaning: independent countries may need filtering on a status column or excluding dependencies"}
+{"example_id": "train_44", "hint": "- Join key mapping: atoms joins compounds via compound_id; compounds joins reactions via reactant_id or product_id"}
+{"example_id": "train_52", "hint": "- Join key mapping: bookings.hotel_id -> hotels.hotel_id to get city"}
+{"example_id": "train_55", "hint": "- Derived metric: use DENSE_RANK() OVER (PARTITION BY player_id ORDER BY points DESC)"}
+{"example_id": "train_61", "hint": "- Derived metric: 2022 means hire_date year is 2022"}
+{"example_id": "train_76", "hint": "- Disambiguating column meaning: all persons in person table are students"}
+{"example_id": "train_77", "hint": "- Categorical value mapping: oxygen-containing means element = 'O' in atoms table\n- Join key mapping: compounds via reactant_id or product_id to reactions"}
+{"example_id": "train_80", "hint": "- Derived metric: compare `Average Length of Stay (Days)` where `Fiscal Year` = 2021 vs 2023; decrease > 0.5 means 2021_value - 2023_value > 0.5"}
+{"example_id": "train_86", "hint": "None"}
+{"example_id": "train_89", "hint": "- Derived metric: daily price change = close_price - LAG(close_price) over previous trading day, or open_price - previous close_price"}
+{"example_id": "train_93", "hint": "- Categorical value mapping: middle schools means `School Type` = 'Middle' or 'Middle School'"}
+{"example_id": "train_104", "hint": "- Derived metric: rivers in more than one country means COUNT(DISTINCT Country) > 1 in geo_river grouped by River"}
+{"example_id": "train_106", "hint": "- Derived metric: agriculture > 40% of GDP means Agriculture > 40 (if percentage) or Agriculture/GDP > 0.4\n- Derived metric: less than 2 mountains means COUNT(Mountain) < 2 per country"}
+{"example_id": "train_113", "hint": "- Categorical value mapping: EBRD is Organization Abbreviation = 'EBRD'\n- Derived metric: established between 03/01/1991 and 04/30/1991 filters on Established date"}
+{"example_id": "train_120", "hint": "Countries with EXISTS in geo_sea, EXISTS in geo_river, and NOT EXISTS in geo_mountain"}
+{"example_id": "train_124", "hint": "High inventory means high stock_quantity; threshold needs definition (e.g., top percentile or specific value)"}
+{"example_id": "train_130", "hint": "Air force: organ = 'air_force'; join male and enlist on name"}
+{"example_id": "train_140", "hint": "Multiple teams: COUNT(DISTINCT team_id) > 1 per player"}
+{"example_id": "train_142", "hint": "Price range: derived buckets from price (e.g., CASE WHEN price < X THEN 'low' ...)"}
+{"example_id": "train_146", "hint": "Class size: COUNT(student_id) per class_id; correlation requires aggregating scores with class sizes"}
+{"example_id": "train_155", "hint": "Patient outcomes: outcome column in treatments table"}
+{"example_id": "train_165", "hint": "Join treatments to diagnoses on diagnosis_id to get severity"}
+{"example_id": "train_166", "hint": "Growth rate: (current_balance - initial_balance) / initial_balance or change over time from transactions"}
+{"example_id": "train_169", "hint": "Revenue per product: quantity * unit_price from order_items; join to products for category"}
+{"example_id": "train_172", "hint": "Scoring: points column in stats; compare player average to overall AVG(points)"}
+{"example_id": "train_174", "hint": "Needing reorder: low stock_quantity threshold (define minimum level)"}
+{"example_id": "train_175", "hint": "Weekend: extract day of week from order_date (Saturday=6, Sunday=0 or 7 depending on DB)"}
+{"example_id": "train_177", "hint": "Year-over-year growth: (current_year - previous_year) / previous_year * 100; extract year from date columns"}
+{"example_id": "train_179", "hint": "Morning vs afternoon: derive time period from date column or time component if available"}
+{"example_id": "train_189", "hint": "Smokers not in schema; age: calculate from Birthday; check Description or Diagnosis for smoking status"}
+{"example_id": "train_192", "hint": "Male: SEX = 'M'; multiple diseases: parse Diagnosis field or COUNT conditions > 2"}
+{"example_id": "train_196", "hint": "Night conditions: derive from time column (e.g., time between 20:00 and 06:00)"}
+{"example_id": "train_199", "hint": "Swimming pool: amenity = 'swimming pool' or similar; coastal cities not in schema (external knowledge or city list needed)"}
+{"example_id": "train_205", "hint": "Toxicity ranking: ORDER BY is_toxic DESC or define toxicity score if available"}
+{"example_id": "train_210", "hint": "Join appointments to doctors on doctor_id; group by department"}
+{"example_id": "train_212", "hint": "Low stock: small stock_quantity; sells well: high SUM(quantity) in order_items"}
+{"example_id": "train_220", "hint": "Self-join atoms: a1.atom_id = bonds.atom1_id, a2.atom_id = bonds.atom2_id WHERE a1.element != a2.element"}
+{"example_id": "train_221", "hint": "Title I schools: `Title I School (Y/N)` = 'Y'; join enrollment_data to test_performance on SchoolCode"}
+{"example_id": "train_222", "hint": "Price range: high_price - low_price"}
+{"example_id": "train_226", "hint": "None"}
+{"example_id": "train_231", "hint": "Join Person to Employee on BusinessEntityID, then to EmployeeDepartmentHistory to find departments; filter by FirstName='David' and LastName='Bradley'"}
+{"example_id": "train_235", "hint": "Join key: politics.Country = country.Code"}
+{"example_id": "train_241", "hint": "None"}
+{"example_id": "train_246", "hint": "Derived metric: popularity can be calculated from total streams, album sales, or concert attendance"}
+{"example_id": "train_248", "hint": "Derived metric: count atoms per bond is always 2 (atom1_id and atom2_id); question likely means bonds where the compound has exactly 2 atoms total"}
+{"example_id": "train_251", "hint": "Derived metric: budget_utilization = (sum of project costs or assigned hours cost) / budget"}
+{"example_id": "train_257", "hint": "Derived metric: seasonal trends derived by grouping order_date by month or quarter and aggregating totals"}
+{"example_id": "train_260", "hint": "None"}
+{"example_id": "train_262", "hint": "Categorical value mapping: u_gender female value may be 'F' or 'Female'; rating 5 indicates 5-star"}
+{"example_id": "train_266", "hint": "None"}
+{"example_id": "train_270", "hint": "Derived metric: booking_value = total_price; aggregate by hotel stars rating"}
+{"example_id": "train_271", "hint": "None"}
+{"example_id": "train_276", "hint": "Derived metric: filter customers having COUNT(account_id) >= 3, then calculate AVG(credit_score)"}
+{"example_id": "train_277", "hint": "Derived metric: price increased when close_price > previous day's close_price; use window functions to detect consecutive increases"}
+{"example_id": "train_278", "hint": "None"}
+{"example_id": "train_279", "hint": "Derived metric: win_rate = wins / total_games; team wins when (home_team_id=team AND home_score>away_score) OR (away_team_id=team AND away_score>home_score)"}
+{"example_id": "train_286", "hint": "Disambiguating column: abnormal results are where value falls outside normal_range"}
+{"example_id": "train_293", "hint": "Derived metric: compare Total Students (K-12) for same school between Test Year 2021 and 2023; increase means 2023 > 2021"}
+{"example_id": "train_296", "hint": "None"}
+{"example_id": "train_300", "hint": "Derived metric: 'this month' means end_date falls within current month; use date functions to filter"}
+{"example_id": "train_301", "hint": "Derived metric: success_rate = COUNT(outcome='success') / COUNT(*) grouped by treatment_type"}
+{"example_id": "train_309", "hint": "None"}
+{"example_id": "train_310", "hint": "Derived metric: album_average = AVG(streams) per album; compare each song's streams to its album's average"}
+{"example_id": "train_311", "hint": "None"}
+{"example_id": "train_316", "hint": "Derived metric: days = check_out - check_in"}
+{"example_id": "train_318", "hint": "Disambiguating column meaning: 'recently' requires defining a threshold on order_date"}
+{"example_id": "train_322", "hint": "Derived metric: monthly revenue = SUM(total) grouped by MONTH(order_date)"}
+{"example_id": "train_332", "hint": "Derived metric: cumulative sales = running SUM of (quantity * unit_price) per product ordered by date"}
+{"example_id": "train_336", "hint": "Derived metric: spending = SUM(total) per customer"}
+{"example_id": "train_337", "hint": "Derived metric: total streams per album = SUM(streams) from songs; Join key: albums.album_id = songs.album_id"}
+{"example_id": "train_341", "hint": "None"}
+{"example_id": "train_344", "hint": "None"}
+{"example_id": "train_354", "hint": "Derived metric: consistency = low standard deviation of points across games"}
+{"example_id": "train_366", "hint": "Join key: enrollment_data.SchoolCode = test_performance.SchoolCode; aggregate by `District Name`"}
+{"example_id": "train_367", "hint": "Categorical value mapping: is_toxic identifies toxic compounds; Join key: reactions.reactant_id or product_id = compounds.compound_id"}
+{"example_id": "train_377", "hint": "Derived metric: duration = end_date - start_date"}
+{"example_id": "train_378", "hint": "Derived metric: revenue = SUM(total); Join key: orders_rest.restaurant_id = restaurants.restaurant_id"}
+{"example_id": "train_382", "hint": "Derived metric: staff-to-student ratio = (`Full-Time Teachers` + `Part-Time Teachers`) / `Total Students (K-12)` or use precomputed `Student-Teacher Ratio`"}
+{"example_id": "train_387", "hint": "Derived metric: COUNT(DISTINCT country) > 1 from concerts per artist"}
+{"example_id": "train_393", "hint": "Derived metric: turnover rate = total quantity sold / stock_quantity"}
+{"example_id": "train_395", "hint": "Disambiguating column meaning: 'all amenities' means hotel has every distinct amenity type in the table"}
+{"example_id": "train_400", "hint": "Derived metric: avg order value = AVG(total) per customer"}
+{"example_id": "train_407", "hint": "Derived metric: cross-grade = COUNT(DISTINCT grade_level) > 1 per teacher"}
+{"example_id": "train_411", "hint": "Derived metric: volume = COUNT(appt_id) grouped by MONTH(date)"}
+{"example_id": "train_414", "hint": "Disambiguating column meaning: 'underperforming' needs definition (e.g., low quantity sold, high stock)"}
+{"example_id": "train_415", "hint": "Join key: bookings.guest_id = guests.guest_id; group by nationality"}
+{"example_id": "train_416", "hint": "Derived metric: retention rate = customers with repeat orders / total customers"}
+{"example_id": "train_423", "hint": "Derived metric: top scorer = MAX(SUM(points)) per team; Join key: players.team_id = teams.team_id"}
+{"example_id": "train_429", "hint": "Derived metric: 50-day average = AVG(close_price) over last 50 trading days per company"}
+{"example_id": "train_431", "hint": "None"}
+{"example_id": "train_440", "hint": "categorical value mapping: 'in stock' means stock_quantity > 0"}
+{"example_id": "train_441", "hint": "derived metric: moving average requires window function over grade_level ordered by grade_level"}
+{"example_id": "train_444", "hint": "derived metric: volatility = standard deviation of (close_price - open_price) or price changes"}
+{"example_id": "train_455", "hint": "categorical value mapping: sales reps have jobTitle = 'Sales Rep'; disambiguating column: reportsTo links to employeeNumber"}
+{"example_id": "train_465", "hint": "derived metric: top selling = MAX(SUM(quantity)); join key mapping: products.product_id = order_items.product_id"}
+{"example_id": "train_468", "hint": "derived metric: enrollment = COUNT of students per class; join key mapping: teachers.teacher_id = classes.teacher_id"}
+{"example_id": "train_471", "hint": "None"}
+{"example_id": "train_472", "hint": "derived metric: percentage = COUNT(canceled)/COUNT(*) * 100; categorical value mapping: canceled means status = 'canceled'"}
+{"example_id": "train_474", "hint": "None"}
+{"example_id": "train_480", "hint": "derived metric: wait time = actual_time - scheduled_time"}
+{"example_id": "train_483", "hint": "derived metric: correlation requires statistical calculation across test_name pairs"}
+{"example_id": "train_485", "hint": "None"}
+{"example_id": "train_488", "hint": "derived metric: chart performance from sales or streams; join key mapping: albums.album_id = songs.album_id"}
+{"example_id": "train_491", "hint": "None"}
+{"example_id": "train_493", "hint": "join key mapping: albums.album_id = songs.album_id"}
+{"example_id": "train_495", "hint": "derived metric: improvement = current year Math Score - previous year Math Score; join key mapping: enrollment_data.SchoolCode = test_performance.SchoolCode"}
+{"example_id": "train_497", "hint": "derived metric: percentage of service = Service column; join key mapping: economy.Country = geo_mountain.Country"}
+{"example_id": "train_498", "hint": "categorical value mapping: 'recent' requires defining a date threshold; join key mapping: products.product_id = order_items.product_id"}
+{"example_id": "train_499", "hint": "disambiguating column: employees.department joins to departments; derived metric: avg salary per dept"}
+{"example_id": "train_501", "hint": "categorical value mapping: best director means highest d_quality"}
+{"example_id": "train_508", "hint": "join key mapping: classes.class_id = test_scores.class_id"}
+{"example_id": "train_510", "hint": "derived metric: revenue = attendance * ticket_price"}
+{"example_id": "train_532", "hint": "disambiguating column: stock names likely refers to ProductName; join needed to ShipMethod for shipping charges"}
+{"example_id": "train_552", "hint": "derived metric: efficiency could be (successful outcomes)/(total) or (end_date - start_date)"}
+{"example_id": "train_563", "hint": "derived metric: recurring = same patient_id with same condition appearing multiple times"}
+{"example_id": "train_575", "hint": "derived metric: performance could be hours worked or projects completed; join key mapping: employees.emp_id = assignments.emp_id"}
+{"example_id": "train_589", "hint": "derived metric: price movement = ABS(close_price - open_price) or (high_price - low_price)"}
+{"example_id": "train_599", "hint": "derived metric: student performance = AVG(score); join path: teachers -> classes -> test_scores"}
+{"example_id": "train_603", "hint": "derived metric: spending = SUM(total) per customer_id"}
+{"example_id": "train_615", "hint": "derived metric: referrals = COUNT where referred_by = doctor_id"}
+{"example_id": "train_620", "hint": "categorical value mapping: Beijing means mfg_city = 'Beijing'; join key mapping: product.prod_id = orders.prod_id"}
+{"example_id": "train_627", "hint": "derived metric: revenue = SUM(total) from orders_rest; join key mapping: restaurants.restaurant_id = orders_rest.restaurant_id"}
+{"example_id": "train_628", "hint": "categorical value mapping: severe means severity = 'severe' or high severity value"}
+{"example_id": "train_631", "hint": "derived metric: revenue = SUM(amount); join key mapping: salespeople.sales_id = sales.sales_id"}
+{"example_id": "train_632", "hint": "categorical value mapping: elementary means School Type = 'Elementary'; join key mapping: enrollment_data.SchoolCode = test_performance.SchoolCode"}
+{"example_id": "train_634", "hint": "derived metric: more than once = COUNT(*) > 1 per guest_id, hotel_id"}
+{"example_id": "train_635", "hint": "None"}
+{"example_id": "train_638", "hint": "derived metric: most common = MAX(COUNT) grouped by bond_type"}
+{"example_id": "train_639", "hint": "categorical value mapping: holidays requires external knowledge or holiday date list"}
+{"example_id": "train_640", "hint": "categorical value mapping: Q1 = months 1-3, Q4 = months 10-12 from order_date"}
+{"example_id": "train_644", "hint": "categorical value mapping: high-value requires threshold definition for total_price"}
+{"example_id": "train_655", "hint": "join key mapping: appointments.appt_id = prescriptions.appt_id; disambiguating column: diagnosis in appointments"}
+{"example_id": "train_659", "hint": "derived metric: compare order count vs average quantity per product"}
+{"example_id": "train_661", "hint": "derived metric: YoY comparison requires self-join on Test Year - 1"}
+{"example_id": "train_662", "hint": "join key mapping: accounts.account_id = transactions.account_id"}
+{"example_id": "train_677", "hint": "join key mapping: enrollment_data.SchoolCode = test_performance.SchoolCode"}
+{"example_id": "train_681", "hint": "derived metric: recovery time = end_date - diagnosis_date or end_date - start_date"}
+{"example_id": "train_684", "hint": "categorical value mapping: swimming pool means amenity = 'swimming pool' or similar"}
+{"example_id": "train_690", "hint": "derived metric: order frequency = COUNT(orders) per customer or orders per time period"}
+{"example_id": "train_695", "hint": "None"}
+{"example_id": "train_699", "hint": "inspection_date format: 'YYYY-MM-DD' for September 9, 2013"}
+{"example_id": "train_710", "hint": "tx_type='deposit' for deposits"}
+{"example_id": "train_719", "hint": "Derived metric: best-selling = MAX(SUM(quantity)) per month; join orders to order_items on order_id"}
+{"example_id": "train_724", "hint": "Derived metric: COUNT(proj_id) per emp_id from assignments"}
+{"example_id": "train_728", "hint": "None"}
+{"example_id": "train_748", "hint": "Derived metric: multiple departments = COUNT(DISTINCT department) > 1; join appointments to doctors on doctor_id"}
+{"example_id": "train_752", "hint": "Group by year from enrollment_data columns"}
+{"example_id": "train_757", "hint": "Derived metric: profit_margin = price - cost"}
+{"example_id": "train_762", "hint": "Join key: enrollment_data.SchoolCode = test_performance.SchoolCode; group by `District Name`"}
+{"example_id": "train_763", "hint": "Relational division: employees with COUNT(DISTINCT proj_id) = total projects in projects table"}
+{"example_id": "train_787", "hint": "Derived metric: SUM(hours) grouped by proj_id"}
+{"example_id": "train_796", "hint": "Derived metric: compare salary to AVG(salary) partitioned by department"}
+{"example_id": "train_819", "hint": "Derived metric: compare duration to AVG(duration) per album_id"}
+{"example_id": "train_823", "hint": "None"}
+{"example_id": "train_833", "hint": "Disambiguating column: use order_items.unit_price for price history; join via order_id"}
+{"example_id": "train_841", "hint": "Disambiguating column: use albums.genre not artists.genre; COUNT(DISTINCT genre) > 1"}
+{"example_id": "train_850", "hint": "Join key: treatments to lab_results via diagnosis->patient; compare test_date to start_date/end_date"}
+{"example_id": "train_858", "hint": "Derived metric: days since last order = DATEDIFF(NOW(), MAX(order_date)) > 30"}
+{"example_id": "train_859", "hint": "None"}
+{"example_id": "train_864", "hint": "Derived metric: MAU = COUNT(DISTINCT customer_id) per month from orders_rest"}
+{"example_id": "train_870", "hint": "Derived metric: revenue = SUM(quantity * unit_price); join products to order_items on product_id"}
+{"example_id": "train_879", "hint": "bond_type='double' or bond_type=2 for double bonds"}
+{"example_id": "train_882", "hint": "Derived metric: CLV = SUM(total) per customer_id from orders_rest"}
+{"example_id": "train_884", "hint": "Derived metric: win = home_score > away_score for home_team_id; track consecutive wins"}
+{"example_id": "train_889", "hint": "Categorical value: low inventory = stock_quantity below threshold"}
+{"example_id": "train_893", "hint": "Derived metric: home win = home_score > away_score; filter teams where no home wins exist"}
+{"example_id": "train_897", "hint": "Join key: orders to order_items on order_id; analyze by customer_id, product_id, order_date"}
+{"example_id": "train_902", "hint": "Derived metric: age_group = calculate from dob; join patients to appointments on patient_id"}
+{"example_id": "train_903", "hint": "Derived metric: top performing = highest SUM(amount); join sales.sales_id = salespeople.sales_id"}
+{"example_id": "train_905", "hint": "Derived metric: negative movement = close_price < open_price"}
+{"example_id": "train_909", "hint": "Derived metric: discount_percentage = (discount/total)*100; Q1 = months 1-3"}
+{"example_id": "train_911", "hint": "Derived metric: response_time = actual_time - scheduled_time"}
+{"example_id": "train_912", "hint": "Derived metric: bestselling = MAX(SUM(quantity)) per author; join products to order_items on product_id"}
+{"example_id": "train_914", "hint": "Derived metric: completion_rate = COUNT(status='completed')/COUNT(*); status='completed' for completed"}
+{"example_id": "train_915", "hint": "Derived metric: compare Total Students (K-12) across years; declining = current < previous"}
+{"example_id": "train_916", "hint": "Derived metric: extract day of week from order_date; SUM(total) per day"}
+{"example_id": "train_917", "hint": "Join key: bookings.hotel_id = hotels.hotel_id, bookings.guest_id = guests.guest_id; stars=5"}
+{"example_id": "train_919", "hints": "- magnet schools refers to `Magnet School (Y/N)` = 'Y'\n- join on SchoolCode"}
+{"example_id": "train_939", "hints": "- diagnoses from 2024 = YEAR(diagnosis_date) = 2024"}
+{"example_id": "train_940", "hints": "- hired before 2020 = YEAR(hire_date) < 2020"}
+{"example_id": "train_942", "hints": "- grocery refers to category = 'grocery'"}
+{"example_id": "train_947", "hints": "- strategic refers to role = 'strategic'"}
+{"example_id": "train_953", "hints": "- published after average year = year > (SELECT AVG(year) FROM books)"}
+{"example_id": "train_959", "hints": "- oldest publication = MIN(year)"}
+{"example_id": "train_964", "hints": "- full name = PREFIX || ' ' || FIRST || ' ' || LAST\n- join careplans.PATIENT = patients.Id"}
+{"example_id": "train_966", "hints": "- track count = COUNT(song_id)\n- join albums.album_id = songs.album_id"}
+{"example_id": "train_971", "hints": "- cytoplasm = Localization = 'cytoplasm'\n- 7 interactions = COUNT(GeneID2) = 7\n- join via GeneID"}
+{"example_id": "train_975", "hints": "- distribution = COUNT(*) GROUP BY status"}
+{"example_id": "train_983", "hints": "- exothermic = is_exothermic = TRUE or 1\n- join compounds to reactions via compound_id"}
+{"example_id": "train_990", "hints": "- average grade = AVG(grade)\n- group by semester"}
+{"example_id": "train_997", "hints": "- chronic = is_chronic = TRUE or 1"}
+{"example_id": "train_1007", "hints": "- quarterly trend = SUM(amount) grouped by QUARTER(sale_date)"}
+{"example_id": "train_1015", "hints": "- over budget = actual_cost > budget"}
+{"example_id": "train_1020", "hints": "- total units = SUM(quantity)\n- join products.product_id = order_items.product_id"}
+{"example_id": "train_1027", "hints": "- enrollment count = COUNT(student_id)\n- group by major"}
+{"example_id": "train_1037", "hints": "- track count = COUNT(song_id)\n- join albums.album_id = songs.album_id"}
+{"example_id": "train_1043", "hints": "- use unit_price from order_items for historical prices\n- join via product_id and order_id"}
+{"example_id": "train_1048", "hints": "- high performing = high grade or high GPA threshold"}
+{"example_id": "train_1049", "hints": "- inactive = status = 'inactive'"}
+{"example_id": "train_1060", "hints": "- class size = COUNT(student_id)\n- join classes.class_id = test_scores.class_id"}
+{"example_id": "train_1067", "hints": "- overdue = status = 'overdue' OR due_date < CURRENT_DATE\n- join customers.customer_id = loans.customer_id"}
+{"example_id": "train_1071", "hints": "- highest mortality = MAX(`Mortality Rate (%)`)\n- join via HospitalID"}
+{"example_id": "train_1086", "hints": "- unusual patterns = outlier detection on duration/streams"}
+{"example_id": "train_1091", "hints": "- group by `School Type`\n- join enrollment_data.SchoolCode = test_performance.SchoolCode"}
+{"example_id": "train_1094", "hints": "- declining sales = compare SUM(quantity) across time periods\n- join via product_id and order_id"}
+{"example_id": "train_1097", "hints": "- top outcomes = success rate or outcome ranking"}
+{"example_id": "train_1103", "hints": "- over 1 billion = market_cap > 1000000000"}
+{"example_id": "train_1108", "hints": "- total hours = SUM(hours)\n- join employees.emp_id = assignments.emp_id"}
+{"example_id": "train_1113", "hints": "- above average streams = streams > (SELECT AVG(streams) FROM songs)"}
+{"example_id": "train_1118", "hints": "- returning customers = COUNT(order_id) > 1 per customer"}
+{"example_id": "train_1122", "hints": "- dormant = no recent transactions\n- join accounts.account_id = transactions.account_id"}
+{"example_id": "train_1128", "hints": "- above average ICU = `ICU Beds (%)` > (SELECT AVG(`ICU Beds (%)`) FROM hospital_stats)"}
+{"example_id": "train_1136", "hints": "- artists without albums = LEFT JOIN albums IS NULL\n- join via artist_id"}
+{"example_id": "train_1142", "hints": "- spending patterns = SUM(total) or frequency\n- join customers.customer_id = orders_rest.customer_id"}
+{"example_id": "train_1149", "hints": "- rank by physicians = ORDER BY `Physicians (FTE)`\n- join via HospitalID"}
+{"example_id": "train_1155", "hints": "- never borrowed = LEFT JOIN loans IS NULL\n- join via book_id"}
+{"example_id": "train_1165", "hints": "- bonds per compound = COUNT(bond_id)\n- join compounds.compound_id = bonds.compound_id"}
+{"example_id": "train_1167", "hints": "- treatment count = COUNT(treatment_id)\n- join via patient_id and diagnosis_id"}
+{"example_id": "train_1178", "hints": "- hire year = YEAR(hire_date)\n- employee count = COUNT(emp_id)"}
+{"example_id": "train_1179", "hints": "- highest rebounds = MAX(rebounds)"}
+{"example_id": "train_1188", "hints": "- atoms join bonds via atom1_id or atom2_id"}
+{"example_id": "train_1189", "hints": "- overbooked = COUNT(bookings) > capacity"}
+{"example_id": "train_1191", "hints": "- stay duration = DATEDIFF(check_out, check_in)"}
+{"example_id": "train_1194", "hints": "- conversion rate = COUNT(status='completed')/COUNT(*)"}
+{"example_id": "train_1200", "hints": "- multiple teachers = COUNT(DISTINCT teacher_id) > 1"}
+{"example_id": "train_1201", "hints": "- join enrollment_data.SchoolCode = test_performance.SchoolCode"}
+{"example_id": "train_1209", "hints": "- diagnosis frequency = COUNT(diagnosis_id)/COUNT(DISTINCT patient_id)"}
+{"example_id": "train_1211", "hints": "- toxic compound = is_toxic = TRUE"}
+{"example_id": "train_1214", "hints": "- tie = home_score = away_score"}
+{"example_id": "train_1218", "hints": "- release trends = COUNT(*) GROUP BY YEAR(release_date)"}
+{"example_id": "train_1225", "hints": "- failing = grade = 'F'"}
+{"example_id": "train_1229", "hints": "- profit = (unit_price - cost) * quantity"}
+{"example_id": "train_1234", "hints": "- top earning per department = MAX(salary) by department"}
+{"example_id": "train_1243", "hints": "- prescription frequency = COUNT(*) GROUP BY medication"}
+{"example_id": "train_1247", "hints": "- products per supplier = COUNT(product_id) GROUP BY supplier_id"}
+{"example_id": "train_1249", "hints": "- highest rated = MAX(rating)"}
+{"example_id": "train_1257", "hints": "- improving = later game stats > earlier game stats"}
+{"example_id": "train_1266", "hints": "- efficiency = inverse of `Average Length of Stay (Days)`"}
+{"example_id": "train_1269", "hints": "- outlier = value NOT IN normal_range"}
+{"example_id": "train_1276", "hints": "- best performing = highest combined `Reading Score (Avg)` + `Math Score (Avg)` + `Science Score (Avg)`"}
+{"example_id": "train_1280", "hints": "- retention = repeat customers / total customers"}
+{"example_id": "train_1284", "hints": "- above-average = class AVG(score) > overall AVG(score)"}
+{"example_id": "train_1288", "hints": "- multiple reactions = COUNT(DISTINCT reaction_id) > 1 per catalyst"}
+{"example_id": "train_1293", "hints": "- reorder point = min_stock level"}
+{"example_id": "train_1295", "hints": "- below reorder = stock_quantity < reorder_level"}
+{"example_id": "train_1302", "hints": "- season column indicates seasonal pricing variations"}
+{"example_id": "train_1308", "hints": "- margin = ABS(home_score - away_score)"}
+{"example_id": "train_1314", "hints": "- underperforming = SUM(amount) < quota"}
+{"example_id": "train_1321", "hints": "- improving = current_year_score > previous_year_score"}
+{"example_id": "train_1327", "hints": "- trends = COUNT(*) GROUP BY specialty and date_period"}
+{"example_id": "train_1333", "hints": "- margin = (price - cost)/cost * 100"}
+{"example_id": "train_1337", "hints": "- perfect attendance = 100% or no absences"}
+{"example_id": "train_1344", "hints": "- popularity = streams + concert attendance + album sales per genre"}
+{"example_id": "train_1349", "hints": "- exceeding budget = actual_cost > budget"}
+{"example_id": "train_1352", "hints": "- return rate = returned books / total loans"}
+{"example_id": "train_1361", "hints": "- accident rate = COUNT(accident_id) per building"}
+{"example_id": "train_1368", "hints": "- multiple conditions = COUNT(DISTINCT condition) > 1 per patient"}
+{"example_id": "train_1375", "hints": "- toxic/non-toxic distribution = split by is_toxic"}
+{"example_id": "train_1379", "hints": "- satisfaction = AVG(rating) per hotel"}
+{"example_id": "train_1387", "hints": "- consistent results = low STDDEV(value) per test"}
+{"example_id": "train_1388", "hints": "- best defense = MIN(points allowed)"}
+{"example_id": "train_1391", "hints": "- age group = FLOOR((age)/10)*10"}
+{"example_id": "train_721", "hints": "- join books.book_id = reviews.book_id to find reviewed books"}
+{"example_id": "train_734", "hints": "- order_items.price is the item-level price, not catalog price"}
+{"example_id": "train_737", "hints": "- country region requires CASE expression mapping countries to regions"}
+{"example_id": "train_738", "hints": "- centered moving average = AVG(amount) OVER (ORDER BY sale_date ROWS BETWEEN n PRECEDING AND n FOLLOWING)"}
+{"example_id": "train_739", "hints": "- loan_duration = julianday(return_date) - julianday(loan_date)\n- duration categories require CASE"}
+{"example_id": "train_741", "hints": "- join film → film_category → category to get category name"}
+{"example_id": "train_764", "hints": "- join AwardsPlayers.playerID = Master.playerID\n- Master.birthCity contains birth city"}
+{"example_id": "train_768", "hints": "- revenue per product = SUM(quantity * price)\n- join order_items → products via product_id"}
+{"example_id": "train_776", "hints": "- position column may be missing from Employees table"}
+{"example_id": "train_779", "hints": "None"}
+{"example_id": "train_781", "hints": "- join weather_data.SiteID = monitoring_sites.SiteID\n- `State/Province` contains the state"}
+{"example_id": "train_785", "hints": "- specialty = 'Neurology'"}
+{"example_id": "train_786", "hints": "- filter by country.Name = 'Singapore'"}
+{"example_id": "train_788", "hints": "- join weather_data.SiteID = monitoring_sites.SiteID\n- average metrics grouped by state"}
+{"example_id": "train_789", "hints": "- track_count = COUNT(songs.song_id) per album\n- median requires subquery or window function"}
+{"example_id": "train_791", "hints": "- join Episode.episode_id = Keyword.episode_id\n- filter Episode.title = 'Dangerous Curves'"}
+{"example_id": "train_792", "hints": "- 1M copies = sales > 1000000"}
+{"example_id": "train_800", "hints": "- join u2base.movieid = movies.movieid\n- filter movieid = 1695219"}
+{"example_id": "train_804", "hints": "- join customer → address via address_id\n- search first_name = 'Mary' AND last_name = 'Smith'"}
+{"example_id": "train_810", "hints": "- value_rating involves price relative to rating"}
+{"example_id": "train_814", "hints": "- join person → person_region → noc_region\n- find region for Clara Hughes"}
+{"example_id": "train_825", "hints": "- stay_length = julianday(check_out) - julianday(check_in)\n- categorize using CASE"}
+{"example_id": "train_835", "hints": "- toxic compounds have is_toxic = 1\n- join compounds.compound_id = atoms.compound_id"}
+{"example_id": "train_837", "hints": "None"}
+{"example_id": "train_838", "hints": "- filter Series.Topic for exact match"}
+{"example_id": "train_849", "hints": "- join Person.name = Credit.person\n- Credit.role contains the role"}
+{"example_id": "train_856", "hints": "- join weather_data.SiteID = monitoring_sites.SiteID\n- `Temperature (C)` is the temperature column"}
+{"example_id": "train_857", "hints": "- DENSE_RANK() OVER (PARTITION BY product_id ORDER BY amount DESC)"}
+{"example_id": "train_860", "hints": "- `Bed Count (Total)` column; ORDER BY DESC LIMIT 10"}
+{"example_id": "train_869", "hints": "- Customers table may not have Phone column"}
+{"example_id": "train_872", "hints": "- dob is stored as TEXT; extract year\n- born between 1990-2000 means year >= 1990 AND <= 2000"}
+{"example_id": "train_880", "hints": "- join Person.name = Credit.person\n- filter for 'Al Jean'"}
+{"example_id": "train_883", "hints": "- total_spending = SUM(total_amount) per customer_id"}
+{"example_id": "train_887", "hints": "- join city.Country = country.Code\n- city.Population = 114339"}
+{"example_id": "train_899", "hints": "- 5-sale moving average = AVG(amount) OVER (ROWS BETWEEN 4 PRECEDING AND CURRENT ROW)\n- join sales → salespeople for region"}
+{"example_id": "train_906", "hints": "- COUNT(DISTINCT member_id) WHERE rating = 5"}
+{"example_id": "train_976", "hints": "- artists.genre contains the music genre"}
+{"example_id": "train_980", "hints": "- specialty = 'Dermatology'"}
+{"example_id": "train_987", "hints": "None"}
+{"example_id": "train_988", "hints": "- category = 'Third-party card management'"}
+{"example_id": "train_991", "hints": "- filter WHERE rental_rate = 0.99"}
+{"example_id": "train_994", "hints": "- join payments → customers → employees\n- highest payment = MAX(amount)\n- filter year 2004"}
+{"example_id": "train_998", "hints": "- join heroes → memberships → teams\n- heroes.strength_level contains strength"}
+{"example_id": "train_1012", "hints": "- running average = AVG(score) OVER (PARTITION BY subject ORDER BY test_date ROWS UNBOUNDED PRECEDING)"}
+{"example_id": "train_1018", "hints": "- join Match.Man_of_the_Match = Player.Player_Id\n- Player_Name = 'SR Watson'"}
+{"example_id": "train_1029", "hints": "- join game_platform → game_publisher\n- filter platform_id = 16"}
+{"example_id": "train_1031", "hints": "- join current.bioguide_id = `current-terms`.bioguide\n- official_full_name = 'Rick Crawford'"}
+{"example_id": "train_1033", "hints": "- classify sales using CASE on albums.sales"}
+{"example_id": "train_1045", "hints": "- country_avg_stars = AVG(stars) OVER (PARTITION BY country)\n- compare hotels.stars > country average"}
+{"example_id": "train_1047", "hints": "- NTILE(8) OVER (ORDER BY sale_date) to split into 8 buckets"}
+{"example_id": "train_1052", "hints": "- 30-year term = term_months = 360"}
+{"example_id": "train_1053", "hints": "- join course → registration → student"}
+{"example_id": "train_1057", "hints": "- LEFT JOIN books to reviews, filter WHERE reviews.book_id IS NULL"}
+{"example_id": "train_1061", "hints": "- join reviews to books on book_id to get genre"}
+{"example_id": "train_1062", "hints": "- `Student-Teacher Ratio` is in staff_info table"}
+{"example_id": "train_1068", "hints": "- COUNT(DISTINCT product_id) > 1 per reactant"}
+{"example_id": "train_1089", "hints": "- join isMember to country on Country code\n- filter Organization='IFAD' and Type='Category III'"}
+{"example_id": "train_1095", "hints": "- Earth-origin = origin = 'Earth'\n- join heroes to memberships on hero_id"}
+{"example_id": "train_1096", "hints": "- Euro currency = CurrencyUnit = 'Euro'"}
+{"example_id": "train_1099", "hints": "- republic government = Government LIKE '%Republic%'"}
+{"example_id": "train_1117", "hints": "- join menu_items to restaurants on restaurant_id\n- filter price > 100"}
+{"example_id": "train_1120", "hints": "- swimming pool = amenity LIKE '%pool%'\n- join hotels to amenities on hotel_id"}
+{"example_id": "train_1130", "hints": "- Product = 'Deposits and withdrawals'\n- join client to events on client_id"}
+{"example_id": "train_1133", "hints": "- SUM(total) per restaurant, HAVING > 500"}
+{"example_id": "train_1138", "hints": "- use LAG(hire_date) window function"}
+{"example_id": "train_1139", "hints": "- find ward for Emma Mitts, then district, then phone from District table"}
+{"example_id": "train_1146", "hints": "- COUNT(albums) per artist > average album count"}
+{"example_id": "train_1152", "hints": "- AVG(sales) per genre > 750000\n- join albums.artist_id to artists.artist_id"}
+{"example_id": "train_1163", "hints": "- last_name column in actor table"}
+{"example_id": "train_1203", "hints": "- join borders to country twice (Country1 and Country2)"}
+{"example_id": "train_1210", "hints": "- AVG(`Test Takers (Count)`) from test_performance"}
+{"example_id": "train_1213", "hints": "- hired in 2023 = hire_date LIKE '2023%'\n- join employees to assignments on emp_id"}
+{"example_id": "train_1219", "hints": "- diagnosis = 'Flu'"}
+{"example_id": "train_1241", "hints": "- extract day of week using strftime('%w', date)"}
+{"example_id": "train_1251", "hints": "- `Reading Score (Avg)` in test_performance\n- filter `Test Year` = 2023"}
+{"example_id": "train_1259", "hints": "- compare rating to 'The Great Book' using subquery"}
+{"example_id": "train_1262", "hints": "- median requires ordering loan counts and selecting middle value"}
+{"example_id": "train_1272", "hints": "- SUM(`Registered Nurses (FTE)`) from staff_metrics"}
+{"example_id": "train_1278", "hints": "- compound_id = 'C001'\n- join bonds to atoms on atom1_id and atom2_id"}
+{"example_id": "train_1279", "hints": "- category = 'game-Rowing' in label_categories\n- join app_labels to label_categories on label_id"}
+{"example_id": "train_1283", "hints": "- use RANK() or DENSE_RANK() over COUNT(school_id) by district"}
+{"example_id": "train_1285", "hints": "- LEFT JOIN artists to albums, filter WHERE album_id IS NULL"}
+{"example_id": "train_1287", "hints": "- diagnosis = 'Diabetes' or LIKE '%Diabetes%'"}
+{"example_id": "train_1298", "hints": "- MAX(`AQI (Index)`) from air_quality"}
+{"example_id": "train_1299", "hints": "- critical = severity = 'Critical'\n- join diagnoses to treatments on diagnosis_id"}
+{"example_id": "train_1301", "hints": "- album length = SUM(duration) of songs per album"}
+{"example_id": "train_1307", "hints": "- use recursive CTE to generate numbers 1-20"}
+{"example_id": "train_1312", "hints": "- use recursive CTE to generate sequence 5000-5020"}
+{"example_id": "train_1319", "hints": "- male = gender = 'M'\n- 1980s = dob LIKE '198%'"}
+{"example_id": "train_1322", "hints": "- use RANK() OVER (PARTITION BY school_id ORDER BY years_exp DESC)"}
+{"example_id": "train_1324", "hints": "- gmail = email LIKE '%@gmail.com'\n- join customers to loans on customer_id"}
+{"example_id": "train_1334", "hints": "- male = gender = 'M' or 'Male'"}
+{"example_id": "train_1335", "hints": "- starting in 2024 = start_date LIKE '2024%'\n- join projects to departments on dept_id, filter name = 'Engineering'"}
+{"example_id": "train_1342", "hints": "None"}
+{"example_id": "train_1364", "hints": "- use LEAD() window function for next row's score"}
+{"example_id": "train_1371", "hints": "- category = 'Securities' in label_categories\n- join app_labels to label_categories on label_id"}
+{"example_id": "train_1374", "hints": "- find customer_id from customer where name = 'Cordy Dumbarton'\n- name may be split into first_name and last_name"}
+{"example_id": "train_1376", "hints": "- phone type in PersonPhone table (PhoneNumberType)"}
+{"example_id": "train_1377", "hints": "- Town = Type column in Store Locations\n- join Store Locations to Regions on StateCode"}
+{"example_id": "train_1378", "hints": "- join WorkOrder to Product on ProductID\n- WorkOrderID = 2540"}
+{"example_id": "train_1386", "hints": "- 'strength' refers to strength_level column in heroes table"}
+{"example_id": "train_1395", "hints": "None"}
+{"example_id": "train_1397", "hints": "None"}
+{"example_id": "train_1401", "hints": "- 'membership types' refers to membership_type column"}
+{"example_id": "train_1403", "hints": "- positive trading day = close_price > open_price\n- running total requires cumulative sum window function"}
+{"example_id": "train_1411", "hints": "- join members.member_id = loans.member_id"}
+{"example_id": "train_1412", "hints": "None"}
+{"example_id": "train_1417", "hints": "- small hospitals = `Bed Count (Total)` < 150\n- high physicians from `Physicians (FTE)` column"}
+{"example_id": "train_1418", "hints": "- chemotherapy = treatment_type LIKE '%chemotherapy%'"}
+{"example_id": "train_1422", "hints": "- join teachers to subjects via assignment"}
+{"example_id": "train_1425", "hints": "- high ICU capacity = `ICU Beds (%)` > 15\n- length of stay = `Avg Length of Stay (days)`"}
+{"example_id": "train_1427", "hints": "- join mountain → country → capital"}
+{"example_id": "train_1429", "hints": "- UK = country IN ('UK', 'United Kingdom')"}
+{"example_id": "train_1435", "hints": "- classify by stars (1-2 = budget, 3 = mid-range, 4-5 = luxury)"}
+{"example_id": "train_1446", "hints": "- AQI refers to `Air Quality Index (AQI)` column"}
+{"example_id": "train_1451", "hints": "- median age = `Median Age (years)` column"}
+{"example_id": "train_1456", "hints": "- running total = cumulative SUM(points) window function"}
+{"example_id": "train_1466", "hints": "- customer 'Adrian' = FirstName = 'Adrian'\n- join Customers → Sales → Products"}
+{"example_id": "train_1469", "hints": "- most powerful ability = MAX(damage) from abilities"}
+{"example_id": "train_1478", "hints": "- day-over-day change = current - previous using LAG()"}
+{"example_id": "train_1480", "hints": "- dense ranking uses DENSE_RANK() window function"}
+{"example_id": "train_1490", "hints": "None"}
+{"example_id": "train_1501", "hints": "- billable period in 2010 = date contains '2010'\n- join patients → encounters"}
+{"example_id": "train_1506", "hints": "None"}
+{"example_id": "train_1513", "hints": "- running total = cumulative SUM(away_score)"}
+{"example_id": "train_1514", "hints": "- 'with ties' means use RANK() not ROW_NUMBER()"}
+{"example_id": "train_1515", "hints": "- river mouth → river → lake via River and Lake columns"}
+{"example_id": "train_1518", "hints": "- graduate degree = `Graduate Degree (%)` column"}
+{"example_id": "train_1527", "hints": "- numbering requires ROW_NUMBER() ordered by name"}
+{"example_id": "train_1530", "hints": "- 25 years old = age = '25'\n- most rated = MAX(COUNT(*)) by movie"}
+{"example_id": "train_1541", "hints": "- nationality = country column in guests"}
+{"example_id": "train_1543", "hints": "- multiple times = COUNT(*) > 1 by guest_id and hotel_id"}
+{"example_id": "train_1545", "hints": "- join congress members → zip_congress → zip_data"}
+{"example_id": "train_1548", "hints": "- low free lunch = `Free Lunch Eligible (%)` < 20"}
+{"example_id": "train_1554", "hints": "- latitude = `Latitude (deg)`, longitude = `Longitude (deg)`"}
+{"example_id": "train_1555", "hints": "- student staff ratio in university_year table"}
+{"example_id": "train_1559", "hints": "- bitterness = ibu column\n- least bitterness = MIN(ibu)"}
+{"example_id": "train_1586", "hints": "None"}
+{"example_id": "train_1590", "hints": "- broader categories = CASE grouping by genre"}
+{"example_id": "train_1598", "hints": "- South region = Region = 'South'"}
+{"example_id": "train_1599", "hints": "None"}
+{"example_id": "train_1600", "hints": "- low stock = stock_quantity < 10"}
+{"example_id": "train_1601", "hints": "- star-price alignment = compare stars vs price_per_night"}
+{"example_id": "train_1613", "hints": "- heaviest = highest molecular_weight"}
+{"example_id": "train_1616", "hints": "- Books category = category = 'Books'"}
+{"example_id": "train_1627", "hints": "- math score = `Math Proficiency (%)`"}
+{"example_id": "train_1630", "hints": "None"}
+{"example_id": "train_1633", "hints": "- USA = country IN ('USA', 'United States', 'US')\n- join orders.customer_id = customers.customer_id"}
+{"example_id": "train_1635", "hints": "None"}
+{"example_id": "train_1636", "hints": "- most common = MAX(COUNT(*)) from diagnoses"}
+{"example_id": "train_1637", "hints": "- join lakes to islands via islandIn table"}
+{"example_id": "train_1640", "hints": "None"}
+{"example_id": "train_1646", "hints": "- avg bonds per compound = COUNT(bonds) / COUNT(DISTINCT compounds)"}
+{"example_id": "train_1648", "hints": "- complexity = COUNT(atoms) + COUNT(bonds)"}
+{"example_id": "train_1658", "hints": "- 14-day moving average using AVG() OVER (ROWS BETWEEN 13 PRECEDING AND CURRENT ROW)"}
+{"example_id": "train_1662", "hints": "- deposits = tx_type = 'deposit'\n- join transactions.account_id → accounts.account_id"}
+{"example_id": "train_1663", "hints": "- aromatic bonds = bond_type = 'aromatic'"}
+{"example_id": "train_1666", "hints": "- mortality rate = `Mortality Rate (%)`\n- join patient_outcomes.HospitalID → hospital_stats.HospitalID"}
+{"example_id": "train_1684", "hints": "- entertainment = category = 'entertainment'"}
+{"example_id": "train_1694", "hints": "- genre in artists table, release_year in albums"}
+{"example_id": "train_1695", "hints": "- join staff_info.SchoolCode → enrollment_data.SchoolCode\n- district = `District Name`"}
+{"example_id": "train_1696", "hints": "- join bookings.hotel_id → hotels.hotel_id, bookings.guest_id → guests.guest_id"}
+{"example_id": "train_1700", "hints": "- join memberships.hero_id → heroes, memberships.team_id → teams, abilities.hero_id → heroes\n- damage level in abilities.damage"}
+{"example_id": "train_1707", "hints": "- hotel revenue = SUM(total_price)\n- tier classification using CASE with thresholds"}
+{"example_id": "train_1709", "hints": "- performance tier = NTILE(3) OVER (ORDER BY points)"}
+{"example_id": "train_1718", "hints": "- disputed = status = 'Disputed'\n- join orders.customerNumber → customers.customerNumber"}
+{"example_id": "train_1724", "hints": "- Computer Science = department = 'Computer Science'"}
+{"example_id": "train_1730", "hints": "None"}
+{"example_id": "train_1733", "hints": "- double bonds = bond_type = 'double'"}
+{"example_id": "train_1734", "hints": "None"}
+{"example_id": "train_1739", "hints": "None"}
+{"example_id": "train_1740", "hints": "- admission rate = `Admission Rate (per 1000)`\n- join patient_outcomes.HospitalID → hospital_stats.HospitalID"}
+{"example_id": "train_1741", "hints": "- carbon = element = 'C', oxygen = element = 'O'"}
+{"example_id": "train_1747", "hints": "- ranking = RANK() OVER (PARTITION BY teacher_id ORDER BY grade_level)"}
+{"example_id": "train_1751", "hints": "- Title I school = `Title I School (Y/N)` = 'Y'\n- performance gap = AVG(Title I) - AVG(non-Title I)"}
+{"example_id": "train_1755", "hints": "- elevation in monitoring_sites"}
+{"example_id": "train_1766", "hints": "- running average = AVG(amount) OVER (ORDER BY sale_date ROWS UNBOUNDED PRECEDING)"}
+{"example_id": "train_1773", "hints": "- 1960s = formed_year BETWEEN 1960 AND 1969"}
+{"example_id": "train_1775", "hints": "- total students = `Total Students (K-12)`"}
+{"example_id": "train_1776", "hints": "- next sale = LEAD(amount) OVER (PARTITION BY sales_id ORDER BY sale_date)"}
+{"example_id": "train_1786", "hints": "- cumulative = SUM(experience_years) OVER (ROWS UNBOUNDED PRECEDING)"}
+{"example_id": "train_1788", "hints": "None"}
+{"example_id": "train_1795", "hints": "- join customer → rental → inventory → film\n- name split into first_name and last_name"}
+{"example_id": "train_1796", "hints": "- January 2024 = order_date LIKE '2024-01%'"}
+{"example_id": "train_1798", "hints": "- join Store → SalesPerson → SalesTerritory"}
+{"example_id": "train_1800", "hints": "- best performing = MAX(amount) per salesperson"}
+{"example_id": "train_1801", "hints": "- Ophthalmology = specialty = 'Ophthalmology'"}
+{"example_id": "train_1805", "hints": "- quality = d_quality = 4, revenue = avg_revenue = 4\n- join movies2directors.directorid → directors.directorid"}
+{"example_id": "train_1807", "hints": "- Amerindian = ethnicGroup.Name = 'Amerindian'\n- infant mortality in population table"}
+{"example_id": "train_1809", "hints": "- Diabetes = diagnosis containing 'Diabetes'\n- March 2024 = date LIKE '2024-03%'"}
+{"example_id": "train_1814", "hints": "- cancer = diagnosis_name LIKE '%cancer%'"}
+{"example_id": "train_1816", "hints": "- joined in 2023 = join_date LIKE '2023%'"}
+{"example_id": "train_1819", "hints": "- 250mg = dosage = '250mg'"}
+{"example_id": "train_1831", "hints": "- admission rate = `Admission Rate (per 1000)`, fiscal year = `Fiscal Year`"}
+{"example_id": "train_1840", "hints": "- California = `State/Province` = 'California'"}
+{"example_id": "train_1843", "hints": "- 50-day SMA = AVG(price) OVER (ORDER BY date ROWS BETWEEN 49 PRECEDING AND CURRENT ROW)"}
+{"example_id": "train_1849", "hints": "- Mathematics = department = 'Mathematics'"}
+{"example_id": "train_1855", "hints": "- join bookings.hotel_id → hotels.hotel_id to get country"}
+{"example_id": "train_1857", "hints": "None"}
+{"example_id": "train_1862", "hints": "- avg songs = AVG of (COUNT(*) GROUP BY album_id)"}

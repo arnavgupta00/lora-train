@@ -1,0 +1,15 @@
+{
+  "total": 1534,
+  "success": 1534,
+  "failed": 0,
+  "with_hints": 1386,
+  "no_hints": 148,
+  "validation_errors": [],
+  "schema_cache_hits": 1523,
+  "parity_check": {
+    "passed": true,
+    "message": "System prompts match exactly",
+    "training_file": "/Users/arnav/programming/lm/data/training/t10/train_t10.jsonl"
+  },
+  "sql_audit_passed": true
+}
