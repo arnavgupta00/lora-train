@@ -25,6 +25,7 @@ python data/training/t10/error-correction/run_error_correction.py \
   --model_id Qwen/Qwen3-1.7B \
   --enable_thinking \
   --max_repair_attempts 2 \
+  --generation_batch_size 8 \
   --min_repairability_score 0.5
 ```
 
@@ -44,6 +45,7 @@ python data/training/t10/error-correction/run_error_correction.py \
   --model_id Qwen/Qwen3-1.7B \
   --enable_thinking \
   --max_repair_attempts 2 \
+  --generation_batch_size 8 \
   --min_repairability_score 0.5
 ```
 
@@ -89,4 +91,6 @@ Main run writes:
 - Repair decoding is greedy: `do_sample=False`
 - Repair model is `Qwen/Qwen3-1.7B`
 - `max_repair_attempts` is capped at `2`
+- GPU generation is batched with `--generation_batch_size`
+- Progress, throughput, and ETA are shown through a `tqdm` progress bar
 - High-diff or structurally suspicious repairs go to quarantine
