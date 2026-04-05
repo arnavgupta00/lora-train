@@ -449,7 +449,7 @@ def run_error_correction(
                     "accepted": validation["accepted"],
                     "reason": validation["reason"],
                     "failed_identifier": classification.failed_identifier,
-                    "identifier_candidates": attempt_log["candidate_scores"],
+                    "identifier_candidates": log_entry["candidate_scores"],
                     "chosen_suggestion": classification.suggested_fix,
                     "candidate_table_name": classification.correct_table,
                     "quarantine_reasons": sorted(set(
