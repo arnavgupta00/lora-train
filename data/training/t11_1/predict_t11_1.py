@@ -62,6 +62,13 @@ def normalize_sql(sql: str) -> str:
     return s
 
 
+def clean_generated_text(text: str) -> str:
+    """Remove chat-role prefixes that sometimes appear at the start of completions."""
+    s = text.strip()
+    s = re.sub(r"^(assistant|system|user)\s*[:\-]?\s*", "", s, flags=re.IGNORECASE)
+    return s
+
+
 def get_git_commit_hash() -> Optional[str]:
     """Get current git commit hash, or None if not in a git repo."""
     import subprocess
@@ -182,9 +189,12 @@ def generate_batch(
         
         # Decode
         for i, output in enumerate(outputs):
-            input_len = int(inputs["attention_mask"][i].sum().item())
+            # With left padding, generated sequences still include the full padded input width.
+            input_len = inputs["input_ids"][i].shape[0]
             gen_ids = output[input_len:]
-            raw_output = tokenizer.decode(gen_ids, skip_special_tokens=True)
+            raw_output = clean_generated_text(
+                tokenizer.decode(gen_ids, skip_special_tokens=True)
+            )
             normalized = normalize_sql(raw_output)
             
             results.append({
