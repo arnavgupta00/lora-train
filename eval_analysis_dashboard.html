@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T10 Eval Analysis · Qwen3-1.7B</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --accent: #6c8eff;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
+
+  header {
+    background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 32px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  header .badge {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff; font-size: 11px; font-weight: 700;
+    padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px;
+  }
+  header h1 { font-size: 20px; font-weight: 700; }
+  header p { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 28px 32px; }
+
+  /* KPI cards */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .kpi {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 24px;
+    position: relative; overflow: hidden;
+  }
+  .kpi::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .kpi.green::before { background: var(--green); }
+  .kpi.yellow::before { background: var(--yellow); }
+  .kpi.red::before { background: var(--red); }
+  .kpi.blue::before { background: var(--accent); }
+  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .kpi-val { font-size: 32px; font-weight: 800; line-height: 1; }
+  .kpi-val.green { color: var(--green); }
+  .kpi-val.yellow { color: var(--yellow); }
+  .kpi-val.red { color: var(--red); }
+  .kpi-val.blue { color: var(--accent); }
+  .kpi-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  /* Layout grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .full-width { margin-bottom: 20px; }
+
+  /* Cards */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px 24px;
+  }
+  .card-title {
+    font-size: 13px; font-weight: 700; color: var(--text);
+    text-transform: uppercase; letter-spacing: 0.6px;
+    margin-bottom: 18px; display: flex; align-items: center; gap: 8px;
+  }
+  .card-title .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot-blue { background: var(--accent); }
+  .dot-purple { background: var(--accent2); }
+  .dot-green { background: var(--green); }
+  .dot-yellow { background: var(--yellow); }
+  .dot-red { background: var(--red); }
+
+  .chart-wrap { position: relative; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 6px; margin-bottom: 18px; }
+  .tab {
+    padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+    cursor: pointer; border: 1px solid var(--border); color: var(--muted);
+    background: transparent; transition: all 0.15s;
+  }
+  .tab:hover { border-color: var(--accent); color: var(--accent); }
+  .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* Heatmap */
+  .heatmap-table { width: 100%; border-collapse: collapse; }
+  .heatmap-table th {
+    font-size: 11px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.5px; padding: 6px 12px; text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .heatmap-table th.center { text-align: center; }
+  .heatmap-table td { padding: 8px 12px; border-bottom: 1px solid rgba(46,51,80,0.5); }
+  .heatmap-table tr:last-child td { border-bottom: none; }
+  .heatmap-table tr:hover td { background: rgba(108, 142, 255, 0.04); }
+  .db-name { font-weight: 600; font-size: 13px; }
+  .pct-cell { text-align: center; }
+  .pct-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 6px;
+    font-size: 12px; font-weight: 700; min-width: 52px; text-align: center;
+  }
+
+  /* Progress bar */
+  .pbar-wrap { display: flex; align-items: center; gap: 10px; }
+  .pbar { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .pbar-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+  .pbar-label { font-size: 12px; font-weight: 700; min-width: 40px; text-align: right; }
+
+  /* Error legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+  /* Tooltip table styling */
+  .info-row { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 4px; font-size: 12px; }
+  .info-row .lbl { color: var(--muted); }
+  .info-row .val { font-weight: 600; }
+
+  /* Section separator */
+  .section-sep { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--muted); margin-bottom: 14px; margin-top: 8px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border); }
+
+  /* DB filter */
+  .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .filter-btn {
+    padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 600;
+    cursor: pointer; border: 1px solid var(--border); color: var(--muted);
+    background: transparent; transition: all 0.15s; letter-spacing: 0.3px;
+  }
+  .filter-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .filter-btn.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+  footer { text-align: center; color: var(--muted); font-size: 11px; padding: 24px; border-top: 1px solid var(--border); margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
+      <div class="badge">BIRD-EVAL · T10</div>
+      <div class="badge" style="background: linear-gradient(135deg,#34d399,#059669);">Qwen3-1.7B</div>
+      <div class="badge" style="background: linear-gradient(135deg,#64748b,#475569);">Without Sampling</div>
+    </div>
+    <h1>Evaluation Analysis Dashboard</h1>
+    <p>1,534 examples · 11 databases · Generated 2026-04-05</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi green">
+      <div class="kpi-label">Execution Accuracy</div>
+      <div class="kpi-val green">38.07%</div>
+      <div class="kpi-sub">584 / 1,534 correct</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label">Exact Match</div>
+      <div class="kpi-val blue">12.32%</div>
+      <div class="kpi-sub">189 / 1,534 exact</div>
+    </div>
+    <div class="kpi yellow">
+      <div class="kpi-label">Exec Failure Rate</div>
+      <div class="kpi-val yellow">20.14%</div>
+      <div class="kpi-sub">309 failed to execute</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">Wrong Result Rate</div>
+      <div class="kpi-val red">41.79%</div>
+      <div class="kpi-sub">641 ran but wrong answer</div>
+    </div>
+  </div>
+
+  <!-- Row 1: DB accuracy bar + Difficulty breakdown -->
+  <div class="grid-2">
+
+    <!-- Database Accuracy -->
+    <div class="card">
+      <div class="card-title"><span class="dot dot-blue"></span>Accuracy by Database</div>
+      <div class="chart-wrap" style="height:300px;">
+        <canvas id="dbAccChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Difficulty breakdown -->
+    <div class="card">
+      <div class="card-title"><span class="dot dot-purple"></span>Difficulty Breakdown</div>
+      <div class="tabs">
+        <button class="tab active" onclick="setDiffView('bar',this)">Bar</button>
+        <button class="tab" onclick="setDiffView('doughnut',this)">Doughnut</button>
+      </div>
+      <div class="chart-wrap" style="height:260px;">
+        <canvas id="diffChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Row 2: Per-DB Per-Difficulty Heatmap -->
+  <div class="full-width">
+    <div class="card">
+      <div class="card-title"><span class="dot dot-green"></span>Per-Database × Difficulty Breakdown</div>
+      <div class="tabs">
+        <button class="tab active" onclick="setHeatView('stacked',this)">Stacked Bar</button>
+        <button class="tab" onclick="setHeatView('table',this)">Table</button>
+      </div>
+      <div id="heatStackedWrap" class="chart-wrap" style="height:340px;">
+        <canvas id="heatStackedChart"></canvas>
+      </div>
+      <div id="heatTableWrap" style="display:none; overflow-x:auto;">
+        <table class="heatmap-table" id="detailTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 3: Outcome breakdown per DB + Error types -->
+  <div class="grid-2">
+
+    <!-- Outcome breakdown stacked -->
+    <div class="card">
+      <div class="card-title"><span class="dot dot-yellow"></span>Outcome Breakdown per Database</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div>Correct</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div>Exec Failed</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Wrong Result</div>
+      </div>
+      <div class="chart-wrap" style="height:280px;">
+        <canvas id="outcomeChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Error type donut per DB -->
+    <div class="card">
+      <div class="card-title"><span class="dot dot-red"></span>Exec Error Types</div>
+      <div class="filter-bar" id="dbFilterBar"></div>
+      <div style="display:flex; align-items:center; gap:20px;">
+        <div class="chart-wrap" style="height:220px; width:220px; flex-shrink:0;">
+          <canvas id="errorDonut"></canvas>
+        </div>
+        <div id="errorLegend" style="flex:1;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Row 4: Difficulty accuracy per database radar / detailed bar -->
+  <div class="full-width">
+    <div class="card">
+      <div class="card-title"><span class="dot dot-purple"></span>Accuracy by Difficulty per Database</div>
+      <div class="filter-bar" id="dbFilterBar2"></div>
+      <div class="chart-wrap" style="height:300px;">
+        <canvas id="diffDbChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>T10 Evaluation · Qwen3-1.7B · BIRD-Eval Benchmark · April 2026</footer>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const SUMMARY = {
+  total: 1534, correct: 584, exact_match: 189,
+  exec_fail: 309, wrong_result: 641,
+  exec_acc: 38.07, exact_acc: 12.32,
+  exec_fail_rate: 20.14, wrong_rate: 41.79
+};
+
+const DIFFICULTY = {
+  simple:      { total: 925,  correct: 431, exec_failed: 147, wrong_result: 347, accuracy: 46.59 },
+  moderate:    { total: 464,  correct: 119, exec_failed: 113, wrong_result: 232, accuracy: 25.65 },
+  challenging: { total: 145,  correct: 34,  exec_failed: 49,  wrong_result: 62,  accuracy: 23.45 },
+};
+
+const PER_DB = [
+  { db: "california_schools",    total: 89,  correct: 11,  exec_failed: 22, wrong_result: 56,  accuracy: 12.36,
+    simple: {total:54,  correct:10,  exec_failed:10, wrong_result:34},
+    moderate:{total:30, correct:1,   exec_failed:10, wrong_result:19},
+    challenging:{total:5, correct:0, exec_failed:2,  wrong_result:3} },
+  { db: "financial",             total: 106, correct: 19,  exec_failed: 18, wrong_result: 69,  accuracy: 17.92,
+    simple: {total:62,  correct:15,  exec_failed:9,  wrong_result:38},
+    moderate:{total:37, correct:4,   exec_failed:5,  wrong_result:28},
+    challenging:{total:7, correct:0, exec_failed:4,  wrong_result:3} },
+  { db: "formula_1",             total: 174, correct: 36,  exec_failed: 46, wrong_result: 92,  accuracy: 20.69,
+    simple: {total:117, correct:32,  exec_failed:21, wrong_result:64},
+    moderate:{total:43, correct:4,   exec_failed:16, wrong_result:23},
+    challenging:{total:14,correct:0, exec_failed:9,  wrong_result:5} },
+  { db: "thrombosis_prediction", total: 163, correct: 44,  exec_failed: 42, wrong_result: 77,  accuracy: 26.99,
+    simple: {total:50,  correct:21,  exec_failed:14, wrong_result:15},
+    moderate:{total:85, correct:21,  exec_failed:18, wrong_result:46},
+    challenging:{total:28,correct:2, exec_failed:10, wrong_result:16} },
+  { db: "debit_card_specializing",total:64, correct: 20,  exec_failed: 10, wrong_result: 34,  accuracy: 31.25,
+    simple: {total:43,  correct:13,  exec_failed:7,  wrong_result:23},
+    moderate:{total:17, correct:6,   exec_failed:1,  wrong_result:10},
+    challenging:{total:4, correct:1, exec_failed:2,  wrong_result:1} },
+  { db: "card_games",            total: 191, correct: 68,  exec_failed: 36, wrong_result: 87,  accuracy: 35.60,
+    simple: {total:125, correct:54,  exec_failed:22, wrong_result:49},
+    moderate:{total:53, correct:9,   exec_failed:13, wrong_result:31},
+    challenging:{total:13,correct:5, exec_failed:1,  wrong_result:7} },
+  { db: "toxicology",            total: 145, correct: 55,  exec_failed: 28, wrong_result: 62,  accuracy: 37.93,
+    simple: {total:76,  correct:34,  exec_failed:11, wrong_result:31},
+    moderate:{total:38, correct:7,   exec_failed:12, wrong_result:19},
+    challenging:{total:31,correct:14,exec_failed:5,  wrong_result:12} },
+  { db: "european_football_2",   total: 129, correct: 66,  exec_failed: 26, wrong_result: 37,  accuracy: 51.16,
+    simple: {total:65,  correct:37,  exec_failed:13, wrong_result:15},
+    moderate:{total:50, correct:25,  exec_failed:7,  wrong_result:18},
+    challenging:{total:14,correct:4, exec_failed:6,  wrong_result:4} },
+  { db: "student_club",          total: 158, correct: 84,  exec_failed: 26, wrong_result: 48,  accuracy: 53.16,
+    simple: {total:101, correct:64,  exec_failed:10, wrong_result:27},
+    moderate:{total:48, correct:18,  exec_failed:12, wrong_result:18},
+    challenging:{total:9, correct:2, exec_failed:4,  wrong_result:3} },
+  { db: "superhero",             total: 129, correct: 70,  exec_failed: 30, wrong_result: 29,  accuracy: 54.26,
+    simple: {total:81,  correct:51,  exec_failed:15, wrong_result:15},
+    moderate:{total:33, correct:14,  exec_failed:9,  wrong_result:10},
+    challenging:{total:15,correct:5, exec_failed:6,  wrong_result:4} },
+  { db: "codebase_community",    total: 186, correct: 111, exec_failed: 25, wrong_result: 50,  accuracy: 59.68,
+    simple: {total:151, correct:100, exec_failed:15, wrong_result:36},
+    moderate:{total:30, correct:10,  exec_failed:10, wrong_result:10},
+    challenging:{total:5, correct:1, exec_failed:0,  wrong_result:4} },
+];
+
+const ERROR_BY_DB = {
+  california_schools:    { column_error: 21, syntax_error: 1 },
+  card_games:            { column_error: 33, syntax_error: 1, table_error: 1, other_error: 1 },
+  codebase_community:    { column_error: 24, other_error: 1 },
+  debit_card_specializing:{ column_error: 9, other_error: 1 },
+  european_football_2:   { column_error: 24, aggregate_error: 1, other_error: 1 },
+  financial:             { column_error: 16, syntax_error: 2 },
+  formula_1:             { column_error: 40, other_error: 3, aggregate_error: 1, table_error: 2 },
+  student_club:          { column_error: 25, aggregate_error: 1 },
+  superhero:             { column_error: 30 },
+  thrombosis_prediction: { column_error: 37, other_error: 4, syntax_error: 1 },
+  toxicology:            { column_error: 28 },
+};
+
+const ALL_ERROR_TYPES = ['column_error','syntax_error','table_error','aggregate_error','other_error'];
+const ERROR_COLORS = {
+  column_error:    '#f87171',
+  syntax_error:    '#fbbf24',
+  table_error:     '#a78bfa',
+  aggregate_error: '#34d399',
+  other_error:     '#60a5fa',
+};
+const ERROR_LABELS = {
+  column_error:    'Column Error',
+  syntax_error:    'Syntax Error',
+  table_error:     'Table Error',
+  aggregate_error: 'Aggregate Error',
+  other_error:     'Other Error',
+};
+
+// ─── HELPERS ────────────────────────────────────────────────────────────────
+const shortDb = db => db.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())
+  .replace('California Schools','CA Schools')
+  .replace('Codebase Community','Codebase')
+  .replace('European Football 2','Eur. Football')
+  .replace('Thrombosis Prediction','Thrombosis')
+  .replace('Debit Card Specializing','Debit Card')
+  .replace('Formula 1','Formula 1')
+  .replace('Student Club','Student Club')
+  .replace('Card Games','Card Games')
+  .replace('Financial','Financial')
+  .replace('Superhero','Superhero')
+  .replace('Toxicology','Toxicology');
+
+function pctColor(v) {
+  if (v >= 50) return '#34d399';
+  if (v >= 35) return '#a3e635';
+  if (v >= 25) return '#fbbf24';
+  return '#f87171';
+}
+
+function pctBg(v) {
+  if (v >= 50) return 'rgba(52,211,153,0.15)';
+  if (v >= 35) return 'rgba(163,230,53,0.15)';
+  if (v >= 25) return 'rgba(251,191,36,0.15)';
+  return 'rgba(248,113,113,0.15)';
+}
+
+const chartDefaults = {
+  color: '#8892a4',
+  plugins: { legend: { display: false } },
+};
+Chart.defaults.color = '#8892a4';
+Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+Chart.defaults.font.size = 11;
+
+// ─── 1. DB ACCURACY BAR ─────────────────────────────────────────────────────
+const sortedDB = [...PER_DB].sort((a,b) => a.accuracy - b.accuracy);
+new Chart(document.getElementById('dbAccChart'), {
+  type: 'bar',
+  data: {
+    labels: sortedDB.map(d => shortDb(d.db)),
+    datasets: [{
+      data: sortedDB.map(d => d.accuracy),
+      backgroundColor: sortedDB.map(d => pctColor(d.accuracy) + 'cc'),
+      borderColor: sortedDB.map(d => pctColor(d.accuracy)),
+      borderWidth: 1.5,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => {
+            const d = sortedDB[ctx.dataIndex];
+            return ` ${d.accuracy}% (${d.correct}/${d.total})`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(46,51,80,0.5)' },
+        ticks: { callback: v => v+'%' },
+        max: 70,
+      },
+      y: {
+        grid: { display: false },
+        ticks: { font: { size: 11 } }
+      }
+    }
+  }
+});
+
+// ─── 2. DIFFICULTY CHART ─────────────────────────────────────────────────────
+let diffChartInstance = null;
+function buildDiffChart(type) {
+  if (diffChartInstance) diffChartInstance.destroy();
+  const ctx = document.getElementById('diffChart');
+  const labels = ['Simple', 'Moderate', 'Challenging'];
+  const data = [46.59, 25.65, 23.45];
+  const colors = ['#6c8eff','#a78bfa','#34d399'];
+
+  if (type === 'bar') {
+    diffChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label:'Correct', data:[431,119,34], backgroundColor:'#34d39966', borderColor:'#34d399', borderWidth:1.5, borderRadius:4, stack:'s' },
+          { label:'Exec Failed', data:[147,113,49], backgroundColor:'#f8717166', borderColor:'#f87171', borderWidth:1.5, borderRadius:4, stack:'s' },
+          { label:'Wrong Result', data:[347,232,62], backgroundColor:'#fbbf2466', borderColor:'#fbbf24', borderWidth:1.5, borderRadius:4, stack:'s' },
+        ]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins: {
+          legend: { display:true, position:'bottom', labels:{ boxWidth:10, padding:12 } },
+          tooltip: {
+            callbacks: {
+              afterBody: (items) => {
+                const i = items[0].dataIndex;
+                const totals = [925,464,145];
+                const acc = [46.59,25.65,23.45];
+                return `Accuracy: ${acc[i]}%\nTotal: ${totals[i]}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { stacked:true, grid:{display:false} },
+          y: { stacked:true, grid:{color:'rgba(46,51,80,0.5)'} }
+        }
+      }
+    });
+  } else {
+    diffChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Simple (46.6%)', 'Moderate (25.7%)', 'Challenging (23.5%)'],
+        datasets: [{
+          data: [925,464,145],
+          backgroundColor: ['#6c8eff99','#a78bfa99','#34d39999'],
+          borderColor: ['#6c8eff','#a78bfa','#34d399'],
+          borderWidth: 2,
+        }]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false, cutout:'60%',
+        plugins: {
+          legend: { display:true, position:'bottom', labels:{ boxWidth:10, padding:12 } },
+          tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} examples` } }
+        }
+      }
+    });
+  }
+}
+buildDiffChart('bar');
+
+function setDiffView(type, btn) {
+  document.querySelectorAll('.tabs')[0].querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  buildDiffChart(type);
+}
+
+// ─── 3. HEATMAP STACKED ──────────────────────────────────────────────────────
+let heatChartInstance = null;
+function buildHeatStacked() {
+  if (heatChartInstance) heatChartInstance.destroy();
+  const ctx = document.getElementById('heatStackedChart');
+  const dbsSorted = [...PER_DB].sort((a,b) => b.accuracy - a.accuracy);
+  const labels = dbsSorted.map(d => shortDb(d.db));
+
+  const simpleAcc    = dbsSorted.map(d => d.simple.total > 0 ? +(d.simple.correct/d.simple.total*100).toFixed(1) : 0);
+  const modAcc       = dbsSorted.map(d => d.moderate.total > 0 ? +(d.moderate.correct/d.moderate.total*100).toFixed(1) : 0);
+  const challAcc     = dbsSorted.map(d => d.challenging.total > 0 ? +(d.challenging.correct/d.challenging.total*100).toFixed(1) : 0);
+
+  heatChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Simple', data: simpleAcc, backgroundColor:'#6c8eff99', borderColor:'#6c8eff', borderWidth:1.5, borderRadius:4 },
+        { label: 'Moderate', data: modAcc, backgroundColor:'#a78bfa99', borderColor:'#a78bfa', borderWidth:1.5, borderRadius:4 },
+        { label: 'Challenging', data: challAcc, backgroundColor:'#34d39999', borderColor:'#34d399', borderWidth:1.5, borderRadius:4 },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: {
+        legend: { display:true, position:'bottom', labels:{ boxWidth:10, padding:14 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const d = dbsSorted[ctx.dataIndex];
+              const diff = ['simple','moderate','challenging'][ctx.datasetIndex];
+              const s = d[diff];
+              return ` ${ctx.dataset.label}: ${ctx.raw}% (${s.correct}/${s.total})`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid:{ display:false }, ticks:{ font:{ size:10 } } },
+        y: {
+          grid:{ color:'rgba(46,51,80,0.5)' },
+          ticks:{ callback:v=>v+'%' }, max:100
+        }
+      }
+    }
+  });
+}
+buildHeatStacked();
+
+// Build heatmap table
+function buildHeatTable() {
+  const tbl = document.getElementById('detailTable');
+  const dbsSorted = [...PER_DB].sort((a,b) => b.accuracy - a.accuracy);
+  tbl.innerHTML = `
+    <thead><tr>
+      <th>Database</th>
+      <th class="center">Overall</th>
+      <th class="center">Simple</th>
+      <th class="center">Moderate</th>
+      <th class="center">Challenging</th>
+      <th>Distribution</th>
+    </tr></thead>
+    <tbody>
+    ${dbsSorted.map(d => {
+      const sAcc = d.simple.total > 0 ? (d.simple.correct/d.simple.total*100).toFixed(0) : '—';
+      const mAcc = d.moderate.total > 0 ? (d.moderate.correct/d.moderate.total*100).toFixed(0) : '—';
+      const cAcc = d.challenging.total > 0 ? (d.challenging.correct/d.challenging.total*100).toFixed(0) : '—';
+      const badge = v => v === '—' ? `<span class="pct-badge" style="background:#1a1d27;color:#8892a4;">—</span>`
+        : `<span class="pct-badge" style="background:${pctBg(+v)};color:${pctColor(+v)};">${v}%</span>`;
+      return `<tr>
+        <td><div class="db-name">${shortDb(d.db)}</div><div style="font-size:10px;color:var(--muted)">${d.total} examples</div></td>
+        <td class="pct-cell">${badge(d.accuracy.toFixed(0))}</td>
+        <td class="pct-cell">${badge(sAcc)}</td>
+        <td class="pct-cell">${badge(mAcc)}</td>
+        <td class="pct-cell">${badge(cAcc)}</td>
+        <td>
+          <div class="pbar-wrap">
+            <div class="pbar">
+              <div class="pbar-fill" style="width:${d.accuracy}%;background:${pctColor(d.accuracy)}"></div>
+            </div>
+            <div class="pbar-label" style="color:${pctColor(d.accuracy)}">${d.accuracy}%</div>
+          </div>
+        </td>
+      </tr>`;
+    }).join('')}
+    </tbody>`;
+}
+buildHeatTable();
+
+function setHeatView(type, btn) {
+  document.querySelectorAll('.tabs')[1].querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  if (type === 'stacked') {
+    document.getElementById('heatStackedWrap').style.display='block';
+    document.getElementById('heatTableWrap').style.display='none';
+    buildHeatStacked();
+  } else {
+    document.getElementById('heatStackedWrap').style.display='none';
+    document.getElementById('heatTableWrap').style.display='block';
+  }
+}
+
+// ─── 4. OUTCOME STACKED PER DB ───────────────────────────────────────────────
+const outcomeDB = [...PER_DB].sort((a,b)=>b.accuracy-a.accuracy);
+new Chart(document.getElementById('outcomeChart'), {
+  type: 'bar',
+  data: {
+    labels: outcomeDB.map(d=>shortDb(d.db)),
+    datasets: [
+      { label:'Correct',      data: outcomeDB.map(d=>+(d.correct/d.total*100).toFixed(1)),      backgroundColor:'#34d39966', borderColor:'#34d399', borderWidth:1.5, stack:'s' },
+      { label:'Exec Failed',  data: outcomeDB.map(d=>+(d.exec_failed/d.total*100).toFixed(1)),  backgroundColor:'#f8717166', borderColor:'#f87171', borderWidth:1.5, stack:'s' },
+      { label:'Wrong Result', data: outcomeDB.map(d=>+(d.wrong_result/d.total*100).toFixed(1)), backgroundColor:'#fbbf2466', borderColor:'#fbbf24', borderWidth:1.5, stack:'s' },
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins: {
+      legend:{display:false},
+      tooltip:{
+        callbacks:{
+          label: ctx=>{
+            const d = outcomeDB[ctx.dataIndex];
+            const map = {0:{k:'correct',l:'Correct'},1:{k:'exec_failed',l:'Exec Failed'},2:{k:'wrong_result',l:'Wrong'}};
+            const m = map[ctx.datasetIndex];
+            return ` ${m.l}: ${ctx.raw}% (${d[m.k]})`;
+          }
+        }
+      }
+    },
+    scales: {
+      x:{ stacked:true, grid:{display:false}, ticks:{font:{size:9}} },
+      y:{ stacked:true, grid:{color:'rgba(46,51,80,0.5)'}, ticks:{callback:v=>v+'%'}, max:105 }
+    }
+  }
+});
+
+// ─── 5. ERROR DONUT ──────────────────────────────────────────────────────────
+let errorDonutInstance = null;
+let activeDbFilter = 'all';
+
+function buildErrorDonut(dbKey) {
+  if (errorDonutInstance) errorDonutInstance.destroy();
+  let counts = {};
+  if (dbKey === 'all') {
+    ALL_ERROR_TYPES.forEach(t => {
+      counts[t] = Object.values(ERROR_BY_DB).reduce((s,d)=>s+(d[t]||0),0);
+    });
+  } else {
+    counts = { ...ERROR_BY_DB[dbKey] };
+    ALL_ERROR_TYPES.forEach(t => { if (!counts[t]) counts[t] = 0; });
+  }
+
+  const types = ALL_ERROR_TYPES.filter(t=>counts[t]>0);
+  const total = types.reduce((s,t)=>s+counts[t],0);
+
+  // Legend
+  const legendEl = document.getElementById('errorLegend');
+  legendEl.innerHTML = types.map(t=>`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <div style="width:12px;height:12px;border-radius:3px;background:${ERROR_COLORS[t]};flex-shrink:0;"></div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--text)">${ERROR_LABELS[t]}</div>
+        <div style="font-size:11px;color:var(--muted)">${counts[t]} errors · ${(counts[t]/total*100).toFixed(1)}%</div>
+      </div>
+    </div>`).join('');
+
+  errorDonutInstance = new Chart(document.getElementById('errorDonut'), {
+    type: 'doughnut',
+    data: {
+      labels: types.map(t=>ERROR_LABELS[t]),
+      datasets: [{
+        data: types.map(t=>counts[t]),
+        backgroundColor: types.map(t=>ERROR_COLORS[t]+'aa'),
+        borderColor: types.map(t=>ERROR_COLORS[t]),
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins: {
+        legend:{ display:false },
+        tooltip:{ callbacks:{ label:ctx=>` ${ctx.label}: ${ctx.raw} (${(ctx.raw/total*100).toFixed(1)}%)` } }
+      }
+    }
+  });
+}
+
+// Build DB filter buttons
+const filterBar = document.getElementById('dbFilterBar');
+[{db:'all',label:'All DBs'}, ...PER_DB.sort((a,b)=>b.accuracy-a.accuracy)].forEach(d=>{
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn' + (d.db==='all'?' active':'');
+  btn.textContent = d.db==='all' ? 'All DBs' : shortDb(d.db);
+  btn.onclick = () => {
+    filterBar.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeDbFilter = d.db;
+    buildErrorDonut(d.db==='all'?'all':d.db);
+  };
+  filterBar.appendChild(btn);
+});
+buildErrorDonut('all');
+
+// ─── 6. DIFF PER DB GROUPED ──────────────────────────────────────────────────
+let diffDbInstance = null;
+let selectedDbs = new Set(PER_DB.map(d=>d.db));
+
+function buildDiffDb() {
+  if (diffDbInstance) diffDbInstance.destroy();
+  const filtered = PER_DB.filter(d=>selectedDbs.has(d.db)).sort((a,b)=>b.accuracy-a.accuracy);
+  const labels = filtered.map(d=>shortDb(d.db));
+
+  diffDbInstance = new Chart(document.getElementById('diffDbChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label:'Simple', data: filtered.map(d=>d.simple.total>0?+(d.simple.correct/d.simple.total*100).toFixed(1):0),
+          backgroundColor:'#6c8eff88', borderColor:'#6c8eff', borderWidth:1.5, borderRadius:4 },
+        { label:'Moderate', data: filtered.map(d=>d.moderate.total>0?+(d.moderate.correct/d.moderate.total*100).toFixed(1):0),
+          backgroundColor:'#a78bfa88', borderColor:'#a78bfa', borderWidth:1.5, borderRadius:4 },
+        { label:'Challenging', data: filtered.map(d=>d.challenging.total>0?+(d.challenging.correct/d.challenging.total*100).toFixed(1):0),
+          backgroundColor:'#34d39988', borderColor:'#34d399', borderWidth:1.5, borderRadius:4 },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: {
+        legend:{ display:true, position:'bottom', labels:{ boxWidth:10, padding:14 } },
+        tooltip:{ callbacks:{ label:ctx=>{
+          const d=filtered[ctx.dataIndex];
+          const diff=['simple','moderate','challenging'][ctx.datasetIndex];
+          const s=d[diff];
+          return ` ${ctx.dataset.label}: ${ctx.raw}% (${s.correct}/${s.total})`;
+        }}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10}}},
+        y:{grid:{color:'rgba(46,51,80,0.5)'},ticks:{callback:v=>v+'%'},max:100}
+      }
+    }
+  });
+}
+
+// Build DB filter buttons for row 4
+const filterBar2 = document.getElementById('dbFilterBar2');
+const allBtn2 = document.createElement('button');
+allBtn2.className = 'filter-btn active';
+allBtn2.textContent = 'All DBs';
+allBtn2.onclick = () => {
+  selectedDbs = new Set(PER_DB.map(d=>d.db));
+  filterBar2.querySelectorAll('.filter-btn').forEach(b=>b.classList.add('active'));
+  buildDiffDb();
+};
+filterBar2.appendChild(allBtn2);
+
+PER_DB.sort((a,b)=>b.accuracy-a.accuracy).forEach(d=>{
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn active';
+  btn.textContent = shortDb(d.db);
+  btn.dataset.db = d.db;
+  btn.onclick = () => {
+    if (selectedDbs.has(d.db)) {
+      selectedDbs.delete(d.db);
+      btn.classList.remove('active');
+    } else {
+      selectedDbs.add(d.db);
+      btn.classList.add('active');
+    }
+    buildDiffDb();
+  };
+  filterBar2.appendChild(btn);
+});
+buildDiffDb();
+</script>
+</body>
+</html>

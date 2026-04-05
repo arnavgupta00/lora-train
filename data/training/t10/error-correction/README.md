@@ -23,9 +23,8 @@ python data/training/t10/error-correction/run_error_correction.py \
   --db_dir data/bird_eval_datasets/dev_databases \
   --output_dir data/training/t10/error-correction \
   --model_id Qwen/Qwen3-1.7B \
-  --enable_thinking \
   --max_repair_attempts 2 \
-  --generation_batch_size 8 \
+  --generation_batch_size 61 \
   --min_repairability_score 0.5
 ```
 
