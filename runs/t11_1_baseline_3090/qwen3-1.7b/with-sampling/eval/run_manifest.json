@@ -1,0 +1,35 @@
+{
+  "timestamp": "2026-04-05T07:08:39",
+  "predictions_file": "/Users/arnav/programming/lm/runs/t11_1_baseline_3090/with-sampling/predictions/predictions_t11_1.jsonl",
+  "summary": {
+    "total_examples": 1534,
+    "execution_accuracy": 32.66,
+    "execution_correct": 501,
+    "exact_match_accuracy": 8.8,
+    "exact_match_count": 135,
+    "exec_fail_count": 369,
+    "exec_fail_rate": 24.05,
+    "wrong_result_count": 664,
+    "wrong_result_rate": 43.29,
+    "gold_sql_errors": 0,
+    "tied_append_matches": 3
+  },
+  "generation_config": {
+    "model_id": "Qwen/Qwen3-1.7B",
+    "adapter_dir": "./runs/t11_1_baseline_3090",
+    "prompts_file": "data/training/t11_1/bird_dev_t11_1.jsonl",
+    "git_commit": "d8174280dadb",
+    "generation": {
+      "max_new_tokens": 256,
+      "temperature": 0.3,
+      "top_p": 0.95,
+      "top_k": 20,
+      "do_sample": true,
+      "num_beams": 1,
+      "repetition_penalty": 1.0
+    },
+    "batch_size": 21,
+    "device": "cuda",
+    "timestamp": "2026-04-05T01:08:17"
+  }
+}
