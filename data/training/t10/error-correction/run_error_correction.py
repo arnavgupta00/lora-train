@@ -50,7 +50,6 @@ from classify_failures import classify_failure, FailureClassification
 from extract_relevant_schema import extract_relevant_schema, RelevantSchemaBlock
 from repair_prompts import RepairPromptBuilder, EscalationPromptBuilder
 from validate_repairs import validate_repair
-from deterministic_repair import attempt_deterministic_repair, DeterministicRepairResult
 
 
 # =============================================================================
@@ -245,7 +244,7 @@ def run_error_correction(
     schema_cache: SchemaCache,
     model,
     tokenizer,
-    enable_thinking: bool = False,  # V1.1: Default to no-thinking for conservative repairs
+    enable_thinking: bool = True,
     max_repair_attempts: int = 2,
     min_repairability_score: float = 0.5,
     max_new_tokens: int = 256,
@@ -340,40 +339,6 @@ def run_error_correction(
             progress.update(1)
             continue
         
-        # V1.1 Pilot filtering: skip difficult repair classes
-        # Only attempt:
-        # - exact_identifier_error (for deterministic fix)
-        # - alias_error (pure alias swaps only)
-        # - wrong_table_side_error (with unambiguous scope)
-        # Skip:
-        # - generic_exec_error
-        # - derived_metric_error
-        # - join_backbone_error
-        # - degenerate_or_truncated_sql
-        # - filter_value_mapping_error
-        skip_types = {
-            "generic_exec_error",
-            "derived_metric_error",
-            "join_backbone_error",
-            "degenerate_or_truncated_sql",
-            "filter_value_mapping_error",
-        }
-        
-        if classification.failure_type in skip_types:
-            stats["repair_skipped"] += 1
-            finalize_prediction(i, qid, db_id, record["predicted_sql"], repaired=False)
-            progress.update(1)
-            continue
-        
-        # For wrong_table_side_error, skip if scope is ambiguous
-        if classification.failure_type == "wrong_table_side_error":
-            scope = classification.failed_identifier_scope or ""
-            if "ambiguous" in scope or "complex" in scope:
-                stats["repair_skipped"] += 1
-                finalize_prediction(i, qid, db_id, record["predicted_sql"], repaired=False)
-                progress.update(1)
-                continue
-        
         # Extract relevant schema
         schema_block = extract_relevant_schema(
             schema=schema,
@@ -407,8 +372,6 @@ def run_error_correction(
             "chosen_suggestion": classification.suggested_fix,
             "candidate_table_name": classification.correct_table,
             "repair_attempted": True,
-            "repair_mode": None,  # Will be set to "deterministic" or "llm"
-            "deterministic_attempt": None,  # Will be populated if deterministic path is tried
             "attempts": [],
             "final_accepted": False,
             "final_sql": record["predicted_sql"],
@@ -419,39 +382,6 @@ def run_error_correction(
             "extracted_relations": list(schema_block.relations),
         }
         
-        # Try deterministic repair first
-        det_result = attempt_deterministic_repair(
-            predicted_sql=record["predicted_sql"],
-            error=record.get("pred_error", ""),
-            schema=schema,
-            db_path=db_path,
-            classification=classification,
-        )
-        
-        log_entry["deterministic_attempt"] = det_result.to_dict()
-        
-        if det_result.success:
-            # Deterministic repair succeeded - accept immediately
-            stats["repair_accepted"] += 1
-            stats["by_failure_type"][classification.failure_type]["accepted"] += 1
-            log_entry["repair_mode"] = "deterministic"
-            log_entry["final_accepted"] = True
-            log_entry["final_sql"] = det_result.repaired_sql
-            log_entry["final_reason"] = det_result.reason
-            repair_log.append(log_entry)
-            finalize_prediction(
-                i,
-                qid,
-                db_id,
-                det_result.repaired_sql,
-                repaired=True,
-                original_sql=record["predicted_sql"],
-            )
-            progress.update(1)
-            continue
-        
-        # Deterministic repair failed - add to pending for LLM repair
-        log_entry["repair_mode"] = "llm"
         stats["repair_attempted"] += 1
         stats["by_failure_type"][classification.failure_type]["attempted"] += 1
         pending.append({

@@ -64,62 +64,6 @@ class FailureClassification:
 
 
 # =============================================================================
-# Helper Functions
-# =============================================================================
-
-def is_pure_alias_fix(
-    col_name: str,
-    wrong_alias: str,
-    aliased_table: str,
-    tables_with_col: List[str],
-    predicted_sql: str,
-    schema: SchemaInfo,
-) -> bool:
-    """
-    Determine if this is a pure alias fix (safe for deterministic repair).
-    
-    Criteria for pure alias fix:
-    - Column exists in exactly one other table (or small set)
-    - Alias map is unambiguous
-    - Fix is only alias/table qualification
-    - No join rewrite required
-    - No table addition required
-    """
-    # Must have exactly one or two target tables
-    if len(tables_with_col) > 2:
-        return False
-    
-    # The correct table must already be in the SQL (no need to add joins)
-    sql_tables = extract_tables_from_sql(predicted_sql)
-    if not any(t in sql_tables for t in tables_with_col):
-        return False
-    
-    # Get alias map
-    aliases = extract_aliases_from_sql(predicted_sql)
-    
-    # Must have a clear alias for the target table
-    target_table = tables_with_col[0]
-    target_alias_found = False
-    for alias, table in aliases.items():
-        if table == target_table:
-            target_alias_found = True
-            break
-    
-    if not target_alias_found and target_table not in sql_tables:
-        # Table isn't in SQL at all - would need join addition
-        return False
-    
-    # Verify the wrong_alias actually points to a different table
-    if wrong_alias in aliases:
-        if aliases[wrong_alias] == target_table:
-            # Alias already points to correct table - not an alias issue
-            return False
-    
-    # All checks passed - this is a pure alias fix
-    return True
-
-
-# =============================================================================
 # Classification Functions
 # =============================================================================
 
@@ -398,39 +342,19 @@ def classify_column_error(
             aliased_table = aliases.get(wrong_alias)
             
             if aliased_table and aliased_table not in tables_with_col:
-                # Alias points to wrong table - check if it's a pure alias fix
-                is_pure = is_pure_alias_fix(
-                    col_name, wrong_alias, aliased_table, tables_with_col, predicted_sql, schema
+                # Alias points to wrong table - clear alias confusion
+                return FailureClassification(
+                    question_id=question_id,
+                    db_id=db_id,
+                    failure_type="alias_error",
+                    confidence=0.9,
+                    reason=f"Column '{col_name}' exists in {tables_with_col} but alias '{wrong_alias}' points to '{aliased_table}'",
+                    repairability_score=0.85,
+                    failed_identifier=col_name,
+                    wrong_alias=wrong_alias,
+                    correct_table=tables_with_col[0],
+                    failed_identifier_scope="same_table" if aliased_table else None,
                 )
-                
-                if is_pure:
-                    # Pure alias confusion - safe for deterministic repair
-                    return FailureClassification(
-                        question_id=question_id,
-                        db_id=db_id,
-                        failure_type="alias_error",
-                        confidence=0.9,
-                        reason=f"Pure alias fix: column '{col_name}' exists in {tables_with_col} but alias '{wrong_alias}' points to '{aliased_table}'",
-                        repairability_score=0.85,
-                        failed_identifier=col_name,
-                        wrong_alias=wrong_alias,
-                        correct_table=tables_with_col[0],
-                        failed_identifier_scope="same_table",
-                    )
-                else:
-                    # Complex alias issue - route to wrong_table_side_error
-                    return FailureClassification(
-                        question_id=question_id,
-                        db_id=db_id,
-                        failure_type="wrong_table_side_error",
-                        confidence=0.75,
-                        reason=f"Column '{col_name}' exists in {tables_with_col} but requires join/table changes",
-                        repairability_score=0.55,
-                        failed_identifier=col_name,
-                        wrong_alias=wrong_alias,
-                        correct_table=tables_with_col[0],
-                        failed_identifier_scope="complex_alias",
-                    )
             else:
                 confidence = 0.85 if len(tables_with_col) == 1 else 0.6
                 repairability = 0.75 if len(tables_with_col) == 1 else 0.45
