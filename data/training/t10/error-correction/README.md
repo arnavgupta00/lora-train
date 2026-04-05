@@ -1,0 +1,92 @@
+# T10 Error Correction
+
+V1 repairs only **non-executing SQL** from the T10 greedy LoRA baseline.
+Wrong-result cases are classified but **not** auto-repaired.
+
+## Inputs
+
+- Predictions: `runs/t10_baseline_3090/qwen3-1.7b/without-sampling/predictions/predictions_t10.jsonl`
+- Per-example eval: `runs/t10_baseline_3090/qwen3-1.7b/without-sampling/eval/per_example_results.jsonl`
+- Eval report: `runs/t10_baseline_3090/qwen3-1.7b/without-sampling/eval/eval_report_t10.json`
+- Prompts: `data/training/t10/bird_dev_t10.jsonl`
+- Databases: `data/bird_eval_datasets/dev_databases`
+
+## Full Repair Run
+
+```bash
+cd /Users/arnav/programming/lm
+
+python data/training/t10/error-correction/run_error_correction.py \
+  --predictions runs/t10_baseline_3090/qwen3-1.7b/without-sampling/predictions/predictions_t10.jsonl \
+  --eval_results runs/t10_baseline_3090/qwen3-1.7b/without-sampling/eval/per_example_results.jsonl \
+  --prompts data/training/t10/bird_dev_t10.jsonl \
+  --db_dir data/bird_eval_datasets/dev_databases \
+  --output_dir data/training/t10/error-correction \
+  --model_id Qwen/Qwen3-1.7B \
+  --enable_thinking \
+  --max_repair_attempts 2 \
+  --min_repairability_score 0.5
+```
+
+## Small Validation Batch
+
+Use this before a full run.
+
+```bash
+cd /Users/arnav/programming/lm
+
+python data/training/t10/error-correction/run_error_correction.py \
+  --predictions data/training/t10/error-correction/validation-batch/predictions_execfail_validation.jsonl \
+  --eval_results data/training/t10/error-correction/validation-batch/per_example_results_execfail_validation.jsonl \
+  --prompts data/training/t10/bird_dev_t10.jsonl \
+  --db_dir data/bird_eval_datasets/dev_databases \
+  --output_dir data/training/t10/error-correction/validation-batch/output \
+  --model_id Qwen/Qwen3-1.7B \
+  --enable_thinking \
+  --max_repair_attempts 2 \
+  --min_repairability_score 0.5
+```
+
+## Evaluate Repaired Predictions
+
+```bash
+cd /Users/arnav/programming/lm
+
+python data/training/t10/error-correction/evaluate_repaired.py \
+  --repaired_predictions data/training/t10/error-correction/repaired_predictions_t10.jsonl \
+  --original_eval runs/t10_baseline_3090/qwen3-1.7b/without-sampling/eval/eval_report_t10.json \
+  --prompts data/training/t10/bird_dev_t10.jsonl \
+  --db_dir data/bird_eval_datasets/dev_databases \
+  --output_dir data/training/t10/error-correction
+```
+
+## Evaluate Validation Batch
+
+```bash
+cd /Users/arnav/programming/lm
+
+python data/training/t10/error-correction/evaluate_repaired.py \
+  --repaired_predictions data/training/t10/error-correction/validation-batch/output/repaired_predictions_t10.jsonl \
+  --original_eval runs/t10_baseline_3090/qwen3-1.7b/without-sampling/eval/eval_report_t10.json \
+  --prompts data/training/t10/bird_dev_t10.jsonl \
+  --db_dir data/bird_eval_datasets/dev_databases \
+  --output_dir data/training/t10/error-correction/validation-batch/output
+```
+
+## Outputs
+
+Main run writes:
+
+- `repaired_predictions_t10.jsonl`
+- `repair_log_t10.jsonl`
+- `quarantined_repairs_t10.jsonl`
+- `repair_summary_t10.json`
+- `repair_eval_report_t10.json`
+- `repair_eval_summary_t10.md`
+
+## Notes
+
+- Repair decoding is greedy: `do_sample=False`
+- Repair model is `Qwen/Qwen3-1.7B`
+- `max_repair_attempts` is capped at `2`
+- High-diff or structurally suspicious repairs go to quarantine
