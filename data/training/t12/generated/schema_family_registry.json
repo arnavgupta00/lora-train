@@ -1,0 +1,146 @@
+{
+  "version": "1.0",
+  "created_at": "2026-04-05",
+  "description": "Registry of non-eval schema sources for T12 archetype-targeted training",
+  "contamination_policy": {
+    "high_risk": "reject - exact eval schemas, trivial rewrites, same identifier bundles",
+    "low_risk": "flag only - same reasoning pattern, different schema/identifiers"
+  },
+  "families": [
+    {
+      "family_name": "california_schools-type",
+      "schema_id": "education_programs",
+      "source_type": "synthetic_isomorphic",
+      "contamination_risk": "low",
+      "based_on_eval_family": true,
+      "exact_eval_schema_used": false,
+      "target_accepted_count": 360,
+      "reasoning_patterns": [
+        "rank by metric, return another field",
+        "derived school/program ratios",
+        "district/county/school-level disambiguation",
+        "subset counting"
+      ],
+      "schema_file": "generated/schemas/education_programs.sql"
+    },
+    {
+      "family_name": "financial-type",
+      "schema_id": "banking_system",
+      "source_type": "synthetic_isomorphic",
+      "contamination_risk": "low",
+      "based_on_eval_family": true,
+      "exact_eval_schema_used": false,
+      "target_accepted_count": 340,
+      "reasoning_patterns": [
+        "table ownership of domain-coded columns",
+        "account/client/disposition multi-hop joins",
+        "denominator and cohort logic",
+        "nested extremum + linked projection"
+      ],
+      "schema_file": "generated/schemas/banking_system.sql"
+    },
+    {
+      "family_name": "formula_1-type",
+      "schema_id": "motorsport_events",
+      "source_type": "synthetic_isomorphic",
+      "contamination_risk": "low",
+      "based_on_eval_family": true,
+      "exact_eval_schema_used": false,
+      "target_accepted_count": 300,
+      "reasoning_patterns": [
+        "event-phase table disambiguation",
+        "rank-by-one-field return-metadata",
+        "circuit/geography/event joins",
+        "completion and percentage logic"
+      ],
+      "schema_file": "generated/schemas/motorsport_events.sql"
+    },
+    {
+      "family_name": "thrombosis_prediction-type",
+      "schema_id": "clinical_records",
+      "source_type": "synthetic_isomorphic",
+      "contamination_risk": "low",
+      "based_on_eval_family": true,
+      "exact_eval_schema_used": false,
+      "target_accepted_count": 260,
+      "reasoning_patterns": [
+        "temporal anchor logic",
+        "patient/exam/lab ownership",
+        "cohort definition then aggregation",
+        "distinct patient-set shape"
+      ],
+      "schema_file": "generated/schemas/clinical_records.sql"
+    },
+    {
+      "family_name": "debit_card_specializing-type",
+      "schema_id": "retail_analytics",
+      "source_type": "synthetic_isomorphic",
+      "contamination_risk": "low",
+      "based_on_eval_family": true,
+      "exact_eval_schema_used": false,
+      "target_accepted_count": 160,
+      "reasoning_patterns": [
+        "group-then-rank business analytics",
+        "year-month windows",
+        "segment comparisons",
+        "two-stage customer history retrieval"
+      ],
+      "schema_file": "generated/schemas/retail_analytics.sql"
+    },
+    {
+      "family_name": "card_games-type",
+      "schema_id": "media_catalog",
+      "source_type": "synthetic_isomorphic",
+      "contamination_risk": "low",
+      "based_on_eval_family": true,
+      "exact_eval_schema_used": false,
+      "target_accepted_count": 180,
+      "reasoning_patterns": [
+        "id vs name return discipline",
+        "side-table ownership",
+        "metadata/rulings/foreign-text disambiguation",
+        "count distinct entity not joined row"
+      ],
+      "schema_file": "generated/schemas/media_catalog.sql"
+    },
+    {
+      "family_name": "toxicology-type",
+      "schema_id": "materials_chemistry",
+      "source_type": "synthetic_isomorphic",
+      "contamination_risk": "low",
+      "based_on_eval_family": true,
+      "exact_eval_schema_used": false,
+      "target_accepted_count": 150,
+      "reasoning_patterns": [
+        "atom vs molecule counting unit",
+        "graph path selection",
+        "bond-table vs connection-table disambiguation",
+        "denominator level for percentages"
+      ],
+      "schema_file": "generated/schemas/materials_chemistry.sql"
+    },
+    {
+      "family_name": "stability-pack",
+      "schema_id": "mixed_stable",
+      "source_type": "handcrafted_schema",
+      "contamination_risk": "low",
+      "based_on_eval_family": false,
+      "exact_eval_schema_used": false,
+      "target_accepted_count": 300,
+      "reasoning_patterns": [
+        "easy retrieval discipline",
+        "moderate joins",
+        "sane group-by patterns",
+        "exact return-field control"
+      ],
+      "schema_file": "generated/schemas/mixed_stable.sql",
+      "purpose": "prevent regression on strong families"
+    }
+  ],
+  "total_target_accepted": 2050,
+  "example_type_mix": {
+    "canonical": 0.55,
+    "contrastive": 0.25,
+    "output_discipline": 0.20
+  }
+}

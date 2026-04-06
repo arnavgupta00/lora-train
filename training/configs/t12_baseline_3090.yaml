@@ -1,0 +1,63 @@
+# T12 Baseline Training Configuration
+# RTX 3090 optimized settings
+
+run_name: t12_baseline_3090
+model_id: Qwen/Qwen3.5-2B
+method: lora_sft
+
+# Data paths (relative to repo root or absolute)
+train_jsonl: data/training/t12/train_t12.jsonl
+dev_jsonl: data/training/t12/dev_t12.jsonl
+output_dir: runs/t12_baseline_3090
+
+# Precision and optimization
+load_in_4bit: false
+bf16: true
+fp16: false
+gradient_checkpointing: true
+pack: false  # Set to true for better GPU utilization if needed
+
+# Sequence length
+max_seq_len: 3072
+
+# Batch size configuration
+per_device_train_batch_size: 2
+per_device_eval_batch_size: 2
+gradient_accumulation_steps: 16
+# Effective batch size = 2 * 16 = 32
+
+# Learning rate and scheduler
+learning_rate: 1.5e-4
+lr_scheduler_type: cosine
+warmup_ratio: 0.05
+weight_decay: 0.01
+max_grad_norm: 1.0
+
+# Training duration
+num_train_epochs: 2
+
+# LoRA configuration
+lora_r: 32
+lora_alpha: 64
+lora_dropout: 0.05
+target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+
+# Logging and checkpointing
+logging_steps: 50
+eval_steps: null
+save_steps: 500
+save_total_limit: 2
+
+# Reproducibility
+seed: 42
+
+# Hardware optimization
+dataloader_num_workers: 4
+attn_implementation: sdpa  # Scaled Dot-Product Attention (efficient)

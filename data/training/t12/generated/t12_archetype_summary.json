@@ -1,0 +1,114 @@
+{
+  "california_schools-type": {
+    "count": 360,
+    "example_types": {
+      "contrastive": 93,
+      "canonical": 191,
+      "output-discipline": 76
+    },
+    "difficulty": {
+      "simple": 93,
+      "moderate": 159,
+      "challenging": 108
+    },
+    "avg_sampling_weight": 1.835555555555551
+  },
+  "financial-type": {
+    "count": 340,
+    "example_types": {
+      "canonical": 242,
+      "contrastive": 87,
+      "output-discipline": 11
+    },
+    "difficulty": {
+      "simple": 24,
+      "moderate": 65,
+      "challenging": 251
+    },
+    "avg_sampling_weight": 2.011764705882361
+  },
+  "formula_1-type": {
+    "count": 300,
+    "example_types": {
+      "canonical": 193,
+      "contrastive": 71,
+      "output-discipline": 36
+    },
+    "difficulty": {
+      "moderate": 108,
+      "challenging": 114,
+      "simple": 78
+    },
+    "avg_sampling_weight": 1.8459999999999992
+  },
+  "thrombosis_prediction-type": {
+    "count": 260,
+    "example_types": {
+      "output-discipline": 45,
+      "canonical": 153,
+      "contrastive": 62
+    },
+    "difficulty": {
+      "challenging": 105,
+      "simple": 57,
+      "moderate": 98
+    },
+    "avg_sampling_weight": 1.862307692307693
+  },
+  "debit_card_specializing-type": {
+    "count": 160,
+    "example_types": {
+      "output-discipline": 28,
+      "contrastive": 41,
+      "canonical": 91
+    },
+    "difficulty": {
+      "challenging": 54,
+      "simple": 33,
+      "moderate": 73
+    },
+    "avg_sampling_weight": 1.8393750000000015
+  },
+  "card_games-type": {
+    "count": 180,
+    "example_types": {
+      "output-discipline": 40,
+      "contrastive": 44,
+      "canonical": 96
+    },
+    "difficulty": {
+      "moderate": 78,
+      "simple": 58,
+      "challenging": 44
+    },
+    "avg_sampling_weight": 1.8038888888888898
+  },
+  "toxicology-type": {
+    "count": 150,
+    "example_types": {
+      "output-discipline": 9,
+      "canonical": 107,
+      "contrastive": 34
+    },
+    "difficulty": {
+      "challenging": 77,
+      "moderate": 60,
+      "simple": 13
+    },
+    "avg_sampling_weight": 1.8460000000000032
+  },
+  "stability-pack": {
+    "count": 300,
+    "example_types": {
+      "canonical": 167,
+      "contrastive": 75,
+      "output-discipline": 58
+    },
+    "difficulty": {
+      "moderate": 116,
+      "challenging": 59,
+      "simple": 125
+    },
+    "avg_sampling_weight": 1.0
+  }
+}

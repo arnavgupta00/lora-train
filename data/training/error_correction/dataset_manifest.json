@@ -1,0 +1,194 @@
+{
+  "name": "SQL Error-Correction Dataset v1",
+  "version": "v1",
+  "created_at": "2026-04-06T11:08:46.934938Z",
+  "description": "Supervised dataset for SQL error-correction model",
+  "task": "Given broken SQL, output corrected SQL",
+  "files": {
+    "internal_train": "train_error_repair_v1.jsonl",
+    "internal_dev": "dev_error_repair_v1.jsonl",
+    "clean_train": "train_error_repair_v1_clean.jsonl",
+    "clean_dev": "dev_error_repair_v1_clean.jsonl"
+  },
+  "statistics": {
+    "train_error_repair_v1.jsonl": 999,
+    "dev_error_repair_v1.jsonl": 105,
+    "train_error_repair_v1_clean.jsonl": 0,
+    "dev_error_repair_v1_clean.jsonl": 0,
+    "samples/real_failures_examples.jsonl": 50
+  },
+  "config": {
+    "version": "v1",
+    "build_size": "B",
+    "targets": {
+      "internal_train": 18000,
+      "internal_dev": 2000,
+      "clean_train_min": 8000,
+      "clean_train_max": 12000,
+      "clean_dev_min": 1000,
+      "clean_dev_max": 1500,
+      "real_failures_min": 0.2,
+      "real_failures_max": 0.35,
+      "synthetic_min": 0.5,
+      "synthetic_max": 0.65,
+      "contrastive_manual_min": 0.1,
+      "contrastive_manual_max": 0.25
+    }
+  },
+  "build_stats": {
+    "start_time": "2026-04-06T11:00:20.521446+00:00",
+    "config": {
+      "version": "v1",
+      "build_size": "B",
+      "include_t11_1": true
+    },
+    "real_failures": {
+      "total_loaded": 3068,
+      "failures_found": 1126,
+      "exec_failed_count": 374,
+      "wrong_result_count": 752,
+      "skipped_no_gold": 0,
+      "skipped_duplicate": 821,
+      "by_db": {
+        "california_schools": 86,
+        "financial": 96,
+        "toxicology": 108,
+        "card_games": 145,
+        "codebase_community": 100,
+        "superhero": 70,
+        "formula_1": 156,
+        "european_football_2": 83,
+        "thrombosis_prediction": 137,
+        "student_club": 88,
+        "debit_card_specializing": 57
+      },
+      "by_difficulty": {
+        "simple": 614,
+        "moderate": 393,
+        "challenging": 119
+      },
+      "by_source": {
+        "t10": 950,
+        "t11_1": 176
+      }
+    },
+    "synthetic": {
+      "total_generated": 0,
+      "note": "Generated using parallel workers"
+    },
+    "contamination": {
+      "total_processed": 1126,
+      "routed_clean": 0,
+      "routed_internal": 1126,
+      "routed_rejected": 0,
+      "clean_percentage": 0.0,
+      "internal_percentage": 100.0,
+      "rejected_percentage": 0.0,
+      "by_source": {
+        "bird_dev_direct": 1126,
+        "bird_gold_reference": 0,
+        "bird_prediction_broken": 0,
+        "non_benchmark": 0,
+        "transformed_archetype": 0
+      },
+      "rejection_reasons": {}
+    },
+    "deduplication": {
+      "total_input": 1126,
+      "total_output": 1104,
+      "duplicates_removed": 22,
+      "duplicate_rate": 1.95,
+      "exact_key_dupes": 0,
+      "normalized_broken_dupes": 2,
+      "normalized_corrected_dupes": 0,
+      "semantic_dupes": 20,
+      "cross_pool_similar": 0
+    },
+    "splitting": {
+      "clean": {
+        "total_input": 0,
+        "train_count": 0,
+        "dev_count": 0,
+        "train_ratio": 0.0,
+        "dev_ratio": 0.0,
+        "train_by_db": {},
+        "dev_by_db": {},
+        "train_by_failure_type": {},
+        "dev_by_failure_type": {},
+        "quota_violations": []
+      },
+      "internal": {
+        "total_input": 1104,
+        "train_count": 999,
+        "dev_count": 105,
+        "train_ratio": 0.905,
+        "dev_ratio": 0.095,
+        "train_by_db": {
+          "california_schools": 78,
+          "financial": 86,
+          "toxicology": 96,
+          "card_games": 127,
+          "codebase_community": 90,
+          "superhero": 62,
+          "formula_1": 135,
+          "european_football_2": 74,
+          "thrombosis_prediction": 121,
+          "student_club": 80,
+          "debit_card_specializing": 50
+        },
+        "dev_by_db": {
+          "california_schools": 8,
+          "financial": 9,
+          "toxicology": 10,
+          "card_games": 14,
+          "codebase_community": 10,
+          "superhero": 6,
+          "formula_1": 15,
+          "european_football_2": 8,
+          "thrombosis_prediction": 13,
+          "student_club": 7,
+          "debit_card_specializing": 5
+        },
+        "train_by_failure_type": {
+          "wrong_return_field": 667,
+          "exact_identifier_error": 317,
+          "syntax_local_error": 15
+        },
+        "dev_by_failure_type": {
+          "wrong_return_field": 70,
+          "exact_identifier_error": 29,
+          "syntax_local_error": 6
+        },
+        "quota_violations": [
+          "DB california_schools: 78/400 (shortfall: 322)",
+          "DB financial: 86/400 (shortfall: 314)",
+          "DB formula_1: 135/400 (shortfall: 265)",
+          "DB thrombosis_prediction: 121/350 (shortfall: 229)",
+          "DB debit_card_specializing: 50/300 (shortfall: 250)",
+          "DB card_games: 127/350 (shortfall: 223)",
+          "DB toxicology: 96/300 (shortfall: 204)",
+          "DB codebase_community: 90/200 (shortfall: 110)",
+          "DB european_football_2: 74/200 (shortfall: 126)",
+          "DB student_club: 80/150 (shortfall: 70)",
+          "DB superhero: 62/150 (shortfall: 88)",
+          "Failure type wrong_return_field: 667/1500 (shortfall: 833)",
+          "Failure type wrong_count_granularity: 0/1200 (shortfall: 1200)",
+          "Failure type wrong_denominator: 0/1000 (shortfall: 1000)",
+          "Failure type wrong_cohort_definition: 0/800 (shortfall: 800)",
+          "Failure type join_path_error: 0/1200 (shortfall: 1200)",
+          "Failure type temporal_anchor_error: 0/600 (shortfall: 600)",
+          "Failure type table_family_confusion: 0/800 (shortfall: 800)",
+          "Failure type alias_error: 0/600 (shortfall: 600)",
+          "Failure type wrong_table_side_error: 0/500 (shortfall: 500)",
+          "Failure type missing_distinct: 0/500 (shortfall: 500)",
+          "Failure type syntax_local_error: 15/400 (shortfall: 385)",
+          "Failure type degenerate_or_truncated_sql: 0/300 (shortfall: 300)"
+        ]
+      }
+    },
+    "verification": {
+      "passed": 1126,
+      "failed": 0
+    }
+  }
+}

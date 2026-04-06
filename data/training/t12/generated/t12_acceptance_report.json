@@ -1,0 +1,83 @@
+{
+  "created_at": "2026-04-06T04:31:28.602322",
+  "total_raw": 3552,
+  "total_accepted": 2050,
+  "backbone_size": 14034,
+  "final_train_size": 16084,
+  "dev_size": 665,
+  "audit_set_size": 96,
+  "per_family_stats": {
+    "california_schools_type": {
+      "total_raw": 432,
+      "passed_syntax": 432,
+      "passed_duplicate": 403,
+      "accepted": 360,
+      "rejected_syntax": 0,
+      "rejected_duplicate": 29,
+      "rejected_over_target": 43
+    },
+    "financial_type": {
+      "total_raw": 752,
+      "passed_syntax": 752,
+      "passed_duplicate": 431,
+      "accepted": 340,
+      "rejected_syntax": 0,
+      "rejected_duplicate": 321,
+      "rejected_over_target": 91
+    },
+    "formula_1_type": {
+      "total_raw": 510,
+      "passed_syntax": 510,
+      "passed_duplicate": 341,
+      "accepted": 300,
+      "rejected_syntax": 0,
+      "rejected_duplicate": 169,
+      "rejected_over_target": 41
+    },
+    "thrombosis_prediction_type": {
+      "total_raw": 412,
+      "passed_syntax": 412,
+      "passed_duplicate": 297,
+      "accepted": 260,
+      "rejected_syntax": 0,
+      "rejected_duplicate": 115,
+      "rejected_over_target": 37
+    },
+    "debit_card_specializing_type": {
+      "total_raw": 190,
+      "passed_syntax": 190,
+      "passed_duplicate": 160,
+      "accepted": 160,
+      "rejected_syntax": 0,
+      "rejected_duplicate": 30,
+      "rejected_over_target": 0
+    },
+    "card_games_type": {
+      "total_raw": 216,
+      "passed_syntax": 216,
+      "passed_duplicate": 180,
+      "accepted": 180,
+      "rejected_syntax": 0,
+      "rejected_duplicate": 36,
+      "rejected_over_target": 0
+    },
+    "toxicology_type": {
+      "total_raw": 330,
+      "passed_syntax": 330,
+      "passed_duplicate": 194,
+      "accepted": 150,
+      "rejected_syntax": 0,
+      "rejected_duplicate": 136,
+      "rejected_over_target": 44
+    },
+    "stability_pack": {
+      "total_raw": 710,
+      "passed_syntax": 710,
+      "passed_duplicate": 395,
+      "accepted": 300,
+      "rejected_syntax": 0,
+      "rejected_duplicate": 315,
+      "rejected_over_target": 95
+    }
+  }
+}

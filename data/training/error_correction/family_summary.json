@@ -1,0 +1,48 @@
+{
+  "by_database_family": {
+    "california_schools": {
+      "train": 78,
+      "dev": 8
+    },
+    "financial": {
+      "train": 86,
+      "dev": 9
+    },
+    "toxicology": {
+      "train": 96,
+      "dev": 10
+    },
+    "card_games": {
+      "train": 127,
+      "dev": 14
+    },
+    "codebase_community": {
+      "train": 90,
+      "dev": 10
+    },
+    "superhero": {
+      "train": 62,
+      "dev": 6
+    },
+    "formula_1": {
+      "train": 135,
+      "dev": 15
+    },
+    "european_football_2": {
+      "train": 74,
+      "dev": 8
+    },
+    "thrombosis_prediction": {
+      "train": 121,
+      "dev": 13
+    },
+    "student_club": {
+      "train": 80,
+      "dev": 7
+    },
+    "debit_card_specializing": {
+      "train": 50,
+      "dev": 5
+    }
+  }
+}

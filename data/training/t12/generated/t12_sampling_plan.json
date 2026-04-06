@@ -1,0 +1,16 @@
+{
+  "strategy": "per_example_weights",
+  "max_physical_duplication": 2,
+  "weights_by_archetype": {
+    "rank-by-X return-Y": 1.8,
+    "derived ratio/formula": 1.8,
+    "multi-hop join chain": 2.0,
+    "table-family disambiguation": 1.8,
+    "distinct entity vs row count": 1.7,
+    "cohort/denominator percentage": 1.9,
+    "date-anchor / temporal SQLite logic": 1.8,
+    "side-table text/metadata return-field": 1.6,
+    "graph traversal / molecule-level": 1.7
+  },
+  "total_weighted_examples": 3578.7
+}

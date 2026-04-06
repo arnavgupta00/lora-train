@@ -1,0 +1,16 @@
+{
+  "by_failure_type": {
+    "wrong_return_field": {
+      "train": 667,
+      "dev": 70
+    },
+    "exact_identifier_error": {
+      "train": 317,
+      "dev": 29
+    },
+    "syntax_local_error": {
+      "train": 15,
+      "dev": 6
+    }
+  }
+}

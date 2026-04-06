@@ -1,0 +1,33 @@
+{
+  "version": "T12",
+  "created_at": "2026-04-06T04:31:28.604617",
+  "description": "Final archetype-targeted dataset upgrade for SQL generation",
+  "benchmark_clean": true,
+  "backbone_source": "T11_2",
+  "files": {
+    "train": "train_t12.jsonl",
+    "dev": "dev_t12.jsonl",
+    "audit_set": "t12_audit_set.jsonl",
+    "source_map": "t12_source_map.jsonl",
+    "acceptance_report": "t12_acceptance_report.json",
+    "archetype_summary": "t12_archetype_summary.json",
+    "sampling_plan": "t12_sampling_plan.json",
+    "schema_registry": "schema_family_registry.json"
+  },
+  "stats": {
+    "train_examples": 16084,
+    "dev_examples": 665,
+    "t12_additions": 2050,
+    "backbone_examples": 14034
+  },
+  "target_families": [
+    "california_schools_type",
+    "financial_type",
+    "formula_1_type",
+    "thrombosis_prediction_type",
+    "debit_card_specializing_type",
+    "card_games_type",
+    "toxicology_type",
+    "stability_pack"
+  ]
+}

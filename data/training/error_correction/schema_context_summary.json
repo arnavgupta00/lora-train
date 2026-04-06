@@ -1,0 +1,10 @@
+{
+  "by_schema_type": {
+    "compact_relevant": 839,
+    "full_schema": 265
+  },
+  "percentages": {
+    "compact_relevant": 76.0,
+    "full_schema": 24.0
+  }
+}
