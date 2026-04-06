@@ -1,76 +1,82 @@
-# SQL Error-Correction Dataset v1_spec_write_smoke
+# Error-Correction Training Pipeline
 
-## Overview
+Training entrypoints for the benchmark-clean SQL repair dataset.
 
-Supervised dataset for training SQL error-correction models.
+## Quick Start
 
-**Task**: Given schema, question, hints, broken SQL, and optional error message,
-output the corrected SQL query only.
+```bash
+# Train with the provided Qwen3.5-2B config
+./data/training/error_correction/train_error_correction.sh \
+    --config training/configs/error_correction_qwen3_5_2b_3090.yaml \
+    2>&1 | tee runs/error_correction_qwen3_5_2b_3090/train.log
 
-## Statistics
-
-| Split | Count |
-|-------|-------|
-| Internal Train | 50 |
-| Internal Dev | 7 |
-| Clean Train | 34 |
-| Clean Dev | 5 |
-
-## Files
-
-### Main Datasets
-
-- `train_error_repair_v1_spec_write_smoke.jsonl` - Full training set (internal)
-- `dev_error_repair_v1_spec_write_smoke.jsonl` - Full dev set (internal)
-- `train_error_repair_v1_spec_write_smoke_clean.jsonl` - Benchmark-safe training set
-- `dev_error_repair_v1_spec_write_smoke_clean.jsonl` - Benchmark-safe dev set
-
-### Reports
-
-- `dataset_manifest.json` - Build configuration and statistics
-- `family_summary.json` - Examples by database family
-- `failure_type_summary.json` - Examples by failure type
-- `source_mix_summary.json` - Examples by source type
-- `schema_context_summary.json` - Examples by schema context type
-- `contamination_report.json` - Contamination routing decisions
-- `duplicate_report.json` - Deduplication statistics
-- `verification_report.json` - Verification results
-- `subagent_usage_report.json` - Subagent proposal usage and outcomes
-
-### Additional Files
-
-- `rejected_examples.jsonl` - Examples that failed validation
-- `internal_only_examples.jsonl` - Internal-only examples before clean filtering
-- `samples/` - Sample examples for inspection
-
-## Example Format
-
-```json
-{
-  "messages": [
-    {"role": "system", "content": "..."},
-    {"role": "user", "content": "Schema:\n...\n\nHints:\n...\n\nQuestion:\n...\n\nBroken SQL:\n..."},
-    {"role": "assistant", "content": "SELECT ..."}
-  ],
-  "metadata": {...}
-}
+# Or train with explicit CLI arguments
+./data/training/error_correction/train_error_correction.sh \
+    --model_id "Qwen/Qwen3.5-2B" \
+    --output_dir "./runs/error_correction_sft_001"
 ```
 
-## Contamination Policy
+## Dataset Files
 
-- **Internal datasets**: May contain examples derived from BIRD dev/eval
-- **Clean datasets**: Only non-benchmark sources (BIRD train, Spider, custom)
+- `train_error_repair_v1_clean.jsonl`
+- `dev_error_repair_v1_clean.jsonl`
 
-Clean datasets are safe for use when evaluating on BIRD benchmark.
+These are the benchmark-clean repair examples. The launcher validates prompt
+structure before calling `/Users/arnav/programming/lm/training/train_lora.py`.
 
-## Usage
+## Prompt Contract
 
-```python
-import json
+System prompt:
 
-with open('train_error_repair_v1_spec_write_smoke_clean.jsonl') as f:
-    for line in f:
-        example = json.loads(line)
-        messages = example['messages']
-        metadata = example['metadata']
+```text
+You are an expert SQL repair assistant. Given schema, question, hints, broken SQL, and optional database error, output the corrected SQL query only.
 ```
+
+User prompt structure:
+
+```text
+Schema:
+...
+
+Hints:
+...
+
+Question:
+...
+
+Broken SQL:
+...
+
+Error:
+...        # optional
+
+Failure Type:
+...        # optional
+```
+
+Assistant output:
+
+- corrected SQL only
+- no markdown
+- no code fences
+- no reasoning or prose
+
+## Included Launcher + Config
+
+- `/Users/arnav/programming/lm/data/training/error_correction/train_error_correction.sh`
+- `/Users/arnav/programming/lm/training/configs/error_correction_qwen3_5_2b_3090.yaml`
+
+The default config is tuned for a faster single-GPU run on a 24 GB class card:
+
+- `Qwen/Qwen3.5-2B`
+- `max_seq_len: 2048`
+- `per_device_train_batch_size: 2`
+- `gradient_accumulation_steps: 16`
+- `pack: true`
+- `bf16 + gradient_checkpointing`
+- `logging_steps: 50`
+- standard Trainer progress bar + saved `run_meta.json`
+
+This profile is intended to keep training in the `3-4 hour` range on the current
+repair dataset. If you hit memory pressure, drop `per_device_train_batch_size`
+back to `1` and restore `gradient_accumulation_steps: 32`.

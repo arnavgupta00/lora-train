@@ -1,0 +1,40 @@
+{
+  "by_failure_type": {
+    "wrong_return_field": {
+      "train": 2779,
+      "dev": 278
+    },
+    "exact_identifier_error": {
+      "train": 317,
+      "dev": 28
+    },
+    "syntax_local_error": {
+      "train": 127,
+      "dev": 22
+    },
+    "output_shape_error": {
+      "train": 1377,
+      "dev": 131
+    },
+    "wrong_table_side_error": {
+      "train": 1890,
+      "dev": 181
+    },
+    "degenerate_or_truncated_sql": {
+      "train": 4218,
+      "dev": 432
+    },
+    "wrong_cohort_definition": {
+      "train": 2367,
+      "dev": 240
+    },
+    "missing_distinct": {
+      "train": 676,
+      "dev": 83
+    },
+    "wrong_count_granularity": {
+      "train": 298,
+      "dev": 57
+    }
+  }
+}
