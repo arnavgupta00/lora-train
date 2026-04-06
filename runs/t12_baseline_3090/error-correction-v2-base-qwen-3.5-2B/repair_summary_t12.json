@@ -1,0 +1,42 @@
+{
+  "total": 1534,
+  "correct": 628,
+  "exec_failed": 192,
+  "wrong_result": 714,
+  "repair_attempted": 906,
+  "repair_accepted": 42,
+  "repair_rejected": 864,
+  "repair_skipped": 0,
+  "quarantined_repairs": 484,
+  "repair_scope": "V2 repairs all non-correct SQL (including wrong-result) and accepts only when repaired execution results match gold.",
+  "by_failure_type": {
+    "wrong_result_non_exec_failure": {
+      "attempted": 714,
+      "accepted": 30
+    },
+    "exact_identifier_error": {
+      "attempted": 24,
+      "accepted": 2
+    },
+    "alias_error": {
+      "attempted": 135,
+      "accepted": 10
+    },
+    "generic_exec_error": {
+      "attempted": 12,
+      "accepted": 0
+    },
+    "wrong_table_side_error": {
+      "attempted": 17,
+      "accepted": 0
+    },
+    "derived_metric_error": {
+      "attempted": 2,
+      "accepted": 0
+    },
+    "degenerate_or_truncated_sql": {
+      "attempted": 2,
+      "accepted": 0
+    }
+  }
+}

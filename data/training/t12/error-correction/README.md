@@ -43,10 +43,14 @@ python data/training/t12/error-correction/run_error_correction.py \
   --db_dir data/bird_eval_datasets/dev_databases \
   --output_dir data/training/t12/error-correction \
   --model_id Qwen/Qwen3.5-2B \
-  --adapter_path /path/to/lora_adapter \
+  --adapter_path runs/error_correction_qwen3_5_2b_3090 \
   --max_repair_attempts 2 \
   --generation_batch_size 61
 ```
+
+Use a workspace-relative adapter path (for example `runs/...`) or a full path like
+`/workspace/lora-train/runs/...`. Avoid `/runs/...` unless that directory actually exists
+at filesystem root.
 
 If `--adapter_path` is used, install PEFT:
 
@@ -118,7 +122,7 @@ Evaluation script writes:
 
 - Repair decoding is greedy: `do_sample=False`
 - Repair model is `Qwen/Qwen3.5-2B`
-- Optional adapter: `--adapter_path /path/to/lora_adapter`
+- Optional adapter: `--adapter_path runs/error_correction_qwen3_5_2b_3090`
 - `max_repair_attempts` is capped at `2`
 - GPU generation is batched with `--generation_batch_size`
 - `--min_repairability_score` is deprecated in V2 and ignored (all non-correct examples are attempted)
