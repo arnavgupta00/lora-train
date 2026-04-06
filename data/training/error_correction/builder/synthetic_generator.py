@@ -80,11 +80,18 @@ class SyntheticStats:
 class SyntheticGenerator:
     """Generator for synthetic corruption examples."""
     
-    def __init__(self, config: BuilderConfig):
+    def __init__(
+        self,
+        config: BuilderConfig,
+        query_timeout_seconds: Optional[float] = None,
+    ):
         self.config = config
         self.paths = config.paths
         self.schema_builder = SchemaBuilder(self.paths, config.schema)
-        self.verifier = Verifier(self.paths)
+        self.verifier = Verifier(
+            self.paths,
+            query_timeout_seconds=query_timeout_seconds,
+        )
         self.stats = SyntheticStats()
         
         # Cache

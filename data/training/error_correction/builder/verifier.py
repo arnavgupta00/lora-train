@@ -11,6 +11,7 @@ Validates corrected SQL against reference SQL using:
 import hashlib
 import re
 import sqlite3
+import time
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from .config import PathConfig
@@ -38,6 +39,7 @@ def execute_sql(
     db_path: str,
     sql: str,
     timeout: int = 30,
+    query_timeout_seconds: Optional[float] = None,
 ) -> Tuple[bool, Any]:
     """
     Execute SQL on a SQLite database and return results.
@@ -45,15 +47,36 @@ def execute_sql(
     Returns:
         (success, results) where results is the query output or error message
     """
+    conn = None
     try:
         conn = sqlite3.connect(db_path, timeout=timeout)
         conn.text_factory = lambda b: b.decode(errors="ignore")
+        conn.execute("PRAGMA query_only=ON")
+
+        if query_timeout_seconds and query_timeout_seconds > 0:
+            deadline = time.monotonic() + query_timeout_seconds
+
+            def progress_handler() -> int:
+                return 1 if time.monotonic() >= deadline else 0
+
+            conn.set_progress_handler(progress_handler, 1000)
+
         cursor = conn.execute(sql)
         results = cursor.fetchall()
-        conn.close()
         return True, results
+    except sqlite3.OperationalError as e:
+        if query_timeout_seconds and "interrupted" in str(e).lower():
+            return False, f"Query timeout after {query_timeout_seconds:.1f}s"
+        return False, str(e)
     except Exception as e:
         return False, str(e)
+    finally:
+        if conn is not None:
+            try:
+                conn.set_progress_handler(None, 0)
+            except Exception:
+                pass
+            conn.close()
 
 
 def results_match(gold_results: Any, pred_results: Any) -> bool:
@@ -264,6 +287,7 @@ def verify_corrected_sql(
     broken_sql: str,
     db_path: str,
     require_different: bool = True,
+    query_timeout_seconds: Optional[float] = None,
 ) -> Tuple[bool, Dict[str, Any]]:
     """
     Verify that corrected SQL is valid and matches reference.
@@ -305,14 +329,22 @@ def verify_corrected_sql(
         details["errors"].extend(schema_errors)
     
     # Execute corrected SQL
-    corrected_success, corrected_results = execute_sql(db_path, corrected_sql)
+    corrected_success, corrected_results = execute_sql(
+        db_path,
+        corrected_sql,
+        query_timeout_seconds=query_timeout_seconds,
+    )
     details["corrected_executes"] = corrected_success
     if not corrected_success:
         details["errors"].append(f"Corrected SQL execution failed: {corrected_results}")
         return False, details
     
     # Execute reference SQL
-    reference_success, reference_results = execute_sql(db_path, reference_sql)
+    reference_success, reference_results = execute_sql(
+        db_path,
+        reference_sql,
+        query_timeout_seconds=query_timeout_seconds,
+    )
     details["reference_executes"] = reference_success
     if not reference_success:
         details["errors"].append(f"Reference SQL execution failed: {reference_results}")
@@ -344,6 +376,7 @@ def verify_synthetic_pair(
     parent_sql: str,
     broken_sql: str,
     db_path: str,
+    query_timeout_seconds: Optional[float] = None,
 ) -> Tuple[bool, Dict[str, Any]]:
     """
     Verify a synthetic corruption pair.
@@ -361,14 +394,22 @@ def verify_synthetic_pair(
     }
     
     # Execute parent SQL (should succeed)
-    parent_success, parent_results = execute_sql(db_path, parent_sql)
+    parent_success, parent_results = execute_sql(
+        db_path,
+        parent_sql,
+        query_timeout_seconds=query_timeout_seconds,
+    )
     details["parent_executes"] = parent_success
     if not parent_success:
         details["errors"].append(f"Parent SQL execution failed: {parent_results}")
         return False, details
     
     # Execute broken SQL (may or may not succeed)
-    broken_success, broken_results = execute_sql(db_path, broken_sql)
+    broken_success, broken_results = execute_sql(
+        db_path,
+        broken_sql,
+        query_timeout_seconds=query_timeout_seconds,
+    )
     details["broken_executes"] = broken_success
     
     # If broken SQL succeeds, results should be different from parent
@@ -393,8 +434,13 @@ def verify_synthetic_pair(
 class Verifier:
     """Verifier for error-correction examples."""
     
-    def __init__(self, paths: PathConfig):
+    def __init__(
+        self,
+        paths: PathConfig,
+        query_timeout_seconds: Optional[float] = None,
+    ):
         self.paths = paths
+        self.query_timeout_seconds = query_timeout_seconds
         self._schema_cache: Dict[str, Dict[str, List[str]]] = {}
     
     def get_schema(self, db_id: str) -> Dict[str, List[str]]:
@@ -419,6 +465,7 @@ class Verifier:
             broken_sql=broken_sql,
             db_path=db_path,
             require_different=True,
+            query_timeout_seconds=self.query_timeout_seconds,
         )
     
     def verify_synthetic(
@@ -433,6 +480,7 @@ class Verifier:
             parent_sql=parent_sql,
             broken_sql=broken_sql,
             db_path=db_path,
+            query_timeout_seconds=self.query_timeout_seconds,
         )
     
     def check_reference_valid(
@@ -450,7 +498,11 @@ class Verifier:
             return False, "Reference SQL is empty"
         
         db_path = str(self.paths.database_path(db_id))
-        success, result = execute_sql(db_path, reference_sql)
+        success, result = execute_sql(
+            db_path,
+            reference_sql,
+            query_timeout_seconds=self.query_timeout_seconds,
+        )
         
         if not success:
             return False, f"Reference SQL failed: {result}"

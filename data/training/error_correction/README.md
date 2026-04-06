@@ -1,4 +1,4 @@
-# SQL Error-Correction Dataset v1
+# SQL Error-Correction Dataset v1_checkpoint_smoke
 
 ## Overview
 
@@ -11,8 +11,8 @@ output the corrected SQL query only.
 
 | Split | Count |
 |-------|-------|
-| Internal Train | 999 |
-| Internal Dev | 105 |
+| Internal Train | 28 |
+| Internal Dev | 11 |
 | Clean Train | 0 |
 | Clean Dev | 0 |
 
@@ -20,10 +20,10 @@ output the corrected SQL query only.
 
 ### Main Datasets
 
-- `train_error_repair_v1.jsonl` - Full training set (internal)
-- `dev_error_repair_v1.jsonl` - Full dev set (internal)
-- `train_error_repair_v1_clean.jsonl` - Benchmark-safe training set
-- `dev_error_repair_v1_clean.jsonl` - Benchmark-safe dev set
+- `train_error_repair_v1_checkpoint_smoke.jsonl` - Full training set (internal)
+- `dev_error_repair_v1_checkpoint_smoke.jsonl` - Full dev set (internal)
+- `train_error_repair_v1_checkpoint_smoke_clean.jsonl` - Benchmark-safe training set
+- `dev_error_repair_v1_checkpoint_smoke_clean.jsonl` - Benchmark-safe dev set
 
 ### Reports
 
@@ -65,7 +65,7 @@ Clean datasets are safe for use when evaluating on BIRD benchmark.
 ```python
 import json
 
-with open('train_error_repair_v1_clean.jsonl') as f:
+with open('train_error_repair_v1_checkpoint_smoke_clean.jsonl') as f:
     for line in f:
         example = json.loads(line)
         messages = example['messages']

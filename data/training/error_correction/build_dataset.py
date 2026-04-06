@@ -92,6 +92,24 @@ def parse_args():
         default=min(4, cpu_count()),
         help=f"Number of parallel workers (default: {min(4, cpu_count())})",
     )
+    parser.add_argument(
+        "--parallel-backend",
+        choices=["auto", "threads", "processes"],
+        default="auto",
+        help="Parallel backend for synthetic generation (default: auto)",
+    )
+    parser.add_argument(
+        "--synthetic-chunk-size",
+        type=int,
+        default=None,
+        help="Synthetic examples per work item; smaller values improve load balancing and progress reporting",
+    )
+    parser.add_argument(
+        "--query-timeout-seconds",
+        type=float,
+        default=10.0,
+        help="Abort individual SQLite queries that exceed this wall-clock time (default: 10s)",
+    )
     return parser.parse_args()
 
 
@@ -145,13 +163,17 @@ def generate_synthetic_batch_worker(args):
     Returns:
         List of RepairExample objects
     """
-    config, start_idx, count, seed = args
+    config, start_idx, count, seed, query_timeout_seconds = args
+    started_at = time.time()
     
     # Set random seed for reproducibility within this worker
     random.seed(seed)
     
     # Create generator instance
-    generator = SyntheticGenerator(config)
+    generator = SyntheticGenerator(
+        config,
+        query_timeout_seconds=query_timeout_seconds,
+    )
     
     # Load gold sources
     train_file = config.paths.t10_data_dir / "train_t10.jsonl"
@@ -170,7 +192,37 @@ def generate_synthetic_batch_worker(args):
         if len(examples) >= count:
             break
     
-    return examples
+    return {
+        "batch_idx": start_idx,
+        "requested": count,
+        "produced": len(examples),
+        "elapsed_seconds": round(time.time() - started_at, 2),
+        "stats": generator.get_stats().to_dict(),
+        "examples": examples,
+    }
+
+
+def resolve_parallel_backend(backend: str, num_workers: int) -> str:
+    """Pick a safe default backend for the current worker count."""
+    if backend != "auto":
+        return backend
+    return "processes" if num_workers > 4 else "threads"
+
+
+def resolve_synthetic_chunk_size(
+    target_synthetic: int,
+    num_workers: int,
+    requested_chunk_size: Optional[int],
+) -> int:
+    """Choose a chunk size that keeps workers busy while preserving visibility."""
+    if requested_chunk_size is not None and requested_chunk_size > 0:
+        return requested_chunk_size
+
+    if target_synthetic <= 0:
+        return 25
+
+    auto_chunk = max(25, target_synthetic // max(1, num_workers * 4))
+    return min(250, auto_chunk)
 
 
 def build_dataset(
@@ -181,6 +233,9 @@ def build_dataset(
     skip_synthetic: bool = False,
     skip_real: bool = False,
     num_workers: int = 4,
+    parallel_backend: str = "auto",
+    synthetic_chunk_size: Optional[int] = None,
+    query_timeout_seconds: float = 10.0,
 ) -> Dict[str, Any]:
     """
     Build the error-correction dataset.
@@ -201,7 +256,10 @@ def build_dataset(
     
     # Initialize components
     log("Initializing components...", verbose)
-    verifier = Verifier(config.paths)
+    verifier = Verifier(
+        config.paths,
+        query_timeout_seconds=query_timeout_seconds,
+    )
     contamination_router = ContaminationRouter()
     deduplicator = Deduplicator(semantic_threshold=0.85)
     
@@ -311,7 +369,14 @@ def build_dataset(
     # Phase 2: Synthetic Generation (Parallelized)
     # =========================================================================
     if not skip_synthetic:
-        log(f"Phase 2: Generating synthetic examples using {num_workers} workers...", verbose)
+        resolved_backend = resolve_parallel_backend(parallel_backend, num_workers)
+        executor_cls = ProcessPoolExecutor if resolved_backend == "processes" else ThreadPoolExecutor
+
+        log(
+            f"Phase 2: Generating synthetic examples using {num_workers} workers "
+            f"via {resolved_backend}...",
+            verbose,
+        )
         
         # Calculate target
         target_synthetic = limit_synthetic
@@ -322,7 +387,11 @@ def build_dataset(
         log(f"  Target: {target_synthetic} synthetic examples", verbose)
         
         # Split work across workers
-        batch_size = max(100, target_synthetic // num_workers)
+        batch_size = resolve_synthetic_chunk_size(
+            target_synthetic=target_synthetic,
+            num_workers=num_workers,
+            requested_chunk_size=synthetic_chunk_size,
+        )
         batches = []
         remaining = target_synthetic
         batch_idx = 0
@@ -330,22 +399,35 @@ def build_dataset(
         while remaining > 0:
             count = min(batch_size, remaining)
             seed = 42 + batch_idx  # Reproducible seeds
-            batches.append((config, batch_idx, count, seed))
+            batches.append((config, batch_idx, count, seed, query_timeout_seconds))
             remaining -= count
             batch_idx += 1
         
-        log(f"  Split into {len(batches)} batches across {num_workers} workers", verbose)
+        log(
+            f"  Split into {len(batches)} chunks of up to {batch_size} examples",
+            verbose,
+        )
         
-        # Generate in parallel using threads (safer than processes for this use case)
         synthetic_count = 0
-        with ThreadPoolExecutor(max_workers=num_workers) as executor:
+        synthetic_attempts = 0
+        synthetic_failed_corruption = 0
+        synthetic_failed_verification = 0
+        next_checkpoint = 500
+        synthetic_phase_start = time.time()
+
+        with executor_cls(max_workers=num_workers) as executor:
             futures = {executor.submit(generate_synthetic_batch_worker, batch): i 
                       for i, batch in enumerate(batches)}
             
             for future in as_completed(futures):
-                batch_idx = futures[future]
+                future_batch_idx = futures[future]
                 try:
-                    batch_examples = future.result()
+                    batch_result = future.result()
+                    batch_examples = batch_result["examples"]
+                    batch_stats = batch_result["stats"]
+                    synthetic_attempts += batch_stats.get("total_attempted", 0)
+                    synthetic_failed_corruption += batch_stats.get("failed_corruption", 0)
+                    synthetic_failed_verification += batch_stats.get("failed_verification", 0)
                     
                     # Process each example
                     for example in batch_examples:
@@ -371,21 +453,40 @@ def build_dataset(
                         all_examples.append(example)
                         synthetic_count += 1
                     
-                    log(f"  Batch {batch_idx + 1}/{len(batches)} complete: {len(batch_examples)} examples ({synthetic_count}/{target_synthetic} total)", verbose)
+                    elapsed = max(0.01, time.time() - synthetic_phase_start)
+                    rate = synthetic_count / elapsed
+                    remaining_examples = max(0, target_synthetic - synthetic_count)
+                    eta_seconds = remaining_examples / rate if rate > 0 else 0.0
+
+                    log(
+                        "  Chunk "
+                        f"{batch_result['batch_idx'] + 1}/{len(batches)} complete: "
+                        f"{len(batch_examples)}/{batch_result['requested']} examples in "
+                        f"{batch_result['elapsed_seconds']:.1f}s "
+                        f"({synthetic_count}/{target_synthetic} accepted, "
+                        f"{synthetic_attempts} attempted, "
+                        f"{synthetic_failed_verification} verify fails, "
+                        f"ETA {eta_seconds / 60:.1f} min)",
+                        verbose,
+                    )
                     
-                    # Save progress every 500 examples
-                    if synthetic_count % 500 == 0 or synthetic_count >= target_synthetic:
+                    if synthetic_count >= next_checkpoint or synthetic_count >= target_synthetic:
                         log(f"  Progress: {synthetic_count} synthetic examples generated, saving checkpoint...", verbose)
                         if not dry_run:
                             save_progress(all_examples, config.paths.output_dir, "progress_synthetic", config.version)
+                        while synthetic_count >= next_checkpoint:
+                            next_checkpoint += 500
                 
                 except Exception as e:
-                    log(f"  Batch {batch_idx + 1} failed: {e}", verbose)
+                    log(f"  Chunk {future_batch_idx + 1} failed: {e}", verbose)
         
-        # Merge stats from generator (this is approximate since we used multiple instances)
         build_stats["synthetic"] = {
+            "backend": resolved_backend,
+            "chunk_size": batch_size,
             "total_generated": synthetic_count,
-            "note": "Generated using parallel workers"
+            "total_attempted": synthetic_attempts,
+            "failed_corruption": synthetic_failed_corruption,
+            "failed_verification": synthetic_failed_verification,
         }
         log(f"  Generated {synthetic_count} synthetic examples", verbose)
         
@@ -529,6 +630,9 @@ def main():
             skip_synthetic=args.skip_synthetic,
             skip_real=args.skip_real,
             num_workers=args.workers,
+            parallel_backend=args.parallel_backend,
+            synthetic_chunk_size=args.synthetic_chunk_size,
+            query_timeout_seconds=args.query_timeout_seconds,
         )
         
         # Print summary
