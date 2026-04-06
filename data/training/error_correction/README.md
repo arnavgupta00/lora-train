@@ -66,17 +66,19 @@ Assistant output:
 - `/Users/arnav/programming/lm/data/training/error_correction/train_error_correction.sh`
 - `/Users/arnav/programming/lm/training/configs/error_correction_qwen3_5_2b_3090.yaml`
 
-The default config is tuned for a faster single-GPU run on a 24 GB class card:
+The default config is tuned for a stronger quality-oriented single-GPU run on a 24 GB class card:
 
 - `Qwen/Qwen3.5-2B`
 - `max_seq_len: 2048`
 - `per_device_train_batch_size: 2`
 - `gradient_accumulation_steps: 16`
-- `pack: false`
+- `pack: true`
 - `bf16 + gradient_checkpointing`
 - `logging_steps: 25`
+- `num_train_epochs: 2`
 - standard Trainer progress bar + saved `run_meta.json`
 
-This profile is intended to keep training in the `3-4 hour` range on the current
-repair dataset. If you hit memory pressure, drop `per_device_train_batch_size`
-back to `1` and restore `gradient_accumulation_steps: 32`.
+This profile favors a bit more training signal over the previous speed-first
+setup. If you need to reduce runtime or hit memory pressure, drop
+`per_device_train_batch_size` back to `1`, restore `gradient_accumulation_steps: 32`,
+or reduce `num_train_epochs` to `1`.
