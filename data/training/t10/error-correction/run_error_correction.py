@@ -122,6 +122,30 @@ def merge_data(
 # Model Loading
 # =============================================================================
 
+def resolve_adapter_path(adapter_path: str) -> str:
+    """Resolve adapter path for local directories before falling back to Hub IDs.
+
+    Supports:
+    - Absolute local paths
+    - Relative local paths
+    - Common mistaken '/runs/...' style paths by trying './runs/...'
+    """
+    raw_path = adapter_path.strip()
+    path_obj = Path(raw_path)
+
+    # 1) As-provided path (absolute or relative)
+    if path_obj.exists():
+        return str(path_obj.resolve())
+
+    # 2) Common mistake: /runs/... while repo root contains ./runs/...
+    if raw_path.startswith("/runs/"):
+        alt = Path.cwd() / raw_path.lstrip("/")
+        if alt.exists():
+            return str(alt.resolve())
+
+    # 3) Keep original value for HF Hub resolution, if intended
+    return raw_path
+
 def load_model(model_id: str, device: str = "cuda", adapter_path: Optional[str] = None):
     """Load model, tokenizer, and optional LoRA adapter."""
     import torch
@@ -152,8 +176,19 @@ def load_model(model_id: str, device: str = "cuda", adapter_path: Optional[str] 
             raise RuntimeError(
                 "--adapter_path was provided but peft is not installed. Install with `pip install peft`."
             ) from exc
-        print(f"Loading LoRA adapter: {adapter_path}")
-        model = PeftModel.from_pretrained(model, adapter_path)
+        resolved_adapter_path = resolve_adapter_path(adapter_path)
+        print(f"Loading LoRA adapter: {resolved_adapter_path}")
+
+        # If path looks local, validate adapter_config.json before invoking PEFT.
+        local_candidate = Path(resolved_adapter_path)
+        if local_candidate.exists() and local_candidate.is_dir():
+            config_path = local_candidate / "adapter_config.json"
+            if not config_path.exists():
+                raise ValueError(
+                    f"Invalid adapter directory: '{resolved_adapter_path}' (missing adapter_config.json)"
+                )
+
+        model = PeftModel.from_pretrained(model, resolved_adapter_path)
     
     model = model.to(device)
     model.eval()
