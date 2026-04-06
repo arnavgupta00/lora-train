@@ -790,6 +790,7 @@ def build_dataset(
         writer = DatasetWriter(config.paths.output_dir, config.version)
         
         # Write main datasets
+        log("  Writing train/dev JSONL files...", verbose)
         writer.write_datasets(
             clean_train=clean_train,
             clean_dev=clean_dev,
@@ -798,10 +799,12 @@ def build_dataset(
         )
         
         # Write rejected
+        log("  Writing rejected/internal-only files...", verbose)
         writer.write_rejected(rejected_examples)
         writer.write_internal_only(internal_examples)
         
         # Write samples
+        log("  Preparing sample files...", verbose)
         real_samples = [e for e in all_examples if e.metadata.source_type == "real_failure"]
         synth_samples = [e for e in all_examples if e.metadata.source_type == "synthetic_corruption"]
         contrastive_samples = [e for e in all_examples if e.metadata.source_type == "contrastive"]
@@ -816,6 +819,7 @@ def build_dataset(
             )
         ]
         
+        log("  Writing sample files...", verbose)
         writer.write_samples(
             real_failures=real_samples,
             synthetic=synth_samples,
@@ -842,6 +846,7 @@ def build_dataset(
     )
 
     if not dry_run:
+        log("  Generating final reports...", verbose)
         writer.generate_all_reports(
             clean_train=clean_train,
             clean_dev=clean_dev,
@@ -855,7 +860,7 @@ def build_dataset(
             },
             build_stats=build_stats,
             contamination_report=contamination_router.generate_report(),
-            dedup_report=deduplicator.generate_report(),
+            dedup_report=deduplicator.generate_report(max_cross_pool_checks=200000),
             verification_report=build_stats["verification"],
             subagent_report=subagent.get_stats().to_dict() if not skip_real else {},
         )

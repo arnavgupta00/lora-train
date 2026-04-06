@@ -321,29 +321,74 @@ class Deduplicator:
         
         return self._clean_examples.copy(), self._internal_examples.copy()
     
-    def check_cross_pool_similarity(self) -> List[Dict[str, Any]]:
+    def check_cross_pool_similarity(
+        self,
+        max_pairwise_checks: int = 200000,
+    ) -> Dict[str, Any]:
         """
         Check for similar examples across clean and internal pools.
-        
+
         Returns report of similar pairs (for tracking, not rejection).
+        The comparison workload is bounded to keep report generation fast
+        on large builds.
         """
         similar_pairs = []
-        
-        for clean_ex in self._clean_examples:
-            for internal_ex in self._internal_examples:
-                sim = semantic_similarity(
-                    clean_ex.question, clean_ex.broken_sql, clean_ex.corrected_sql,
-                    internal_ex.question, internal_ex.broken_sql, internal_ex.corrected_sql,
-                )
+        clean_count = len(self._clean_examples)
+        internal_count = len(self._internal_examples)
+        total_possible_pairs = clean_count * internal_count
+
+        if clean_count == 0 or internal_count == 0:
+            return {
+                "pairs": similar_pairs,
+                "checked_pairs": 0,
+                "total_possible_pairs": total_possible_pairs,
+                "sampling_applied": False,
+                "max_pairwise_checks": max_pairwise_checks,
+            }
+
+        max_pairwise_checks = max(1, int(max_pairwise_checks))
+        sampling_applied = total_possible_pairs > max_pairwise_checks
+        checked_pairs = 0
+        cross_pool_hits = 0
+
+        internal_indices: List[int]
+        if sampling_applied:
+            # Evenly sample internal examples so checks scale linearly with clean size.
+            per_clean = max(1, max_pairwise_checks // max(1, clean_count))
+            per_clean = min(internal_count, per_clean)
+            if per_clean >= internal_count:
+                internal_indices = list(range(internal_count))
+            else:
+                step = max(1, internal_count // per_clean)
+                internal_indices = list(range(0, internal_count, step))[:per_clean]
+        else:
+            internal_indices = list(range(internal_count))
+
+        for clean_ex, clean_sig in zip(self._clean_examples, self._clean_signatures):
+            for idx in internal_indices:
+                internal_ex = self._internal_examples[idx]
+                internal_sig = self._internal_signatures[idx]
+
+                sim = semantic_similarity_from_signatures(clean_sig, internal_sig)
+                checked_pairs += 1
+
                 if sim >= 0.8:  # Slightly lower threshold for cross-pool
                     similar_pairs.append({
                         "clean_id": clean_ex.metadata.example_id,
                         "internal_id": internal_ex.metadata.example_id,
                         "similarity": round(sim, 3),
                     })
-                    self.stats.cross_pool_similar += 1
-        
-        return similar_pairs
+                    cross_pool_hits += 1
+
+        self.stats.cross_pool_similar = cross_pool_hits
+
+        return {
+            "pairs": similar_pairs,
+            "checked_pairs": checked_pairs,
+            "total_possible_pairs": total_possible_pairs,
+            "sampling_applied": sampling_applied,
+            "max_pairwise_checks": max_pairwise_checks,
+        }
     
     def get_clean_examples(self) -> List[RepairExample]:
         """Get deduplicated clean examples."""
@@ -357,14 +402,20 @@ class Deduplicator:
         """Get deduplication statistics."""
         return self.stats
     
-    def generate_report(self) -> Dict[str, Any]:
+    def generate_report(self, max_cross_pool_checks: int = 200000) -> Dict[str, Any]:
         """Generate deduplication report."""
-        cross_pool = self.check_cross_pool_similarity()
+        cross_pool = self.check_cross_pool_similarity(
+            max_pairwise_checks=max_cross_pool_checks,
+        )
         
         return {
             "statistics": self.stats.to_dict(),
             "clean_count": len(self._clean_examples),
             "internal_count": len(self._internal_examples),
-            "cross_pool_similar_pairs": len(cross_pool),
-            "cross_pool_sample": cross_pool[:20],  # First 20 pairs
+            "cross_pool_similar_pairs": len(cross_pool["pairs"]),
+            "cross_pool_checked_pairs": cross_pool["checked_pairs"],
+            "cross_pool_total_possible_pairs": cross_pool["total_possible_pairs"],
+            "cross_pool_sampling_applied": cross_pool["sampling_applied"],
+            "cross_pool_max_pairwise_checks": cross_pool["max_pairwise_checks"],
+            "cross_pool_sample": cross_pool["pairs"][:20],  # First 20 pairs
         }
