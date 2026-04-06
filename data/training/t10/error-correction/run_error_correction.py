@@ -122,7 +122,7 @@ def merge_data(
 # Model Loading
 # =============================================================================
 
-def load_model(model_id: str, device: str = "cuda", adapter_dir: str = ""):
+def load_model(model_id: str, device: str = "cuda", adapter_path: Optional[str] = None):
     """Load model, tokenizer, and optional LoRA adapter."""
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -145,10 +145,15 @@ def load_model(model_id: str, device: str = "cuda", adapter_dir: str = ""):
         low_cpu_mem_usage=True,
     )
 
-    if adapter_dir and os.path.isdir(adapter_dir):
-        print(f"Loading LoRA adapter: {adapter_dir}")
-        from peft import PeftModel
-        model = PeftModel.from_pretrained(model, adapter_dir)
+    if adapter_path:
+        try:
+            from peft import PeftModel
+        except ImportError as exc:
+            raise RuntimeError(
+                "--adapter_path was provided but peft is not installed. Install with `pip install peft`."
+            ) from exc
+        print(f"Loading LoRA adapter: {adapter_path}")
+        model = PeftModel.from_pretrained(model, adapter_path)
     
     model = model.to(device)
     model.eval()
@@ -280,7 +285,7 @@ def run_error_correction(
         "repair_rejected": 0,
         "repair_skipped": 0,
         "quarantined_repairs": 0,
-        "repair_scope": "V1 repairs only non-executing SQL; wrong-result cases are classified but not auto-repaired.",
+        "repair_scope": "V2 repairs all non-correct SQL (including wrong-result) and accepts only when repaired execution results match gold.",
         "by_failure_type": defaultdict(lambda: {"attempted": 0, "accepted": 0}),
     }
 
@@ -330,19 +335,15 @@ def run_error_correction(
         # Classify failure
         classification = classify_failure(record, schema)
         
-        # Skip non-repairable (wrong_result or low score)
-        if not classification or classification.repairability_score < min_repairability_score:
-            stats["repair_skipped"] += 1
-            finalize_prediction(i, qid, db_id, record["predicted_sql"], repaired=False)
-            progress.update(1)
-            continue
-        
-        # Also skip wrong_result explicitly (defense in depth)
-        if classification.failure_type == "wrong_result_non_exec_failure":
-            stats["repair_skipped"] += 1
-            finalize_prediction(i, qid, db_id, record["predicted_sql"], repaired=False)
-            progress.update(1)
-            continue
+        if not classification:
+            classification = FailureClassification(
+                question_id=qid,
+                db_id=db_id,
+                failure_type="generic_exec_error",
+                confidence=0.3,
+                reason="Classification missing; fallback to generic repair",
+                repairability_score=0.0,
+            )
         
         # Extract relevant schema
         schema_block = extract_relevant_schema(
@@ -397,6 +398,8 @@ def run_error_correction(
             "classification": classification,
             "schema_block": schema_block,
             "log_entry": log_entry,
+            "original_exec_result": None,
+            "gold_exec_result": None,
         })
 
     for attempt in range(max_repair_attempts):
@@ -421,13 +424,14 @@ def run_error_correction(
                 log_entry = item["log_entry"]
 
                 if attempt == 0:
+                    prompt_error_message = record.get("pred_error", "") or classification.reason
                     messages = prompt_builder.build_messages(
                         failure_type=classification.failure_type,
                         schema_block=schema_block,
                         question=record["question"],
                         hints=record.get("evidence", ""),
                         predicted_sql=record["predicted_sql"],
-                        error_message=record.get("pred_error", ""),
+                        error_message=prompt_error_message,
                         failed_identifier=classification.failed_identifier,
                         suggested_fix=classification.suggested_fix,
                         wrong_alias=classification.wrong_alias,
@@ -449,9 +453,9 @@ def run_error_correction(
                         question=record["question"],
                         hints=record.get("evidence", ""),
                         predicted_sql=record["predicted_sql"],
-                        original_error=record.get("pred_error", ""),
+                        original_error=record.get("pred_error", "") or classification.reason,
                         first_repair_sql=prev_attempt["repaired_sql"],
-                        first_repair_error=prev_attempt.get("exec_error", "unknown error"),
+                        first_repair_error=prev_attempt.get("reason") or prev_attempt.get("exec_error") or "unknown feedback",
                     )
                 messages_batch.append(messages)
 
@@ -473,6 +477,7 @@ def run_error_correction(
 
                 validation = validate_repair(
                     original_sql=record["predicted_sql"],
+                    gold_sql=record.get("gold_sql", ""),
                     raw_repair_output=raw_output,
                     db_path=db_path,
                     schema=schema,
@@ -481,7 +486,13 @@ def run_error_correction(
                         classification.identifier_candidates[0]["score"]
                         if classification.identifier_candidates else None
                     ),
+                    original_exec_result=item.get("original_exec_result"),
+                    gold_exec_result=item.get("gold_exec_result"),
                 )
+                if item.get("original_exec_result") is None:
+                    item["original_exec_result"] = validation.get("original_exec_result")
+                if item.get("gold_exec_result") is None:
+                    item["gold_exec_result"] = validation.get("gold_exec_result")
 
                 attempt_log = {
                     "attempt_index": attempt,
@@ -498,6 +509,7 @@ def run_error_correction(
                     "structure_metrics": validation["structure_metrics"],
                     "quarantine": validation["quarantine"],
                     "quarantine_reasons": validation["quarantine_reasons"],
+                    "matches_gold": validation.get("matches_gold", False),
                 }
                 log_entry["attempts"].append(attempt_log)
 
@@ -665,8 +677,8 @@ def main():
     # Model settings
     parser.add_argument("--model_id", default="Qwen/Qwen3-1.7B",
                         help="Model ID for repair")
-    parser.add_argument("--adapter_dir", default="",
-                        help="Optional LoRA adapter directory for the repair model")
+    parser.add_argument("--adapter_path", default=None,
+                        help="Optional PEFT/LoRA adapter path for repair model")
     parser.add_argument("--device", default="cuda",
                         help="Device to use")
     parser.add_argument("--enable_thinking", action="store_true",
@@ -676,7 +688,7 @@ def main():
     parser.add_argument("--max_repair_attempts", type=int, default=2,
                         help="Max repair attempts per example")
     parser.add_argument("--min_repairability_score", type=float, default=0.5,
-                        help="Minimum repairability score to attempt repair")
+                        help="Deprecated: ignored in V2 (all non-correct examples are attempted)")
     parser.add_argument("--max_new_tokens", type=int, default=256,
                         help="Max tokens to generate per repair")
     parser.add_argument("--generation_batch_size", type=int, default=8,
@@ -694,10 +706,11 @@ def main():
     print(f"Predictions: {args.predictions}")
     print(f"Eval results: {args.eval_results}")
     print(f"Model: {args.model_id}")
-    print(f"Adapter: {args.adapter_dir or 'None'}")
+    if args.adapter_path:
+        print(f"Adapter: {args.adapter_path}")
     print(f"Thinking: {args.enable_thinking}")
     print(f"Max attempts: {args.max_repair_attempts}")
-    print(f"Min repairability: {args.min_repairability_score}")
+    print(f"Min repairability (ignored in V2): {args.min_repairability_score}")
     print(f"Generation batch size: {args.generation_batch_size}")
     print()
     
@@ -721,7 +734,7 @@ def main():
     schema_cache = SchemaCache(args.db_dir)
     
     # Load model
-    model, tokenizer = load_model(args.model_id, args.device, args.adapter_dir)
+    model, tokenizer = load_model(args.model_id, args.device, args.adapter_path)
     
     # Run error correction
     print("\nRunning error correction...")
@@ -764,7 +777,7 @@ def main():
     print(f"Total examples: {stats['total']}")
     print(f"Correct (no repair needed): {stats['correct']}")
     print(f"Exec failed: {stats['exec_failed']}")
-    print(f"Wrong result (not repaired): {stats['wrong_result']}")
+    print(f"Wrong result (from baseline eval): {stats['wrong_result']}")
     print()
     print(f"Repair attempted: {stats['repair_attempted']}")
     print(f"Repair accepted: {stats['repair_accepted']}")
@@ -782,8 +795,7 @@ def main():
     new_ex = new_correct / stats['total'] * 100
     print()
     print(f"Original EX (correct only): {orig_ex:.2f}%")
-    print(f"Potential new EX: {new_ex:.2f}% (+{new_ex - orig_ex:.2f}%)")
-    print("(Note: Actual EX requires re-evaluation against gold)")
+    print(f"Repaired EX (gold-validated during repair): {new_ex:.2f}% (+{new_ex - orig_ex:.2f}%)")
     print(stats["repair_scope"])
 
 

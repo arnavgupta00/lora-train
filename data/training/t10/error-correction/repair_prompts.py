@@ -223,6 +223,33 @@ Fix the join structure:
 - Preserve the original join structure unless a join change is necessary to fix the execution error
 - Do not add new tables unless absolutely necessary
 Output only the corrected SQL.""",
+
+    "fix_wrong_result_error": """{system_tag}
+The SQL executes but its result does not match the expected answer.
+
+Schema:
+{schema_block}
+
+Relations:
+{relations}
+
+Question: {question}
+Hints: {hints}
+
+Original SQL (executes but wrong result):
+{predicted_sql}
+
+Signal from evaluator/classifier:
+{error_message}
+
+{notes_section}
+
+Fix the SQL semantically so it answers the question correctly.
+IMPORTANT:
+- Make the minimal change necessary.
+- Use only the provided schema.
+- Do not invent tables/columns.
+Output only the corrected SQL.""",
 }
 
 
@@ -309,6 +336,7 @@ class RepairPromptBuilder:
             "generic_exec_error": "fix_generic_exec_error",
             "filter_value_mapping_error": "fix_filter_value_error",
             "join_backbone_error": "fix_join_backbone_error",
+            "wrong_result_non_exec_failure": "fix_wrong_result_error",
         }
         return mapping.get(failure_type, "fix_generic_exec_error")
     
@@ -349,7 +377,7 @@ class RepairPromptBuilder:
 # =============================================================================
 
 ESCALATION_TEMPLATE = """{system_tag}
-The previous repair attempt failed. The SQL still has an error.
+The previous repair attempt was rejected.
 
 Schema:
 {schema_block}
@@ -366,7 +394,7 @@ Original SQL (with error):
 First repair attempt:
 {first_repair_sql}
 
-First repair error: {first_repair_error}
+First repair feedback: {first_repair_error}
 
 Previous error was: {original_error}
 
