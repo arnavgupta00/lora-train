@@ -12,6 +12,7 @@ Deduplication logic for error-correction examples:
 import hashlib
 import re
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -44,6 +45,26 @@ class DedupStats:
             "semantic_dupes": self.semantic_dupes,
             "cross_pool_similar": self.cross_pool_similar,
         }
+
+
+@dataclass
+class ExampleSignature:
+    """Cached normalized fields used for semantic dedup checks."""
+
+    question_lc: str
+    broken_norm: str
+    corrected_norm: str
+    tokens: Set[str]
+
+
+@dataclass
+class PreparedExample:
+    """Precomputed values used by dedup checks."""
+
+    exact_key: Tuple[Optional[int], str, str]
+    broken_hash: str
+    corrected_hash: str
+    signature: ExampleSignature
 
 
 def sql_hash(sql: str) -> str:
@@ -94,6 +115,14 @@ def semantic_similarity(
     return 0.4 * q_sim + 0.3 * b_sim + 0.3 * c_sim
 
 
+def semantic_similarity_from_signatures(sig1: ExampleSignature, sig2: ExampleSignature) -> float:
+    """Compute semantic similarity from pre-normalized signatures."""
+    q_sim = compute_similarity(sig1.question_lc, sig2.question_lc)
+    b_sim = compute_similarity(sig1.broken_norm, sig2.broken_norm)
+    c_sim = compute_similarity(sig1.corrected_norm, sig2.corrected_norm)
+    return 0.4 * q_sim + 0.3 * b_sim + 0.3 * c_sim
+
+
 class Deduplicator:
     """Deduplicator for error-correction examples."""
     
@@ -108,6 +137,8 @@ class Deduplicator:
         # Tracking sets for each pool
         self._clean_examples: List[RepairExample] = []
         self._internal_examples: List[RepairExample] = []
+        self._clean_signatures: List[ExampleSignature] = []
+        self._internal_signatures: List[ExampleSignature] = []
         
         # Dedup indices
         self._exact_keys: Set[Tuple[Optional[int], str, str]] = set()
@@ -120,6 +151,20 @@ class Deduplicator:
             ex.metadata.original_question_id,
             ex.metadata.db_family,
             sql_hash(ex.broken_sql),
+        )
+
+    def _prepare_example(self, ex: RepairExample) -> PreparedExample:
+        """Precompute hashes and signatures once per example."""
+        broken_hash = sql_hash(ex.broken_sql)
+        return PreparedExample(
+            exact_key=(
+                ex.metadata.original_question_id,
+                ex.metadata.db_family,
+                broken_hash,
+            ),
+            broken_hash=broken_hash,
+            corrected_hash=sql_hash(ex.corrected_sql),
+            signature=self._build_signature(ex),
         )
     
     def _check_exact_dupe(self, ex: RepairExample) -> bool:
@@ -146,24 +191,96 @@ class Deduplicator:
     
     def _check_semantic_dupe(
         self,
-        ex: RepairExample,
-        pool: List[RepairExample],
+        ex_sig: ExampleSignature,
+        pool_signatures: List[ExampleSignature],
     ) -> bool:
         """Check if example is semantically too similar to existing."""
         # Only check last N examples for efficiency
         check_window = 100
-        recent = pool[-check_window:] if len(pool) > check_window else pool
+        recent = (
+            pool_signatures[-check_window:]
+            if len(pool_signatures) > check_window
+            else pool_signatures
+        )
+
+        ex_len = max(1, len(ex_sig.broken_norm))
         
-        for other in recent:
-            sim = semantic_similarity(
-                ex.question, ex.broken_sql, ex.corrected_sql,
-                other.question, other.broken_sql, other.corrected_sql,
-            )
+        for other_sig in recent:
+            # Cheap filter 1: skip if broken SQL lengths are too different.
+            other_len = max(1, len(other_sig.broken_norm))
+            if abs(ex_len - other_len) / max(ex_len, other_len) > 0.65:
+                continue
+
+            # Cheap filter 2: require minimum token overlap before expensive match.
+            if ex_sig.tokens and other_sig.tokens:
+                overlap = len(ex_sig.tokens & other_sig.tokens) / max(
+                    1, len(ex_sig.tokens | other_sig.tokens)
+                )
+                if overlap < 0.10:
+                    continue
+
+            sim = semantic_similarity_from_signatures(ex_sig, other_sig)
             if sim >= self.semantic_threshold:
                 return True
         
         return False
+
+    def _build_signature(self, ex: RepairExample) -> ExampleSignature:
+        """Build cached normalized representation for semantic checks."""
+        question_lc = (ex.question or "").lower()
+        broken_norm = normalize_sql(ex.broken_sql)
+        corrected_norm = normalize_sql(ex.corrected_sql)
+        tokens = extract_key_tokens(question_lc)
+        tokens.update(extract_key_tokens(broken_norm))
+        tokens.update(extract_key_tokens(corrected_norm))
+        return ExampleSignature(
+            question_lc=question_lc,
+            broken_norm=broken_norm,
+            corrected_norm=corrected_norm,
+            tokens=tokens,
+        )
     
+    def _add_prepared(self, ex: RepairExample, prepared: PreparedExample) -> bool:
+        """Add an example using precomputed dedup fields."""
+        self.stats.total_input += 1
+
+        pool = ex.metadata.pool
+
+        # Check exact key
+        if prepared.exact_key in self._exact_keys:
+            self.stats.exact_key_dupes += 1
+            return False
+
+        # Check normalized broken SQL
+        if prepared.broken_hash in self._broken_hashes:
+            self.stats.normalized_broken_dupes += 1
+            return False
+
+        # Check semantic similarity within pool
+        if pool == "clean":
+            if self._check_semantic_dupe(prepared.signature, self._clean_signatures):
+                self.stats.semantic_dupes += 1
+                return False
+        else:
+            if self._check_semantic_dupe(prepared.signature, self._internal_signatures):
+                self.stats.semantic_dupes += 1
+                return False
+
+        # Not a duplicate - add it
+        self._exact_keys.add(prepared.exact_key)
+        self._broken_hashes.add(prepared.broken_hash)
+        self._corrected_hashes.add(prepared.corrected_hash)
+
+        if pool == "clean":
+            self._clean_examples.append(ex)
+            self._clean_signatures.append(prepared.signature)
+        else:
+            self._internal_examples.append(ex)
+            self._internal_signatures.append(prepared.signature)
+
+        self.stats.total_output += 1
+        return True
+
     def add_example(self, ex: RepairExample) -> bool:
         """
         Add an example, checking for duplicates.
@@ -171,46 +288,15 @@ class Deduplicator:
         Returns:
             True if added, False if duplicate
         """
-        self.stats.total_input += 1
-        
-        pool = ex.metadata.pool
-        
-        # Check exact key
-        if self._check_exact_dupe(ex):
-            self.stats.exact_key_dupes += 1
-            return False
-        
-        # Check normalized broken SQL
-        if self._check_normalized_broken_dupe(ex):
-            self.stats.normalized_broken_dupes += 1
-            return False
-        
-        # Check semantic similarity within pool
-        if pool == "clean":
-            if self._check_semantic_dupe(ex, self._clean_examples):
-                self.stats.semantic_dupes += 1
-                return False
-        else:
-            if self._check_semantic_dupe(ex, self._internal_examples):
-                self.stats.semantic_dupes += 1
-                return False
-        
-        # Not a duplicate - add it
-        self._exact_keys.add(self._get_exact_key(ex))
-        self._broken_hashes.add(sql_hash(ex.broken_sql))
-        self._corrected_hashes.add(sql_hash(ex.corrected_sql))
-        
-        if pool == "clean":
-            self._clean_examples.append(ex)
-        else:
-            self._internal_examples.append(ex)
-        
-        self.stats.total_output += 1
-        return True
+        prepared = self._prepare_example(ex)
+        return self._add_prepared(ex, prepared)
     
     def deduplicate_batch(
         self,
         examples: List[RepairExample],
+        progress_every: int = 0,
+        progress_callback=None,
+        prepare_workers: int = 1,
     ) -> Tuple[List[RepairExample], List[RepairExample]]:
         """
         Deduplicate a batch of examples.
@@ -218,8 +304,20 @@ class Deduplicator:
         Returns:
             (clean_examples, internal_examples)
         """
-        for ex in examples:
-            self.add_example(ex)
+        if prepare_workers > 1 and len(examples) > 1:
+            with ThreadPoolExecutor(max_workers=prepare_workers) as executor:
+                prepared_examples = list(executor.map(self._prepare_example, examples))
+        else:
+            prepared_examples = [self._prepare_example(ex) for ex in examples]
+
+        total = len(examples)
+        for idx, (ex, prepared) in enumerate(zip(examples, prepared_examples), start=1):
+            self._add_prepared(ex, prepared)
+            if progress_callback and progress_every > 0 and idx % progress_every == 0:
+                progress_callback(idx, total, self.stats)
+
+        if progress_callback and progress_every > 0 and total % progress_every != 0:
+            progress_callback(total, total, self.stats)
         
         return self._clean_examples.copy(), self._internal_examples.copy()
     

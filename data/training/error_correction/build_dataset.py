@@ -134,6 +134,12 @@ def parse_args():
         default=10.0,
         help="Abort individual SQLite queries that exceed this wall-clock time (default: 10s)",
     )
+    parser.add_argument(
+        "--dedup-workers",
+        type=int,
+        default=1,
+        help="Parallel workers for Phase 5 dedup preprocessing (default: 1)",
+    )
     return parser.parse_args()
 
 
@@ -349,6 +355,7 @@ def build_dataset(
     parallel_backend: str = "auto",
     synthetic_chunk_size: Optional[int] = None,
     query_timeout_seconds: float = 10.0,
+    dedup_workers: int = 1,
 ) -> Dict[str, Any]:
     """
     Build the error-correction dataset.
@@ -718,8 +725,30 @@ def build_dataset(
     # Phase 5: Deduplication
     # =========================================================================
     log("Phase 5: Deduplicating...", verbose)
-    
-    clean_examples, internal_examples = deduplicator.deduplicate_batch(all_examples)
+    if dedup_workers > 1:
+        log(f"  Dedup preprocessing in parallel with {dedup_workers} workers", verbose)
+
+    dedup_start = time.time()
+
+    def log_dedup_progress(processed: int, total: int, stats_obj) -> None:
+        elapsed = max(0.01, time.time() - dedup_start)
+        rate = processed / elapsed
+        eta = (total - processed) / rate if rate > 0 else 0.0
+        log(
+            "  Dedup progress: "
+            f"{processed}/{total} processed, "
+            f"{stats_obj.total_output} kept, "
+            f"{stats_obj.total_input - stats_obj.total_output} removed, "
+            f"ETA {eta / 60:.1f} min",
+            verbose,
+        )
+
+    clean_examples, internal_examples = deduplicator.deduplicate_batch(
+        all_examples,
+        progress_every=1000,
+        progress_callback=log_dedup_progress,
+        prepare_workers=max(1, dedup_workers),
+    )
     
     build_stats["deduplication"] = deduplicator.get_stats().to_dict()
     build_stats["contamination"] = contamination_router.get_stats().to_dict()
@@ -878,6 +907,7 @@ def main():
             parallel_backend=args.parallel_backend,
             synthetic_chunk_size=args.synthetic_chunk_size,
             query_timeout_seconds=args.query_timeout_seconds,
+            dedup_workers=args.dedup_workers,
         )
         
         # Print summary
