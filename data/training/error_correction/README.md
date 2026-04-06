@@ -74,7 +74,7 @@ The default config is tuned for a faster single-GPU run on a 24 GB class card:
 - `gradient_accumulation_steps: 16`
 - `pack: false`
 - `bf16 + gradient_checkpointing`
-- `logging_steps: 50`
+- `logging_steps: 25`
 - standard Trainer progress bar + saved `run_meta.json`
 
 This profile is intended to keep training in the `3-4 hour` range on the current
