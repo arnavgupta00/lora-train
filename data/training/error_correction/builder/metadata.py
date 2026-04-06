@@ -67,6 +67,14 @@ class VerificationMethod(str, Enum):
     BOTH = "both"
 
 
+class ContaminationRisk(str, Enum):
+    """Benchmark contamination risk level."""
+
+    NONE = "none"
+    LOW = "low"
+    HIGH = "high"
+
+
 class SchemaContextType(str, Enum):
     """Type of schema context provided."""
     
@@ -129,6 +137,8 @@ class ExampleMetadata:
     schema_columns_kept: int = 0
     relations: List[str] = field(default_factory=list)
     schema_notes: Optional[str] = None
+    notes: Optional[str] = None
+    compact_schema_stats: Optional[Dict[str, Any]] = None
     
     # Failure classification
     failure_type: str = ""
@@ -138,6 +148,7 @@ class ExampleMetadata:
     
     # Contamination and pool assignment
     contamination_source: str = "bird_dev_direct"
+    contamination_risk: str = ContaminationRisk.HIGH.value
     benchmark_clean: bool = False
     pool: str = "internal"
     
@@ -186,7 +197,7 @@ class ExampleMetadata:
     
     def is_clean_eligible(self) -> bool:
         """Check if this example is eligible for the clean pool."""
-        return self.contamination_source in [
+        return self.contamination_risk != ContaminationRisk.HIGH.value and self.contamination_source in [
             ContaminationSource.NON_BENCHMARK.value,
             ContaminationSource.TRANSFORMED_ARCHETYPE.value,
         ]
@@ -217,6 +228,9 @@ class ExampleMetadata:
         
         if self.pool == Pool.CLEAN.value and not self.benchmark_clean:
             errors.append("pool=clean but benchmark_clean=False")
+
+        if self.pool == Pool.CLEAN.value and self.contamination_risk == ContaminationRisk.HIGH.value:
+            errors.append("pool=clean but contamination_risk=high")
         
         return errors
 

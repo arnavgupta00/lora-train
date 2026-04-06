@@ -115,16 +115,14 @@ class DatasetWriter:
         rejected: List[RepairExample],
     ) -> None:
         """Write rejected examples."""
-        if rejected:
-            self._write_jsonl(rejected, "rejected_examples.jsonl")
+        self._write_jsonl(rejected, "rejected_examples.jsonl")
     
     def write_internal_only(
         self,
         internal_only: List[RepairExample],
     ) -> None:
         """Write internal-only examples (for reference)."""
-        if internal_only:
-            self._write_jsonl(internal_only, "internal_only_examples.jsonl")
+        self._write_jsonl(internal_only, "internal_only_examples.jsonl")
     
     def write_samples(
         self,
@@ -135,31 +133,22 @@ class DatasetWriter:
         sample_size: int = 50,
     ) -> None:
         """Write sample files for inspection."""
-        samples_dir = self.output_dir / "samples"
-        
-        if real_failures:
-            self._write_jsonl(
-                real_failures[:sample_size],
-                "samples/real_failures_examples.jsonl",
-            )
-        
-        if synthetic:
-            self._write_jsonl(
-                synthetic[:sample_size],
-                "samples/synthetic_examples.jsonl",
-            )
-        
-        if contrastive:
-            self._write_jsonl(
-                contrastive[:sample_size],
-                "samples/contrastive_examples.jsonl",
-            )
-        
-        if hard_cases:
-            self._write_jsonl(
-                hard_cases[:sample_size],
-                "samples/hard_cases_examples.jsonl",
-            )
+        self._write_jsonl(
+            real_failures[:sample_size],
+            "samples/real_failures_examples.jsonl",
+        )
+        self._write_jsonl(
+            synthetic[:sample_size],
+            "samples/synthetic_examples.jsonl",
+        )
+        self._write_jsonl(
+            contrastive[:sample_size],
+            "samples/contrastive_examples.jsonl",
+        )
+        self._write_jsonl(
+            hard_cases[:sample_size],
+            "samples/hard_cases_examples.jsonl",
+        )
     
     def generate_manifest(
         self,
@@ -346,13 +335,16 @@ output the corrected SQL query only.
 - `family_summary.json` - Examples by database family
 - `failure_type_summary.json` - Examples by failure type
 - `source_mix_summary.json` - Examples by source type
+- `schema_context_summary.json` - Examples by schema context type
 - `contamination_report.json` - Contamination routing decisions
 - `duplicate_report.json` - Deduplication statistics
 - `verification_report.json` - Verification results
+- `subagent_usage_report.json` - Subagent proposal usage and outcomes
 
 ### Additional Files
 
 - `rejected_examples.jsonl` - Examples that failed validation
+- `internal_only_examples.jsonl` - Internal-only examples before clean filtering
 - `samples/` - Sample examples for inspection
 
 ## Example Format

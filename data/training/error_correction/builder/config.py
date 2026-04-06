@@ -166,6 +166,13 @@ class PathConfig:
         elif source == "t11_1":
             return self.t11_1_eval_dir / "per_example_results_t11_1.jsonl"
         raise ValueError(f"Unknown source: {source}")
+
+    def eval_report(self, source: str = "t10") -> Path:
+        if source == "t10":
+            return self.t10_eval_dir / "eval_report_t10.json"
+        elif source == "t11_1":
+            return self.t11_1_eval_dir / "eval_report_t11_1.json"
+        raise ValueError(f"Unknown source: {source}")
     
     def bird_dev_prompts(self, source: str = "t10") -> Path:
         if source == "t10":
@@ -179,6 +186,28 @@ class PathConfig:
             return self.t10_predictions_dir / "predictions_t10.jsonl"
         elif source == "t11_1":
             return self.t11_1_predictions_dir / "predictions_t11_1.jsonl"
+        raise ValueError(f"Unknown source: {source}")
+
+    def train_file(self, source: str = "t10") -> Path:
+        if source == "t10":
+            return self.t10_data_dir / "train_t10.jsonl"
+        elif source == "t11_1":
+            return self.t11_1_data_dir / "train_t11_1.jsonl"
+        raise ValueError(f"Unknown source: {source}")
+
+    def repair_log_file(self, source: str = "t10") -> Path:
+        if source == "t10":
+            return (
+                self.project_root
+                / "runs/t10_baseline_3090/qwen3-1.7b/without-sampling"
+                / "error-correction-base-qwen-3.5-2b/repair_log_t10.jsonl"
+            )
+        elif source == "t11_1":
+            return (
+                self.project_root
+                / "runs/t11_1_baseline_3090/qwen3-1.7b/without-sampling"
+                / "error-correction-base-qwen-3.5-2b/repair_log_t11_1.jsonl"
+            )
         raise ValueError(f"Unknown source: {source}")
     
     def database_path(self, db_id: str) -> Path:
@@ -202,6 +231,23 @@ class BuilderConfig:
     include_t11_1: bool = True  # Include auxiliary T11_1 failures
     dry_run: bool = False
     verbose: bool = True
+
+    def apply_build_size(self) -> None:
+        """Resolve A/B targets into concrete train/dev ranges."""
+        if self.build_size == "A":
+            self.targets.internal_train = 10000
+            self.targets.internal_dev = 1000
+            self.targets.clean_train_min = 4000
+            self.targets.clean_train_max = 7000
+            self.targets.clean_dev_min = 400
+            self.targets.clean_dev_max = 700
+        else:
+            self.targets.internal_train = 18000
+            self.targets.internal_dev = 2000
+            self.targets.clean_train_min = 8000
+            self.targets.clean_train_max = 12000
+            self.targets.clean_dev_min = 1000
+            self.targets.clean_dev_max = 1500
     
     def validate(self) -> List[str]:
         """Validate configuration and return list of errors."""
@@ -218,6 +264,15 @@ class BuilderConfig:
         
         if not self.paths.databases_dir.exists():
             errors.append(f"Missing databases directory: {self.paths.databases_dir}")
+
+        if not self.paths.failure_archetypes_file.exists():
+            errors.append(f"Missing failure archetypes file: {self.paths.failure_archetypes_file}")
+
+        if not self.paths.eval_report("t10").exists():
+            errors.append(f"Missing eval report for t10: {self.paths.eval_report('t10')}")
+
+        if self.include_t11_1 and not self.paths.eval_report("t11_1").exists():
+            errors.append(f"Missing eval report for t11_1: {self.paths.eval_report('t11_1')}")
         
         # Validate composition caps sum to reasonable range
         total_min = (self.targets.real_failures_min + 

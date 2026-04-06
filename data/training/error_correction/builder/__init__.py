@@ -27,6 +27,7 @@ from .taxonomy import FailureType, TargetFailureMode
 from .contamination import ContaminationRouter, RoutingDecision
 from .contrastive_generator import ContrastiveGenerator, ContrastivePattern, CONTRASTIVE_PATTERNS
 from .deduplicator import Deduplicator
+from .deterministic_loader import DeterministicRepairLoader, DeterministicStats
 from .real_failure_ingester import RealFailureIngester, RealFailure
 from .schema_builder import SchemaBuilder
 from .splitter import split_pools
@@ -56,6 +57,8 @@ __all__ = [
     "ContrastivePattern",
     "CONTRASTIVE_PATTERNS",
     "Deduplicator",
+    "DeterministicRepairLoader",
+    "DeterministicStats",
     "RealFailureIngester",
     "RealFailure",
     "SchemaBuilder",

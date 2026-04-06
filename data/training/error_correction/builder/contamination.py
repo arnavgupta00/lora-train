@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from .metadata import ContaminationSource, Pool, ExampleMetadata
+from .metadata import ContaminationRisk, ContaminationSource, Pool, ExampleMetadata
 
 
 class RoutingDecision(str, Enum):
@@ -365,6 +365,12 @@ class ContaminationRouter:
         metadata.contamination_source = routing_result.contamination_source.value
         metadata.pool = routing_result.decision.value
         metadata.benchmark_clean = routing_result.decision == RoutingDecision.CLEAN
+        if routing_result.contamination_source == ContaminationSource.NON_BENCHMARK:
+            metadata.contamination_risk = ContaminationRisk.NONE.value
+        elif routing_result.contamination_source == ContaminationSource.TRANSFORMED_ARCHETYPE:
+            metadata.contamination_risk = ContaminationRisk.LOW.value
+        else:
+            metadata.contamination_risk = ContaminationRisk.HIGH.value
         return metadata
     
     def get_stats(self) -> ContaminationStats:

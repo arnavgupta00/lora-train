@@ -127,6 +127,82 @@ def load_schema_from_db(db_path: Path) -> SchemaInfo:
     return schema
 
 
+def load_schema_from_ddl(raw_ddl: str, db_id: str = "inline_schema") -> SchemaInfo:
+    """Parse schema information from CREATE TABLE DDL text."""
+    schema = SchemaInfo(db_id=db_id, raw_ddl=raw_ddl)
+    if not raw_ddl:
+        return schema
+
+    table_pattern = re.compile(
+        r"CREATE\s+TABLE(?:\s+IF\s+NOT\s+EXISTS)?\s+`?(\w+)`?\s*\((.*?)\)\s*;",
+        re.IGNORECASE | re.DOTALL,
+    )
+
+    for match in table_pattern.finditer(raw_ddl):
+        table_name = match.group(1)
+        body = match.group(2)
+        columns: List[ColumnInfo] = []
+        pk_columns: List[str] = []
+
+        parts: List[str] = []
+        current: List[str] = []
+        depth = 0
+        for char in body:
+            if char == "(":
+                depth += 1
+            elif char == ")":
+                depth -= 1
+            elif char == "," and depth == 0:
+                parts.append("".join(current).strip())
+                current = []
+                continue
+            current.append(char)
+        if current:
+            parts.append("".join(current).strip())
+
+        for part in parts:
+            upper = part.upper()
+            if upper.startswith(("PRIMARY KEY", "UNIQUE", "CHECK")):
+                continue
+            fk_match = re.match(
+                r"FOREIGN\s+KEY\s*\(([^)]+)\)\s+REFERENCES\s+`?(\w+)`?\s*\(([^)]+)\)",
+                part,
+                re.IGNORECASE,
+            )
+            if fk_match:
+                src_col = fk_match.group(1).strip("` ")
+                dst_table = fk_match.group(2).strip("` ")
+                dst_col = fk_match.group(3).strip("` ")
+                schema.foreign_keys.append((table_name, src_col, dst_table, dst_col))
+                continue
+
+            col_match = re.match(r"`?([^\s`]+)`?\s+([A-Z0-9_]+)?", part, re.IGNORECASE)
+            if not col_match:
+                continue
+
+            col_name = col_match.group(1)
+            col_type = (col_match.group(2) or "TEXT").upper()
+            is_pk = "PRIMARY KEY" in upper
+            columns.append(ColumnInfo(name=col_name, type=col_type, is_pk=is_pk))
+            if is_pk:
+                pk_columns.append(col_name)
+
+        schema.tables[table_name] = TableInfo(
+            name=table_name,
+            columns=columns,
+            pk_columns=pk_columns,
+        )
+
+    for src_table, src_col, dst_table, dst_col in schema.foreign_keys:
+        if src_table in schema.tables:
+            for col in schema.tables[src_table].columns:
+                if col.name == src_col:
+                    col.is_fk = True
+                    col.fk_ref = (dst_table, dst_col)
+
+    return schema
+
+
 def extract_identifiers_from_text(text: str) -> Set[str]:
     """Extract potential table/column identifiers from question or hints."""
     if not text:

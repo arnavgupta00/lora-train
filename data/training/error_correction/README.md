@@ -1,4 +1,4 @@
-# SQL Error-Correction Dataset v1_checkpoint_smoke
+# SQL Error-Correction Dataset v1_spec_write_smoke
 
 ## Overview
 
@@ -11,19 +11,19 @@ output the corrected SQL query only.
 
 | Split | Count |
 |-------|-------|
-| Internal Train | 28 |
-| Internal Dev | 11 |
-| Clean Train | 0 |
-| Clean Dev | 0 |
+| Internal Train | 50 |
+| Internal Dev | 7 |
+| Clean Train | 34 |
+| Clean Dev | 5 |
 
 ## Files
 
 ### Main Datasets
 
-- `train_error_repair_v1_checkpoint_smoke.jsonl` - Full training set (internal)
-- `dev_error_repair_v1_checkpoint_smoke.jsonl` - Full dev set (internal)
-- `train_error_repair_v1_checkpoint_smoke_clean.jsonl` - Benchmark-safe training set
-- `dev_error_repair_v1_checkpoint_smoke_clean.jsonl` - Benchmark-safe dev set
+- `train_error_repair_v1_spec_write_smoke.jsonl` - Full training set (internal)
+- `dev_error_repair_v1_spec_write_smoke.jsonl` - Full dev set (internal)
+- `train_error_repair_v1_spec_write_smoke_clean.jsonl` - Benchmark-safe training set
+- `dev_error_repair_v1_spec_write_smoke_clean.jsonl` - Benchmark-safe dev set
 
 ### Reports
 
@@ -31,13 +31,16 @@ output the corrected SQL query only.
 - `family_summary.json` - Examples by database family
 - `failure_type_summary.json` - Examples by failure type
 - `source_mix_summary.json` - Examples by source type
+- `schema_context_summary.json` - Examples by schema context type
 - `contamination_report.json` - Contamination routing decisions
 - `duplicate_report.json` - Deduplication statistics
 - `verification_report.json` - Verification results
+- `subagent_usage_report.json` - Subagent proposal usage and outcomes
 
 ### Additional Files
 
 - `rejected_examples.jsonl` - Examples that failed validation
+- `internal_only_examples.jsonl` - Internal-only examples before clean filtering
 - `samples/` - Sample examples for inspection
 
 ## Example Format
@@ -65,7 +68,7 @@ Clean datasets are safe for use when evaluating on BIRD benchmark.
 ```python
 import json
 
-with open('train_error_repair_v1_checkpoint_smoke_clean.jsonl') as f:
+with open('train_error_repair_v1_spec_write_smoke_clean.jsonl') as f:
     for line in f:
         example = json.loads(line)
         messages = example['messages']

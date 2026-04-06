@@ -27,12 +27,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
 
 from builder.config import BuilderConfig, DatasetTargets
 from builder.contamination import ContaminationRouter, RoutingDecision
+from builder.contrastive_generator import ContrastiveGenerator
 from builder.deduplicator import Deduplicator
+from builder.deterministic_loader import DeterministicRepairLoader
 from builder.metadata import Pool, RepairExample
 from builder.real_failure_ingester import RealFailureIngester
 from builder.schema_builder import SchemaBuilder
 from builder.splitter import split_pools
-from builder.subagent_client import MockSubagentClient, SubagentClient
+from builder.subagent_client import MockSubagentClient
 from builder.synthetic_generator import SyntheticGenerator
 from builder.taxonomy import FailureType
 from builder.verifier import Verifier
@@ -77,9 +79,31 @@ def parse_args():
         help="Limit number of synthetic examples to generate",
     )
     parser.add_argument(
+        "--limit-contrastive",
+        type=int,
+        default=None,
+        help="Limit number of contrastive examples to generate",
+    )
+    parser.add_argument(
+        "--limit-deterministic",
+        type=int,
+        default=None,
+        help="Limit number of deterministic-fix examples to load",
+    )
+    parser.add_argument(
         "--skip-synthetic",
         action="store_true",
         help="Skip synthetic generation (for testing)",
+    )
+    parser.add_argument(
+        "--skip-contrastive",
+        action="store_true",
+        help="Skip contrastive generation (for testing)",
+    )
+    parser.add_argument(
+        "--skip-deterministic",
+        action="store_true",
+        help="Skip deterministic-fix ingestion (for testing)",
     )
     parser.add_argument(
         "--skip-real",
@@ -184,6 +208,10 @@ def generate_synthetic_batch_worker(args):
     
     if dev_file.exists():
         generator.load_gold_from_bird_dev(dev_file)
+
+    generated_files = get_t12_generated_files(config, output_only=False)
+    if generated_files:
+        generator.load_gold_from_generated_files(generated_files, source_name="t12_generated")
     
     # Generate examples for this batch
     examples = []
@@ -192,6 +220,56 @@ def generate_synthetic_batch_worker(args):
         if len(examples) >= count:
             break
     
+    return {
+        "batch_idx": start_idx,
+        "requested": count,
+        "produced": len(examples),
+        "elapsed_seconds": round(time.time() - started_at, 2),
+        "stats": generator.get_stats().to_dict(),
+        "examples": examples,
+    }
+
+
+def generate_contrastive_batch_worker(args):
+    """Worker function for parallel contrastive generation."""
+    (
+        config,
+        start_idx,
+        count,
+        seed,
+        query_timeout_seconds,
+        clean_only,
+        transform_names,
+    ) = args
+    started_at = time.time()
+
+    random.seed(seed)
+
+    generator = ContrastiveGenerator(
+        config,
+        query_timeout_seconds=query_timeout_seconds,
+    )
+    train_file = config.paths.train_file("t10")
+    dev_file = config.paths.bird_dev_prompts("t10")
+
+    if train_file.exists():
+        generator.load_gold_from_bird_train(train_file)
+    if dev_file.exists():
+        generator.load_gold_from_bird_dev(dev_file)
+    generated_files = get_t12_generated_files(config, output_only=False)
+    if generated_files:
+        generator.load_gold_from_generated_files(generated_files, source_name="t12_generated")
+
+    examples = []
+    for example in generator.generate_batch(
+        count=count,
+        clean_only=clean_only,
+        transform_names=transform_names,
+    ):
+        examples.append(example)
+        if len(examples) >= count:
+            break
+
     return {
         "batch_idx": start_idx,
         "requested": count,
@@ -225,12 +303,47 @@ def resolve_synthetic_chunk_size(
     return min(250, auto_chunk)
 
 
+def resolve_build_targets(config: BuilderConfig) -> Dict[str, int]:
+    """Resolve the requested A/B build into concrete totals."""
+    train_target = config.targets.internal_train
+    dev_target = config.targets.internal_dev
+    total_target = train_target + dev_target
+    return {
+        "train_target": train_target,
+        "dev_target": dev_target,
+        "total_target": total_target,
+    }
+
+
+def get_t12_generated_files(config: BuilderConfig, output_only: bool = False) -> List[Path]:
+    """Return generated T12 files that can act as clean, schema-inline sources."""
+    generated_dir = config.paths.training_dir / "t12" / "generated"
+    if not generated_dir.exists():
+        return []
+
+    excluded = {"t12_source_map.jsonl", "t12_audit_set.jsonl"}
+    patterns = ["*output_discipline*.jsonl"] if output_only else ["*_raw*.jsonl", "*output_discipline*.jsonl"]
+    files: List[Path] = []
+    seen = set()
+    for pattern in patterns:
+        for path in sorted(generated_dir.glob(pattern)):
+            if path.name in excluded or path in seen:
+                continue
+            seen.add(path)
+            files.append(path)
+    return files
+
+
 def build_dataset(
     config: BuilderConfig,
     dry_run: bool = False,
     limit_real: Optional[int] = None,
     limit_synthetic: Optional[int] = None,
+    limit_contrastive: Optional[int] = None,
+    limit_deterministic: Optional[int] = None,
     skip_synthetic: bool = False,
+    skip_contrastive: bool = False,
+    skip_deterministic: bool = False,
     skip_real: bool = False,
     num_workers: int = 4,
     parallel_backend: str = "auto",
@@ -253,6 +366,7 @@ def build_dataset(
     """
     start_time = time.time()
     verbose = config.verbose
+    resolved_targets = resolve_build_targets(config)
     
     # Initialize components
     log("Initializing components...", verbose)
@@ -274,14 +388,157 @@ def build_dataset(
             "version": config.version,
             "build_size": config.build_size,
             "include_t11_1": config.include_t11_1,
+            "resolved_targets": resolved_targets,
         },
         "real_failures": {},
         "synthetic": {},
+        "contrastive": {},
+        "deterministic": {},
         "contamination": {},
         "deduplication": {},
         "splitting": {},
         "verification": {"passed": 0, "failed": 0},
     }
+
+    def run_parallel_generation_phase(
+        phase_name: str,
+        target_count: int,
+        kind: str,
+        clean_only: bool = False,
+        transform_names: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
+        """Run either synthetic or contrastive generation in parallel."""
+        if target_count <= 0:
+            return {
+                "backend": resolve_parallel_backend(parallel_backend, num_workers),
+                "chunk_size": 0,
+                "total_generated": 0,
+                "total_attempted": 0,
+                "failed_corruption": 0,
+                "failed_verification": 0,
+            }
+
+        resolved_backend = resolve_parallel_backend(parallel_backend, num_workers)
+        executor_cls = (
+            ProcessPoolExecutor if resolved_backend == "processes" else ThreadPoolExecutor
+        )
+        chunk_size = resolve_synthetic_chunk_size(
+            target_synthetic=target_count,
+            num_workers=num_workers,
+            requested_chunk_size=synthetic_chunk_size,
+        )
+        batches = []
+        remaining = target_count
+        batch_idx = 0
+        while remaining > 0:
+            count = min(chunk_size, remaining)
+            seed = 42 + (1000 if kind == "contrastive" else 0) + batch_idx
+            if kind == "contrastive":
+                batches.append(
+                    (
+                        config,
+                        batch_idx,
+                        count,
+                        seed,
+                        query_timeout_seconds,
+                        clean_only,
+                        transform_names,
+                    )
+                )
+            else:
+                batches.append((config, batch_idx, count, seed, query_timeout_seconds))
+            remaining -= count
+            batch_idx += 1
+
+        log(
+            f"{phase_name}: generating {target_count} examples using {num_workers} workers "
+            f"via {resolved_backend} in {len(batches)} chunks of up to {chunk_size}",
+            verbose,
+        )
+
+        accepted = 0
+        attempted = 0
+        failed_corruption = 0
+        failed_verification = 0
+        next_checkpoint = 500
+        phase_start = time.time()
+        worker_fn = (
+            generate_contrastive_batch_worker
+            if kind == "contrastive"
+            else generate_synthetic_batch_worker
+        )
+
+        with executor_cls(max_workers=num_workers) as executor:
+            futures = {
+                executor.submit(worker_fn, batch): i
+                for i, batch in enumerate(batches)
+            }
+            for future in as_completed(futures):
+                future_batch_idx = futures[future]
+                try:
+                    batch_result = future.result()
+                except Exception as exc:
+                    log(f"  Chunk {future_batch_idx + 1} failed: {exc}", verbose)
+                    continue
+
+                batch_examples = batch_result["examples"]
+                batch_stats = batch_result["stats"]
+                attempted += batch_stats.get("total_attempted", 0)
+                failed_corruption += batch_stats.get("failed_corruption", 0)
+                failed_verification += batch_stats.get("failed_verification", 0)
+
+                for example in batch_examples:
+                    routing = contamination_router.tag_and_route(
+                        example_id=example.metadata.example_id,
+                        source_type=example.metadata.source_type,
+                        source_run=example.metadata.source_run,
+                        db_id=example.metadata.db_family,
+                        reference_sql_source=example.metadata.reference_sql_source,
+                        validation_passed=True,
+                        reference_sql_valid=True,
+                        has_required_fields=True,
+                        parent_source=(
+                            "bird_train" if example.metadata.benchmark_clean else "bird_dev"
+                        ),
+                    )
+                    contamination_router.update_metadata(example.metadata, routing)
+                    if routing.decision == RoutingDecision.REJECTED:
+                        rejected_examples.append(example)
+                        continue
+                    all_examples.append(example)
+                    accepted += 1
+
+                elapsed = max(0.01, time.time() - phase_start)
+                rate = accepted / elapsed
+                remaining_examples = max(0, target_count - accepted)
+                eta_seconds = remaining_examples / rate if rate > 0 else 0.0
+                log(
+                    "  Chunk "
+                    f"{batch_result['batch_idx'] + 1}/{len(batches)} complete: "
+                    f"{len(batch_examples)}/{batch_result['requested']} examples in "
+                    f"{batch_result['elapsed_seconds']:.1f}s "
+                    f"({accepted}/{target_count} accepted, {attempted} attempted, "
+                    f"{failed_verification} verify fails, ETA {eta_seconds / 60:.1f} min)",
+                    verbose,
+                )
+
+                if accepted >= next_checkpoint or accepted >= target_count:
+                    if not dry_run:
+                        prefix = f"progress_{kind}"
+                        save_progress(all_examples, config.paths.output_dir, prefix, config.version)
+                    while accepted >= next_checkpoint:
+                        next_checkpoint += 500
+
+        return {
+            "backend": resolved_backend,
+            "chunk_size": chunk_size,
+            "total_generated": accepted,
+            "total_attempted": attempted,
+            "failed_corruption": failed_corruption,
+            "failed_verification": failed_verification,
+            "clean_only": clean_only,
+            "transform_names": transform_names or [],
+        }
     
     # =========================================================================
     # Phase 1: Real Failure Ingestion
@@ -312,6 +569,8 @@ def build_dataset(
             example.corrected_sql = failure.gold_sql
             example.metadata.subagent_used = False  # Mock doesn't count
             example.metadata.corrected_sql_source = "gold_aligned"
+            example.metadata.subagent_candidate_sql = failure.gold_sql
+            example.metadata.subagent_accept_reason = "Gold-aligned fallback repair"
             
             # Verify
             passed, details = verifier.verify_real_failure_repair(
@@ -365,140 +624,100 @@ def build_dataset(
             log(f"  Saving {real_count} real failures to disk...", verbose)
             save_progress(all_examples, config.paths.output_dir, "checkpoint_after_real", config.version)
     
+    target_total = resolved_targets["total_target"]
+    target_contrastive = (
+        limit_contrastive if limit_contrastive is not None else int(target_total * 0.18)
+    )
+    target_deterministic = limit_deterministic if limit_deterministic is not None else 250
+    target_synthetic = limit_synthetic
+    if target_synthetic is None:
+        target_synthetic = max(
+            int(target_total * config.targets.synthetic_min),
+            target_total - len(all_examples) - target_contrastive - target_deterministic + int(target_total * 0.12),
+        )
+
     # =========================================================================
-    # Phase 2: Synthetic Generation (Parallelized)
+    # Phase 2: Synthetic Generation
     # =========================================================================
     if not skip_synthetic:
-        resolved_backend = resolve_parallel_backend(parallel_backend, num_workers)
-        executor_cls = ProcessPoolExecutor if resolved_backend == "processes" else ThreadPoolExecutor
-
+        build_stats["synthetic"] = run_parallel_generation_phase(
+            phase_name="Phase 2",
+            target_count=target_synthetic,
+            kind="synthetic",
+            clean_only=False,
+        )
         log(
-            f"Phase 2: Generating synthetic examples using {num_workers} workers "
-            f"via {resolved_backend}...",
+            f"  Generated {build_stats['synthetic']['total_generated']} synthetic examples",
             verbose,
         )
-        
-        # Calculate target
-        target_synthetic = limit_synthetic
-        if target_synthetic is None:
-            total_target = config.targets.internal_train
-            target_synthetic = int(total_target * 0.6)  # ~60% synthetic
-        
-        log(f"  Target: {target_synthetic} synthetic examples", verbose)
-        
-        # Split work across workers
-        batch_size = resolve_synthetic_chunk_size(
-            target_synthetic=target_synthetic,
-            num_workers=num_workers,
-            requested_chunk_size=synthetic_chunk_size,
+        if not dry_run and build_stats["synthetic"]["total_generated"] > 0:
+            save_progress(
+                all_examples,
+                config.paths.output_dir,
+                "checkpoint_after_synthetic",
+                config.version,
+            )
+
+    # =========================================================================
+    # Phase 3: Deterministic Repair Ingestion
+    # =========================================================================
+    if not skip_deterministic:
+        log("Phase 3: Loading deterministic repairs...", verbose)
+        deterministic_loader = DeterministicRepairLoader(config, verifier=verifier)
+        deterministic_examples = deterministic_loader.load_examples(
+            limit=target_deterministic,
         )
-        batches = []
-        remaining = target_synthetic
-        batch_idx = 0
-        
-        while remaining > 0:
-            count = min(batch_size, remaining)
-            seed = 42 + batch_idx  # Reproducible seeds
-            batches.append((config, batch_idx, count, seed, query_timeout_seconds))
-            remaining -= count
-            batch_idx += 1
-        
+        for example in deterministic_examples:
+            routing = contamination_router.tag_and_route(
+                example_id=example.metadata.example_id,
+                source_type=example.metadata.source_type,
+                source_run=example.metadata.source_run,
+                db_id=example.metadata.db_family,
+                reference_sql_source=example.metadata.reference_sql_source,
+                validation_passed=True,
+                reference_sql_valid=True,
+                has_required_fields=True,
+                parent_source="bird_dev",
+            )
+            contamination_router.update_metadata(example.metadata, routing)
+            if routing.decision == RoutingDecision.REJECTED:
+                rejected_examples.append(example)
+                continue
+            all_examples.append(example)
+        build_stats["deterministic"] = deterministic_loader.get_stats().to_dict()
         log(
-            f"  Split into {len(batches)} chunks of up to {batch_size} examples",
+            f"  Loaded {len(deterministic_examples)} deterministic-fix examples",
             verbose,
         )
-        
-        synthetic_count = 0
-        synthetic_attempts = 0
-        synthetic_failed_corruption = 0
-        synthetic_failed_verification = 0
-        next_checkpoint = 500
-        synthetic_phase_start = time.time()
 
-        with executor_cls(max_workers=num_workers) as executor:
-            futures = {executor.submit(generate_synthetic_batch_worker, batch): i 
-                      for i, batch in enumerate(batches)}
-            
-            for future in as_completed(futures):
-                future_batch_idx = futures[future]
-                try:
-                    batch_result = future.result()
-                    batch_examples = batch_result["examples"]
-                    batch_stats = batch_result["stats"]
-                    synthetic_attempts += batch_stats.get("total_attempted", 0)
-                    synthetic_failed_corruption += batch_stats.get("failed_corruption", 0)
-                    synthetic_failed_verification += batch_stats.get("failed_verification", 0)
-                    
-                    # Process each example
-                    for example in batch_examples:
-                        # Route via contamination
-                        routing = contamination_router.tag_and_route(
-                            example_id=example.metadata.example_id,
-                            source_type=example.metadata.source_type,
-                            source_run=None,
-                            db_id=example.metadata.db_family,
-                            reference_sql_source=example.metadata.reference_sql_source,
-                            validation_passed=True,
-                            reference_sql_valid=True,
-                            has_required_fields=True,
-                            parent_source="bird_train" if example.metadata.benchmark_clean else "bird_dev",
-                        )
-                        
-                        contamination_router.update_metadata(example.metadata, routing)
-                        
-                        if routing.decision == RoutingDecision.REJECTED:
-                            rejected_examples.append(example)
-                            continue
-                        
-                        all_examples.append(example)
-                        synthetic_count += 1
-                    
-                    elapsed = max(0.01, time.time() - synthetic_phase_start)
-                    rate = synthetic_count / elapsed
-                    remaining_examples = max(0, target_synthetic - synthetic_count)
-                    eta_seconds = remaining_examples / rate if rate > 0 else 0.0
+    # =========================================================================
+    # Phase 4: Contrastive / Output-Discipline Generation
+    # =========================================================================
+    if not skip_contrastive:
+        transform_names = [pattern.transform_name for pattern in ContrastiveGenerator(config).get_patterns()]
+        build_stats["contrastive"] = run_parallel_generation_phase(
+            phase_name="Phase 4",
+            target_count=target_contrastive,
+            kind="contrastive",
+            clean_only=True,
+            transform_names=transform_names,
+        )
+        log(
+            f"  Generated {build_stats['contrastive']['total_generated']} contrastive examples",
+            verbose,
+        )
+        if not dry_run and build_stats["contrastive"]["total_generated"] > 0:
+            save_progress(
+                all_examples,
+                config.paths.output_dir,
+                "checkpoint_after_contrastive",
+                config.version,
+            )
 
-                    log(
-                        "  Chunk "
-                        f"{batch_result['batch_idx'] + 1}/{len(batches)} complete: "
-                        f"{len(batch_examples)}/{batch_result['requested']} examples in "
-                        f"{batch_result['elapsed_seconds']:.1f}s "
-                        f"({synthetic_count}/{target_synthetic} accepted, "
-                        f"{synthetic_attempts} attempted, "
-                        f"{synthetic_failed_verification} verify fails, "
-                        f"ETA {eta_seconds / 60:.1f} min)",
-                        verbose,
-                    )
-                    
-                    if synthetic_count >= next_checkpoint or synthetic_count >= target_synthetic:
-                        log(f"  Progress: {synthetic_count} synthetic examples generated, saving checkpoint...", verbose)
-                        if not dry_run:
-                            save_progress(all_examples, config.paths.output_dir, "progress_synthetic", config.version)
-                        while synthetic_count >= next_checkpoint:
-                            next_checkpoint += 500
-                
-                except Exception as e:
-                    log(f"  Chunk {future_batch_idx + 1} failed: {e}", verbose)
-        
-        build_stats["synthetic"] = {
-            "backend": resolved_backend,
-            "chunk_size": batch_size,
-            "total_generated": synthetic_count,
-            "total_attempted": synthetic_attempts,
-            "failed_corruption": synthetic_failed_corruption,
-            "failed_verification": synthetic_failed_verification,
-        }
-        log(f"  Generated {synthetic_count} synthetic examples", verbose)
-        
-        # Final save after synthetic generation
-        if not dry_run and synthetic_count > 0:
-            log(f"  Saving checkpoint after synthetic generation...", verbose)
-            save_progress(all_examples, config.paths.output_dir, "checkpoint_after_synthetic", config.version)
-    
     # =========================================================================
-    # Phase 3: Deduplication
+    # Phase 5: Deduplication
     # =========================================================================
-    log("Phase 3: Deduplicating...", verbose)
+    log("Phase 5: Deduplicating...", verbose)
     
     clean_examples, internal_examples = deduplicator.deduplicate_batch(all_examples)
     
@@ -508,9 +727,9 @@ def build_dataset(
     log(f"  Clean: {len(clean_examples)}, Internal: {len(internal_examples)}", verbose)
     
     # =========================================================================
-    # Phase 4: Split Train/Dev
+    # Phase 6: Split Train/Dev
     # =========================================================================
-    log("Phase 4: Splitting train/dev...", verbose)
+    log("Phase 6: Splitting train/dev...", verbose)
     
     split_result = split_pools(
         clean_examples=clean_examples,
@@ -534,10 +753,10 @@ def build_dataset(
     log(f"  Internal: {len(internal_train)} train, {len(internal_dev)} dev", verbose)
     
     # =========================================================================
-    # Phase 5: Export
+    # Phase 7: Export
     # =========================================================================
     if not dry_run:
-        log("Phase 5: Writing datasets...", verbose)
+        log("Phase 7: Writing datasets...", verbose)
         
         writer = DatasetWriter(config.paths.output_dir, config.version)
         
@@ -551,37 +770,29 @@ def build_dataset(
         
         # Write rejected
         writer.write_rejected(rejected_examples)
+        writer.write_internal_only(internal_examples)
         
         # Write samples
         real_samples = [e for e in all_examples if e.metadata.source_type == "real_failure"]
         synth_samples = [e for e in all_examples if e.metadata.source_type == "synthetic_corruption"]
+        contrastive_samples = [e for e in all_examples if e.metadata.source_type == "contrastive"]
+        hard_case_samples = [
+            e for e in all_examples
+            if e.metadata.source_type in ("deterministic_fix", "manual_fix")
+            or e.metadata.failure_type in (
+                "wrong_denominator",
+                "join_path_error",
+                "temporal_anchor_error",
+                "table_family_confusion",
+            )
+        ]
         
         writer.write_samples(
             real_failures=real_samples,
             synthetic=synth_samples,
-            contrastive=[],
-            hard_cases=[],
+            contrastive=contrastive_samples,
+            hard_cases=hard_case_samples,
         )
-        
-        # Generate reports
-        writer.generate_all_reports(
-            clean_train=clean_train,
-            clean_dev=clean_dev,
-            internal_train=internal_train,
-            internal_dev=internal_dev,
-            config={
-                "version": config.version,
-                "build_size": config.build_size,
-                "targets": asdict(config.targets),
-            },
-            build_stats=build_stats,
-            contamination_report=contamination_router.generate_report(),
-            dedup_report=deduplicator.generate_report(),
-            verification_report=build_stats["verification"],
-            subagent_report={"mock": True, "note": "Mock subagent used"},
-        )
-        
-        log(f"  Wrote {len(writer.stats.files_written)} files", verbose)
     else:
         log("Dry run - skipping file writes", verbose)
     
@@ -591,6 +802,35 @@ def build_dataset(
     elapsed = time.time() - start_time
     build_stats["elapsed_seconds"] = round(elapsed, 2)
     build_stats["end_time"] = datetime.now(timezone.utc).isoformat()
+    build_stats["verification"]["passed"] += (
+        build_stats["synthetic"].get("total_generated", 0)
+        + build_stats["contrastive"].get("total_generated", 0)
+        + build_stats["deterministic"].get("total_accepted", 0)
+    )
+    build_stats["verification"]["failed"] += (
+        build_stats["synthetic"].get("failed_verification", 0)
+        + build_stats["contrastive"].get("failed_verification", 0)
+    )
+
+    if not dry_run:
+        writer.generate_all_reports(
+            clean_train=clean_train,
+            clean_dev=clean_dev,
+            internal_train=internal_train,
+            internal_dev=internal_dev,
+            config={
+                "version": config.version,
+                "build_size": config.build_size,
+                "targets": asdict(config.targets),
+                "resolved_targets": resolved_targets,
+            },
+            build_stats=build_stats,
+            contamination_report=contamination_router.generate_report(),
+            dedup_report=deduplicator.generate_report(),
+            verification_report=build_stats["verification"],
+            subagent_report=subagent.get_stats().to_dict() if not skip_real else {},
+        )
+        log(f"  Wrote {len(writer.stats.files_written)} files", verbose)
     
     log(f"Build complete in {elapsed:.1f}s", verbose)
     log(f"  Total examples: {len(all_examples)}", verbose)
@@ -611,6 +851,7 @@ def main():
         verbose=args.verbose,
         dry_run=args.dry_run,
     )
+    config.apply_build_size()
     
     # Validate config
     errors = config.validate()
@@ -627,7 +868,11 @@ def main():
             dry_run=args.dry_run,
             limit_real=args.limit_real,
             limit_synthetic=args.limit_synthetic,
+            limit_contrastive=args.limit_contrastive,
+            limit_deterministic=args.limit_deterministic,
             skip_synthetic=args.skip_synthetic,
+            skip_contrastive=args.skip_contrastive,
+            skip_deterministic=args.skip_deterministic,
             skip_real=args.skip_real,
             num_workers=args.workers,
             parallel_backend=args.parallel_backend,

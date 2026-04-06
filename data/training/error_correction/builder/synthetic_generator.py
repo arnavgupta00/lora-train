@@ -27,13 +27,20 @@ from .corruption import (
     apply_specific_corruption,
 )
 from .metadata import ExampleMetadata, Pool, RepairExample, SourceType
-from .schema_builder import SchemaBuilder, SchemaInfo, load_schema_from_db
+from .schema_builder import (
+    SchemaBuilder,
+    SchemaInfo,
+    build_compact_schema,
+    build_full_schema,
+    load_schema_from_db,
+    load_schema_from_ddl,
+)
 from .taxonomy import (
     FailureType,
     get_sampling_weight,
     get_suggested_target_mode,
 )
-from .verifier import Verifier
+from .verifier import Verifier, check_prose_contamination, validate_schema_usage
 
 
 @dataclass
@@ -46,6 +53,8 @@ class GoldSqlSource:
     hints: str
     source_name: str  # "bird_train", "spider", "bird_dev", etc.
     question_id: Optional[int] = None
+    original_example_id: Optional[str] = None
+    schema_ddl: Optional[str] = None
     is_benchmark_safe: bool = True  # Safe for clean pool
 
 
@@ -97,13 +106,94 @@ class SyntheticGenerator:
         # Cache
         self._schemas: Dict[str, SchemaInfo] = {}
         self._gold_sources: List[GoldSqlSource] = []
-    
-    def _get_schema(self, db_id: str) -> SchemaInfo:
-        """Get schema for a database (cached)."""
-        if db_id not in self._schemas:
-            db_path = self.paths.database_path(db_id)
-            self._schemas[db_id] = load_schema_from_db(db_path)
-        return self._schemas[db_id]
+
+    @staticmethod
+    def _parse_user_sections(user_content: str) -> Dict[str, str]:
+        """Extract Schema/Hints/Question sections from a chat-style user prompt."""
+        sections: Dict[str, str] = {}
+        if not user_content:
+            return sections
+
+        markers = ["Schema:", "Hints:", "Question:", "Broken SQL:", "Error:", "Failure Type:"]
+        positions = []
+        for marker in markers:
+            idx = user_content.find(marker)
+            if idx != -1:
+                positions.append((idx, marker))
+
+        positions.sort()
+        for i, (start, marker) in enumerate(positions):
+            end = positions[i + 1][0] if i + 1 < len(positions) else len(user_content)
+            value = user_content[start + len(marker):end].strip()
+            sections[marker[:-1].lower().replace(" ", "_")] = value
+
+        return sections
+
+    @classmethod
+    def _extract_gold_source_from_record(
+        cls,
+        data: Dict[str, Any],
+        source_name: str,
+        default_question_id: Optional[int],
+        is_benchmark_safe: bool,
+    ) -> Optional[GoldSqlSource]:
+        """Normalize either structured examples or chat-format SFT examples into GoldSqlSource."""
+        sql = data.get("gold_sql", data.get("sql", ""))
+        db_id = data.get("db_id", "")
+        question = data.get("question", "")
+        hints = data.get("evidence", data.get("hints", ""))
+        question_id = data.get("question_id", default_question_id)
+
+        if not sql and "messages" in data:
+            messages = data.get("messages", [])
+            user_content = ""
+            assistant_content = ""
+            for message in messages:
+                role = message.get("role")
+                if role == "user":
+                    user_content = message.get("content", "")
+                elif role == "assistant":
+                    assistant_content = message.get("content", "")
+
+            sections = cls._parse_user_sections(user_content)
+            sql = assistant_content.strip()
+            question = question or sections.get("question", "")
+            hints = hints or sections.get("hints", "")
+            schema_ddl = sections.get("schema", "")
+            db_id = db_id or data.get("metadata", {}).get("db_id", "")
+        else:
+            schema_ddl = data.get("schema")
+
+        if not sql or not db_id:
+            return None
+
+        return GoldSqlSource(
+            sql=sql,
+            db_id=db_id,
+            question=question,
+            hints=hints,
+            source_name=source_name,
+            question_id=question_id,
+            original_example_id=data.get("example_id"),
+            schema_ddl=schema_ddl,
+            is_benchmark_safe=is_benchmark_safe,
+        )
+
+    def _get_schema(self, source: GoldSqlSource) -> SchemaInfo:
+        """Get schema for a source, using the database file or inline DDL."""
+        cache_key = source.db_id if source.schema_ddl is None else f"{source.db_id}:inline"
+        if cache_key not in self._schemas:
+            db_path = self.paths.database_path(source.db_id)
+            if db_path.exists():
+                self._schemas[cache_key] = load_schema_from_db(db_path)
+            elif source.schema_ddl:
+                self._schemas[cache_key] = load_schema_from_ddl(
+                    source.schema_ddl,
+                    db_id=source.db_id,
+                )
+            else:
+                raise FileNotFoundError(f"Schema not found for source {source.db_id}")
+        return self._schemas[cache_key]
     
     def add_gold_source(self, source: GoldSqlSource) -> None:
         """Add a gold SQL source."""
@@ -121,26 +211,17 @@ class SyntheticGenerator:
             return 0
         
         with open(train_file, 'r', encoding='utf-8') as f:
-            for line in f:
+            for idx, line in enumerate(f):
                 try:
                     data = json.loads(line)
-                    
-                    # Extract fields
-                    sql = data.get('gold_sql', data.get('sql', ''))
-                    db_id = data.get('db_id', '')
-                    question = data.get('question', '')
-                    hints = data.get('evidence', data.get('hints', ''))
-                    
-                    if sql and db_id:
-                        self._gold_sources.append(GoldSqlSource(
-                            sql=sql,
-                            db_id=db_id,
-                            question=question,
-                            hints=hints,
-                            source_name="bird_train",
-                            question_id=data.get('question_id'),
-                            is_benchmark_safe=True,
-                        ))
+                    source = self._extract_gold_source_from_record(
+                        data=data,
+                        source_name="bird_train",
+                        default_question_id=idx,
+                        is_benchmark_safe=True,
+                    )
+                    if source:
+                        self._gold_sources.append(source)
                         count += 1
                 except json.JSONDecodeError:
                     continue
@@ -159,29 +240,44 @@ class SyntheticGenerator:
             return 0
         
         with open(dev_file, 'r', encoding='utf-8') as f:
-            for line in f:
+            for idx, line in enumerate(f):
                 try:
                     data = json.loads(line)
-                    
-                    sql = data.get('gold_sql', '')
-                    db_id = data.get('db_id', '')
-                    question = data.get('question', '')
-                    hints = data.get('evidence', data.get('hints', ''))
-                    
-                    if sql and db_id:
-                        self._gold_sources.append(GoldSqlSource(
-                            sql=sql,
-                            db_id=db_id,
-                            question=question,
-                            hints=hints,
-                            source_name="bird_dev",
-                            question_id=data.get('question_id'),
-                            is_benchmark_safe=False,  # Not safe for clean
-                        ))
+                    source = self._extract_gold_source_from_record(
+                        data=data,
+                        source_name="bird_dev",
+                        default_question_id=idx,
+                        is_benchmark_safe=False,
+                    )
+                    if source:
+                        self._gold_sources.append(source)
                         count += 1
                 except json.JSONDecodeError:
                     continue
         
+        return count
+
+    def load_gold_from_generated_files(self, files: List[Path], source_name: str) -> int:
+        """Load transformed/archetype sources from generated JSONL files."""
+        count = 0
+        for path in files:
+            if not path.exists():
+                continue
+            with open(path, "r", encoding="utf-8") as handle:
+                for idx, line in enumerate(handle):
+                    try:
+                        data = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    source = self._extract_gold_source_from_record(
+                        data=data,
+                        source_name=source_name,
+                        default_question_id=idx,
+                        is_benchmark_safe=data.get("contamination_risk") != "high",
+                    )
+                    if source:
+                        self._gold_sources.append(source)
+                        count += 1
         return count
     
     def generate_one(
@@ -205,7 +301,7 @@ class SyntheticGenerator:
         
         # Get schema
         try:
-            schema = self._get_schema(source.db_id)
+            schema = self._get_schema(source)
         except Exception:
             self.stats.failed_corruption += 1
             return None
@@ -221,24 +317,47 @@ class SyntheticGenerator:
             return None
         
         # Verify the pair
-        passed, details = self.verifier.verify_synthetic(
-            parent_sql=source.sql,
-            broken_sql=result.broken_sql,
-            db_id=source.db_id,
-        )
-        
+        db_path = self.paths.database_path(source.db_id)
+        if db_path.exists():
+            passed, details = self.verifier.verify_synthetic(
+                parent_sql=source.sql,
+                broken_sql=result.broken_sql,
+                db_id=source.db_id,
+            )
+            verification_method = "execution_match"
+        else:
+            schema_valid, _ = validate_schema_usage(source.sql, schema.get_all_columns())
+            corrected_clean, _ = check_prose_contamination(source.sql)
+            broken_clean, _ = check_prose_contamination(result.broken_sql)
+            passed = schema_valid and corrected_clean and broken_clean and source.sql.strip() != result.broken_sql.strip()
+            details = {"schema_only": True}
+            verification_method = "normalized_match"
+
         if not passed:
             self.stats.failed_verification += 1
             return None
         
         # Build schema context
-        schema_context, schema_meta = self.schema_builder.build_context(
-            db_id=source.db_id,
-            question=source.question,
-            hints=source.hints,
-            broken_sql=result.broken_sql,
-            use_compact=use_compact_schema,
-        )
+        if db_path.exists():
+            schema_context, schema_meta = self.schema_builder.build_context(
+                db_id=source.db_id,
+                question=source.question,
+                hints=source.hints,
+                broken_sql=result.broken_sql,
+                use_compact=use_compact_schema,
+            )
+        elif use_compact_schema:
+            schema_context, compact_meta = build_compact_schema(
+                schema,
+                question=source.question,
+                hints=source.hints,
+                broken_sql=result.broken_sql,
+                config=self.config.schema,
+            )
+            schema_meta = compact_meta
+        else:
+            schema_context, full_meta = build_full_schema(schema)
+            schema_meta = full_meta
         
         # Determine contamination status
         if source.is_benchmark_safe:
@@ -281,10 +400,14 @@ class SyntheticGenerator:
             source_type=SourceType.SYNTHETIC_CORRUPTION.value,
             source_run=None,
             original_question_id=source.question_id,
+            original_example_id=source.original_example_id,
             db_family=source.db_id,
             schema_context_type=schema_meta.get("schema_context_type", "compact_relevant"),
             schema_tables_kept=schema_meta.get("tables_kept", []),
             schema_columns_kept=schema_meta.get("columns_kept", 0),
+            relations=[],
+            notes=f"Synthetic corruption from {source.source_name}",
+            compact_schema_stats=schema_meta,
             failure_type=failure_type.value,
             target_failure_mode=target_mode.value,
             exec_failed_originally=False,  # Synthetic may or may not exec fail
@@ -297,7 +420,7 @@ class SyntheticGenerator:
             corrected_sql_source="synthetic_parent",
             reference_sql_source="synthetic_parent",
             reference_sql=source.sql,
-            verification_method="execution_match",
+            verification_method=verification_method,
             verification_passed=True,
             subagent_used=False,
             corruption_transform=result.transform_name,
