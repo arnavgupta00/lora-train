@@ -5,9 +5,18 @@ Configuration Module
 Dataclasses for builder configuration, dataset targets, and paths.
 """
 
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
+
+
+def resolve_project_root() -> Path:
+    """Resolve the repository root, with an optional environment override."""
+    env_root = os.environ.get("LM_PROJECT_ROOT")
+    if env_root:
+        return Path(env_root).expanduser().resolve()
+    return Path(__file__).resolve().parents[4]
 
 
 @dataclass
@@ -100,7 +109,7 @@ class PathConfig:
     """Paths to input files and output directories."""
     
     # Base paths
-    project_root: Path = field(default_factory=lambda: Path("/Users/arnav/programming/lm"))
+    project_root: Path = field(default_factory=resolve_project_root)
     
     @property
     def data_dir(self) -> Path:
