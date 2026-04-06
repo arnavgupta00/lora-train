@@ -72,7 +72,7 @@ The default config is tuned for a faster single-GPU run on a 24 GB class card:
 - `max_seq_len: 2048`
 - `per_device_train_batch_size: 2`
 - `gradient_accumulation_steps: 16`
-- `pack: true`
+- `pack: false`
 - `bf16 + gradient_checkpointing`
 - `logging_steps: 50`
 - standard Trainer progress bar + saved `run_meta.json`

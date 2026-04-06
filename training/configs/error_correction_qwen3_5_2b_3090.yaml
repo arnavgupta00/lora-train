@@ -15,7 +15,7 @@ load_in_4bit: false
 bf16: true
 fp16: false
 gradient_checkpointing: true
-pack: true
+pack: false
 
 # Sequence length
 max_seq_len: 2048
@@ -50,7 +50,7 @@ target_modules:
   - down_proj
 
 # Logging and checkpointing
-logging_steps: 25
+logging_steps: 50
 eval_steps: null
 save_steps: 400
 save_total_limit: 2
