@@ -52,7 +52,7 @@ target_modules:
 # Logging and checkpointing
 logging_steps: 50
 eval_steps: null
-save_steps: 500
+save_steps: 700
 save_total_limit: 2
 
 # Reproducibility
