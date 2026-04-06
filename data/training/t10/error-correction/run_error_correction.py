@@ -122,8 +122,8 @@ def merge_data(
 # Model Loading
 # =============================================================================
 
-def load_model(model_id: str, device: str = "cuda"):
-    """Load model and tokenizer."""
+def load_model(model_id: str, device: str = "cuda", adapter_dir: str = ""):
+    """Load model, tokenizer, and optional LoRA adapter."""
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
     
@@ -144,6 +144,11 @@ def load_model(model_id: str, device: str = "cuda"):
         attn_implementation="sdpa",
         low_cpu_mem_usage=True,
     )
+
+    if adapter_dir and os.path.isdir(adapter_dir):
+        print(f"Loading LoRA adapter: {adapter_dir}")
+        from peft import PeftModel
+        model = PeftModel.from_pretrained(model, adapter_dir)
     
     model = model.to(device)
     model.eval()
@@ -660,6 +665,8 @@ def main():
     # Model settings
     parser.add_argument("--model_id", default="Qwen/Qwen3-1.7B",
                         help="Model ID for repair")
+    parser.add_argument("--adapter_dir", default="",
+                        help="Optional LoRA adapter directory for the repair model")
     parser.add_argument("--device", default="cuda",
                         help="Device to use")
     parser.add_argument("--enable_thinking", action="store_true",
@@ -687,6 +694,7 @@ def main():
     print(f"Predictions: {args.predictions}")
     print(f"Eval results: {args.eval_results}")
     print(f"Model: {args.model_id}")
+    print(f"Adapter: {args.adapter_dir or 'None'}")
     print(f"Thinking: {args.enable_thinking}")
     print(f"Max attempts: {args.max_repair_attempts}")
     print(f"Min repairability: {args.min_repairability_score}")
@@ -713,7 +721,7 @@ def main():
     schema_cache = SchemaCache(args.db_dir)
     
     # Load model
-    model, tokenizer = load_model(args.model_id, args.device)
+    model, tokenizer = load_model(args.model_id, args.device, args.adapter_dir)
     
     # Run error correction
     print("\nRunning error correction...")

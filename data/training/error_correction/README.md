@@ -16,6 +16,23 @@ Training entrypoints for the benchmark-clean SQL repair dataset.
     --output_dir "./runs/error_correction_sft_001"
 ```
 
+## Run T10 Repairs
+
+After training, run the repair model against the existing T10 baseline outputs:
+
+```bash
+./data/training/error_correction/run_t10_error_correction.sh \
+    --adapter_dir ./runs/error_correction_qwen3_5_2b_3090 \
+    2>&1 | tee ./runs/error_correction_qwen3_5_2b_3090/t10_repair/launcher.log
+```
+
+This launcher:
+
+- reads T10 predictions from `runs/t10_baseline_3090/qwen3-1.7b/without-sampling`
+- uses `Qwen/Qwen3.5-2B` plus your repair LoRA adapter
+- writes repaired predictions and repair logs
+- runs repaired-prediction evaluation automatically
+
 ## Dataset Files
 
 - `train_error_repair_v1_clean.jsonl`
