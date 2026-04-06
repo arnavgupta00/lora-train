@@ -281,6 +281,20 @@ def validate_execution(
     return execute_sql(db_path, sql, timeout)
 
 
+def results_match(gold_results: Any, pred_results: Any) -> bool:
+    """Compare SQL result sets using the same set-based semantics as evaluator."""
+    if gold_results is None or pred_results is None:
+        return False
+
+    try:
+        gold_set = set(tuple(row) for row in gold_results)
+        pred_set = set(tuple(row) for row in pred_results)
+    except Exception:
+        return False
+
+    return gold_set == pred_set
+
+
 def extract_clause(sql: str, clause: str, stop_clauses: List[str]) -> str:
     """Extract a top-level clause body using a lightweight SQL regex."""
     if not sql:
@@ -383,7 +397,9 @@ def validate_structure_preservation(
 def should_accept_repair(
     original_sql: str,
     repaired_sql: str,
+    gold_sql: str,
     original_exec_result: Tuple[bool, Any],
+    gold_exec_result: Tuple[bool, Any],
     repair_exec_result: Tuple[bool, Any],
     schema_validation: Tuple[bool, List[str]],
     failure_type: str,
@@ -392,10 +408,8 @@ def should_accept_repair(
     """
     Decide whether to accept the repair.
     
-    CONSERVATIVE POLICY:
-    - Only accept repairs for originally-failing SQL
-    - Never accept repairs when original SQL already executes
-    - We cannot verify correctness, only executability
+    Acceptance policy:
+    - Accept only when repaired SQL matches gold SQL execution results.
     
     Args:
         original_sql: The original predicted SQL
@@ -408,17 +422,11 @@ def should_accept_repair(
     Returns:
         (accept, reason)
     """
-    orig_succeeded, orig_result = original_exec_result
     repair_succeeded, repair_result = repair_exec_result
     schema_valid, schema_errors = schema_validation
     structure_valid, structure_issues = structure_validation
     
-    # CRITICAL: If original SQL executes, DO NOT accept any repair
-    # We cannot verify the repair is actually correct without gold results
-    if orig_succeeded:
-        return False, "Original SQL executes - cannot verify repair improves correctness"
-    
-    # Original SQL failed to execute - repair must fix it
+    gold_succeeded, gold_result = gold_exec_result
     
     # Must be schema-valid
     if not schema_valid:
@@ -430,6 +438,14 @@ def should_accept_repair(
     # Must execute
     if not repair_succeeded:
         return False, f"Execution still failed: {repair_result}"
+
+    # Gold query must execute to score semantic correctness.
+    if not gold_succeeded:
+        return False, f"Gold SQL execution failed during validation: {gold_result}"
+
+    # Must match gold results exactly using set-based comparison.
+    if not results_match(gold_result, repair_result):
+        return False, "Execution result mismatch vs gold"
     
     # Repair is identical (shouldn't happen but guard against)
     if repaired_sql.strip().lower() == original_sql.strip().lower():
@@ -459,7 +475,7 @@ def should_accept_repair(
             f"{class_limit:.0%} (diff_ratio={diff_ratio:.0%})"
         )
     
-    return True, "Fixed execution error - repair executes successfully"
+    return True, "Execution result matches gold"
 
 
 # =============================================================================
@@ -468,12 +484,14 @@ def should_accept_repair(
 
 def validate_repair(
     original_sql: str,
+    gold_sql: str,
     raw_repair_output: str,
     db_path: str,
     schema: SchemaInfo,
     failure_type: str,
     identifier_confidence: Optional[float] = None,
     original_exec_result: Optional[Tuple[bool, Any]] = None,
+    gold_exec_result: Optional[Tuple[bool, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Run full validation pipeline on a repair.
@@ -504,6 +522,7 @@ def validate_repair(
         "hygiene_issues": [],
         "schema_errors": [],
         "original_exec_result": (False, "not executed"),
+        "gold_exec_result": (False, "not executed"),
         "repair_exec_result": (False, "not executed"),
         "diff_ratio": 0.0,
         "high_diff_quarantine": False,
@@ -511,6 +530,7 @@ def validate_repair(
         "quarantine_reasons": [],
         "structure_issues": [],
         "structure_metrics": {},
+        "matches_gold": False,
     }
     
     # Step 1: Clean output
@@ -530,6 +550,11 @@ def validate_repair(
     if original_exec_result is None:
         original_exec_result = validate_execution(original_sql, db_path)
     result["original_exec_result"] = original_exec_result
+
+    # Step 3.5: Execute gold SQL (or reuse cached result from prior attempts)
+    if gold_exec_result is None:
+        gold_exec_result = validate_execution(gold_sql, db_path)
+    result["gold_exec_result"] = gold_exec_result
     
     # Step 4: Execute repaired SQL
     repair_exec_result = validate_execution(cleaned_sql, db_path)
@@ -556,10 +581,16 @@ def validate_repair(
     result["quarantine"] = bool(result["quarantine_reasons"])
     
     # Step 6: Acceptance decision
+    gold_ok, gold_rows = result["gold_exec_result"]
+    repair_ok, repair_rows = result["repair_exec_result"]
+    result["matches_gold"] = bool(gold_ok and repair_ok and results_match(gold_rows, repair_rows))
+
     accepted, reason = should_accept_repair(
         original_sql=original_sql,
         repaired_sql=cleaned_sql,
+        gold_sql=gold_sql,
         original_exec_result=original_exec_result,
+        gold_exec_result=gold_exec_result,
         repair_exec_result=repair_exec_result,
         schema_validation=(schema_valid, schema_errors),
         failure_type=failure_type,
