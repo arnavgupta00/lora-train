@@ -34,7 +34,7 @@ weight_decay: 0.01
 max_grad_norm: 1.0
 
 # Training duration
-num_train_epochs: 2
+num_train_epochs: 1
 
 # LoRA configuration
 lora_r: 32
