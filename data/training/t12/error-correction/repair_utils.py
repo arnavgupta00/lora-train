@@ -12,6 +12,7 @@ Shared utilities for the T10 error-correction pipeline:
 
 import re
 import sqlite3
+import time
 from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -728,14 +729,40 @@ def compute_sql_diff_ratio(sql1: str, sql2: str) -> float:
 def execute_sql(db_path: str, sql: str, timeout: int = 30) -> Tuple[bool, Any]:
     """
     Execute SQL and return (success, results_or_error).
+
+    Notes:
+    - sqlite3 `timeout` only applies to lock contention, not query runtime.
+    - We enforce a wall-clock runtime limit via a progress handler so a single
+      pathological query cannot stall the whole repair pipeline.
     """
+    if timeout <= 0:
+        timeout = 30
+
     try:
-        conn = sqlite3.connect(db_path, timeout=timeout)
+        deadline = time.monotonic() + float(timeout)
+        conn = sqlite3.connect(db_path, timeout=float(timeout))
         conn.text_factory = lambda b: b.decode(errors='ignore')
-        cursor = conn.execute(sql)
-        results = cursor.fetchall()
-        conn.close()
-        return True, results
+        conn.execute(f"PRAGMA busy_timeout = {int(float(timeout) * 1000)}")
+
+        def _progress_abort() -> int:
+            # Non-zero return interrupts the current SQLite operation.
+            return 1 if time.monotonic() > deadline else 0
+
+        conn.set_progress_handler(_progress_abort, 10_000)
+
+        try:
+            cursor = conn.execute(sql)
+            # Validation only needs successful execution, not full result materialization.
+            results = cursor.fetchmany(10)
+            return True, results
+        finally:
+            conn.set_progress_handler(None, 0)
+            conn.close()
+    except sqlite3.OperationalError as e:
+        msg = str(e)
+        if "interrupted" in msg.lower():
+            return False, f"query timeout after {timeout}s"
+        return False, msg
     except Exception as e:
         return False, str(e)
 

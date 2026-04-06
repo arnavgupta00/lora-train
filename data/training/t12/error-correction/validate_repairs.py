@@ -473,6 +473,7 @@ def validate_repair(
     schema: SchemaInfo,
     failure_type: str,
     identifier_confidence: Optional[float] = None,
+    original_exec_result: Optional[Tuple[bool, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Run full validation pipeline on a repair.
@@ -525,8 +526,9 @@ def validate_repair(
     schema_valid, schema_errors = validate_schema_usage(cleaned_sql, schema)
     result["schema_errors"] = schema_errors
     
-    # Step 3: Execute original SQL
-    original_exec_result = validate_execution(original_sql, db_path)
+    # Step 3: Execute original SQL (or reuse cached result from prior attempts)
+    if original_exec_result is None:
+        original_exec_result = validate_execution(original_sql, db_path)
     result["original_exec_result"] = original_exec_result
     
     # Step 4: Execute repaired SQL

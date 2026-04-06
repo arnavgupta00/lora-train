@@ -391,6 +391,7 @@ def run_error_correction(
             "classification": classification,
             "schema_block": schema_block,
             "log_entry": log_entry,
+            "original_exec_result": None,
         })
 
     for attempt in range(max_repair_attempts):
@@ -475,7 +476,10 @@ def run_error_correction(
                         classification.identifier_candidates[0]["score"]
                         if classification.identifier_candidates else None
                     ),
+                    original_exec_result=item.get("original_exec_result"),
                 )
+                if item.get("original_exec_result") is None:
+                    item["original_exec_result"] = validation.get("original_exec_result")
 
                 attempt_log = {
                     "attempt_index": attempt,

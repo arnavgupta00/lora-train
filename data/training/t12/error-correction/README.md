@@ -17,8 +17,8 @@ Wrong-result cases are classified but **not** auto-repaired.
 cd /Users/arnav/programming/lm
 
 python data/training/t12/error-correction/run_error_correction.py \
-  --predictions runs/t12_baseline_3090/qwen3.5-2b/without-sampling/predictions/predictions_t12.jsonl \
-  --eval_results runs/t12_baseline_3090/qwen3.5-2b/without-sampling/eval/per_example_results.jsonl \
+  --predictions runs/t12_baseline_3090/predictions/predictions_t12.jsonl \
+  --eval_results runs/t12_baseline_3090/eval/per_example_results.jsonl \
   --prompts data/training/t12/bird_dev_t12.jsonl \
   --db_dir data/bird_eval_datasets/dev_databases \
   --output_dir data/training/t12/error-correction \
