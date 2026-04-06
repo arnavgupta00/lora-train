@@ -1,0 +1,21 @@
+{
+  "name": "SQL Error-Correction Dataset v1",
+  "version": "v1",
+  "created_at": "2026-04-06T16:37:39.581675Z",
+  "description": "Supervised dataset for SQL error-correction model",
+  "task": "Given broken SQL, output corrected SQL",
+  "files": {
+    "internal_train": "train_error_repair_v1.jsonl",
+    "internal_dev": "dev_error_repair_v1.jsonl",
+    "clean_train": "train_error_repair_v1_clean.jsonl",
+    "clean_dev": "dev_error_repair_v1_clean.jsonl"
+  },
+  "statistics": {},
+  "config": {
+    "version": "v1",
+    "resume": "phase7_reports_only"
+  },
+  "build_stats": {
+    "resume_mode": true
+  }
+}

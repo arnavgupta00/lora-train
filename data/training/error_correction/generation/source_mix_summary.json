@@ -1,0 +1,22 @@
+{
+  "by_source_type": {
+    "real_failure": {
+      "train": 1002,
+      "dev": 99,
+      "total": 1101,
+      "percentage": 7.1
+    },
+    "synthetic_corruption": {
+      "train": 12887,
+      "dev": 1333,
+      "total": 14220,
+      "percentage": 91.74
+    },
+    "contrastive": {
+      "train": 160,
+      "dev": 20,
+      "total": 180,
+      "percentage": 1.16
+    }
+  }
+}
