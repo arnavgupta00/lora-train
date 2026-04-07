@@ -48,6 +48,37 @@ def load_prompts(prompts_file: str, limit: int) -> List[Dict[str, Any]]:
     return prompts
 
 
+def read_jsonl(path: Path) -> List[Dict[str, Any]]:
+    if not path.exists():
+        return []
+    out: List[Dict[str, Any]] = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                out.append(json.loads(line))
+    return out
+
+
+def write_jsonl(path: Path, rows: List[Optional[Dict[str, Any]]]) -> None:
+    with open(path, "w", encoding="utf-8") as f:
+        for row in rows:
+            if row is not None:
+                f.write(json.dumps(row, ensure_ascii=True) + "\n")
+
+
+def save_progress_snapshot(
+    output_dir: Path,
+    prediction_rows: List[Optional[Dict[str, Any]]],
+    candidate_rows: List[Optional[Dict[str, Any]]],
+    state: Dict[str, Any],
+) -> None:
+    write_jsonl(output_dir / "predictions_sc_t12.jsonl", prediction_rows)
+    write_jsonl(output_dir / "candidates_sc_t12.jsonl", candidate_rows)
+    with open(output_dir / "progress_state_sc_t12.json", "w", encoding="utf-8") as f:
+        json.dump(state, f, indent=2)
+
+
 def execute_sql(db_path: str, sql: str, timeout: int = 30) -> Tuple[bool, Any, float]:
     start = time.time()
     try:
@@ -353,6 +384,28 @@ def evaluate_selected_predictions(
     return final_results, summary
 
 
+def quick_match_selected(
+    example: Dict[str, Any],
+    pred_sql: str,
+    db_dir: str,
+    timeout: int,
+) -> bool:
+    db_id = example["db_id"]
+    db_path = find_database(db_dir, db_id)
+    if not db_path:
+        return False
+    gold_sql = normalize_sql(example.get("gold_sql", example.get("SQL", "")))
+    pred_sql = normalize_sql(pred_sql)
+
+    gok, grows, _ = execute_sql(db_path, gold_sql, timeout=timeout)
+    if not gok:
+        return False
+    pok, prows, _ = execute_sql(db_path, pred_sql, timeout=timeout)
+    if not pok:
+        return False
+    return results_match(grows, prows)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="T12 self-consistency runner (sampling-only, n=7)")
 
@@ -376,6 +429,8 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", type=str, default="cuda")
+    parser.add_argument("--resume", action="store_true", help="Resume from predictions_sc_t12.jsonl in output_dir")
+    parser.add_argument("--min_batch_size", type=int, default=1, help="Minimum batch size when reducing after OOM")
 
     args = parser.parse_args()
 
@@ -386,6 +441,11 @@ def main() -> None:
         raise ValueError("temperature must be > 0.0 for self-consistency sampling.")
 
     os.makedirs(args.output_dir, exist_ok=True)
+    output_dir = Path(args.output_dir)
+
+    # Reduce fragmentation risk for long runs on consumer GPUs.
+    if "PYTORCH_CUDA_ALLOC_CONF" not in os.environ:
+        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
     print("=" * 72)
     print("T12 SELF-CONSISTENCY (N=7, SAMPLING-ONLY)")
@@ -471,39 +531,119 @@ def main() -> None:
         )
 
     selected_sql: List[str] = [""] * len(prompts)
-    prediction_rows: List[Dict[str, Any]] = [None] * len(prompts)  # type: ignore
-    candidate_rows: List[Dict[str, Any]] = [None] * len(prompts)  # type: ignore
+    prediction_rows: List[Optional[Dict[str, Any]]] = [None] * len(prompts)
+    candidate_rows: List[Optional[Dict[str, Any]]] = [None] * len(prompts)
+
+    qid_to_idx = {p.get("question_id", i): i for i, p in enumerate(prompts)}
+    running_processed = 0
+    running_correct = 0
+    filled_count = 0
+
+    pred_path = output_dir / "predictions_sc_t12.jsonl"
+    cand_path = output_dir / "candidates_sc_t12.jsonl"
+    state_path = output_dir / "progress_state_sc_t12.json"
+
+    if args.resume and pred_path.exists():
+        existing_preds = read_jsonl(pred_path)
+        existing_cands = read_jsonl(cand_path)
+        cand_by_qid = {r.get("question_id"): r for r in existing_cands}
+
+        for r in existing_preds:
+            qid = r.get("question_id")
+            if qid not in qid_to_idx:
+                continue
+            idx = qid_to_idx[qid]
+            prediction_rows[idx] = r
+            selected_sql[idx] = normalize_sql(r.get("predicted_sql", ""))
+            if qid in cand_by_qid:
+                candidate_rows[idx] = cand_by_qid[qid]
+
+        filled_count = sum(1 for r in prediction_rows if r is not None)
+        print(f"Resumed {filled_count}/{len(prompts)} rows from existing output files")
+
+        if state_path.exists():
+            with open(state_path, "r", encoding="utf-8") as f:
+                st = json.load(f)
+            running_processed = int(st.get("running_processed", 0))
+            running_correct = int(st.get("running_correct", 0))
+            print(
+                f"Resume state: running_EX={((100.0 * running_correct / running_processed) if running_processed else 0.0):.2f}% "
+                f"({running_correct}/{running_processed})"
+            )
+        else:
+            # Backfill running metrics if old run predates state file.
+            running_processed = 0
+            running_correct = 0
+            for i, row in enumerate(prediction_rows):
+                if row is None:
+                    continue
+                running_processed += 1
+                if quick_match_selected(prompts[i], row.get("predicted_sql", ""), args.db_dir, args.sql_timeout):
+                    running_correct += 1
+            print(
+                f"Backfilled resume metrics: running_EX={((100.0 * running_correct / running_processed) if running_processed else 0.0):.2f}% "
+                f"({running_correct}/{running_processed})"
+            )
 
     gen_start = time.time()
 
-    for batch_start in range(0, len(prompts), args.batch_size):
-        batch_end = min(batch_start + args.batch_size, len(prompts))
-        p_batch = prompts[batch_start:batch_end]
-        r_batch = rendered_prompts[batch_start:batch_end]
+    batch_start = 0
+    current_batch_size = args.batch_size
 
-        batch_candidates = generate_candidates_batch(
-            model=model,
-            tokenizer=tokenizer,
-            prompt_batch=r_batch,
-            n_samples=args.n_samples,
-            max_new_tokens=args.max_new_tokens,
-            temperature=args.temperature,
-            top_p=args.top_p,
-            top_k=args.top_k,
-            repetition_penalty=args.repetition_penalty,
-        )
+    while batch_start < len(prompts):
+        batch_end = min(batch_start + current_batch_size, len(prompts))
+        unresolved = [i for i in range(batch_start, batch_end) if prediction_rows[i] is None]
 
-        def vote_one(local_i: int) -> Tuple[int, str, Dict[str, Any], List[Dict[str, Any]]]:
-            global_i = batch_start + local_i
-            db_id = p_batch[local_i]["db_id"]
+        if not unresolved:
+            batch_start = batch_end
+            continue
+
+        p_batch = [prompts[i] for i in unresolved]
+        r_batch = [rendered_prompts[i] for i in unresolved]
+        local_idx_by_global = {g: l for l, g in enumerate(unresolved)}
+
+        try:
+            batch_candidates = generate_candidates_batch(
+                model=model,
+                tokenizer=tokenizer,
+                prompt_batch=r_batch,
+                n_samples=args.n_samples,
+                max_new_tokens=args.max_new_tokens,
+                temperature=args.temperature,
+                top_p=args.top_p,
+                top_k=args.top_k,
+                repetition_penalty=args.repetition_penalty,
+            )
+        except RuntimeError as e:
+            emsg = str(e).lower()
+            if "outofmemory" in emsg or "cuda out of memory" in emsg:
+                import torch
+
+                torch.cuda.empty_cache()
+                if current_batch_size <= args.min_batch_size:
+                    raise RuntimeError(
+                        "OOM even at minimum batch size. Try lower max_new_tokens, lower n_samples, or use resume after restarting with more free VRAM."
+                    ) from e
+                new_bs = max(args.min_batch_size, current_batch_size // 2)
+                print(
+                    f"  [OOM] Reducing batch_size {current_batch_size} -> {new_bs} and retrying from index {batch_start}"
+                )
+                current_batch_size = new_bs
+                continue
+            raise
+
+        def vote_one(local_i: int) -> Tuple[int, str, Dict[str, Any], List[Dict[str, Any]], bool]:
+            global_i = unresolved[local_i]
+            db_id = prompts[global_i]["db_id"]
             db_path = find_database(args.db_dir, db_id)
             sql, meta, attempts = build_vote(db_path, batch_candidates[local_i], args.sql_timeout)
-            return global_i, sql, meta, attempts
+            partial_correct = quick_match_selected(prompts[global_i], sql, args.db_dir, args.sql_timeout)
+            return global_i, sql, meta, attempts, partial_correct
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=args.vote_workers) as pool:
             futs = [pool.submit(vote_one, i) for i in range(len(p_batch))]
             for fut in concurrent.futures.as_completed(futs):
-                i, chosen, vmeta, attempts = fut.result()
+                i, chosen, vmeta, attempts, partial_correct = fut.result()
                 selected_sql[i] = chosen
                 row = prompts[i]
 
@@ -515,31 +655,65 @@ def main() -> None:
                     "gold_sql": row.get("gold_sql", row.get("SQL", "")),
                     "difficulty": row.get("difficulty", "unknown"),
                     "vote_metadata": vmeta,
+                    "partial_correct": partial_correct,
                 }
                 candidate_rows[i] = {
                     "question_id": row.get("question_id", i),
                     "db_id": row["db_id"],
-                    "candidates": batch_candidates[i - batch_start],
+                    "candidates": batch_candidates[local_idx_by_global[i]],
                     "vote_metadata": vmeta,
                     "attempts": attempts,
                     "selected_sql": chosen,
                 }
+                filled_count += 1
+                running_processed += 1
+                running_correct += int(partial_correct)
 
-        print(f"  [gen+vote {batch_end}/{len(prompts)}]")
+        running_ex = (100.0 * running_correct / running_processed) if running_processed else 0.0
+        print(
+            f"  [gen+vote {filled_count}/{len(prompts)}] running_EX={running_ex:.2f}% ({running_correct}/{running_processed})"
+        )
+
+        save_progress_snapshot(
+            output_dir=output_dir,
+            prediction_rows=prediction_rows,
+            candidate_rows=candidate_rows,
+            state={
+                "running_processed": running_processed,
+                "running_correct": running_correct,
+                "filled_count": filled_count,
+                "next_batch_start": batch_end,
+                "current_batch_size": current_batch_size,
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            },
+        )
+
+        batch_start = batch_end
 
     gen_elapsed = time.time() - gen_start
 
-    # Save prediction outputs.
-    pred_path = Path(args.output_dir) / "predictions_sc_t12.jsonl"
-    cand_path = Path(args.output_dir) / "candidates_sc_t12.jsonl"
+    # Save prediction outputs one final time.
+    save_progress_snapshot(
+        output_dir=output_dir,
+        prediction_rows=prediction_rows,
+        candidate_rows=candidate_rows,
+        state={
+            "running_processed": running_processed,
+            "running_correct": running_correct,
+            "filled_count": filled_count,
+            "next_batch_start": len(prompts),
+            "current_batch_size": current_batch_size,
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "done_generation": True,
+        },
+    )
 
-    with open(pred_path, "w", encoding="utf-8") as f:
-        for row in prediction_rows:
-            f.write(json.dumps(row, ensure_ascii=True) + "\n")
-
-    with open(cand_path, "w", encoding="utf-8") as f:
-        for row in candidate_rows:
-            f.write(json.dumps(row, ensure_ascii=True) + "\n")
+    # Ensure no missing rows before final full evaluation.
+    missing = [i for i, r in enumerate(prediction_rows) if r is None]
+    if missing:
+        raise RuntimeError(
+            f"Generation incomplete ({len(missing)} missing). Re-run with --resume to continue."
+        )
 
     # Evaluate selected SQL.
     print("Evaluating voted predictions...")
@@ -556,6 +730,8 @@ def main() -> None:
     voting_used = 0
     fallback_used = 0
     for row in prediction_rows:
+        if row is None:
+            continue
         vm = row["vote_metadata"]
         if vm["method"] == "execution_result_vote":
             voting_used += 1

@@ -60,6 +60,33 @@ python data/training/t12/self-consistency/run_self_consistency_t12.py \
   --temperature 0.5
 ```
 
+## Resume After Interruption / OOM
+
+If a run stops mid-way, restart with the same `--output_dir` and add `--resume`.
+The script will load existing `predictions_sc_t12.jsonl`, skip completed items,
+continue from remaining examples, and print running EX progress.
+
+```bash
+python data/training/t12/self-consistency/run_self_consistency_t12.py \
+  --base_model_id Qwen/Qwen3.5-2B \
+  --adapter_repo Arnav3035/garuda-sql-2b \
+  --prompts_file data/training/t12/bird_dev_t12.jsonl \
+  --db_dir data/bird_eval_datasets/dev_databases \
+  --output_dir runs/t12_sc_n7 \
+  --n_samples 7 \
+  --temperature 0.5 \
+  --top_p 0.9 \
+  --top_k 50 \
+  --batch_size 4 \
+  --min_batch_size 1 \
+  --vote_workers 8 \
+  --eval_workers 8 \
+  --resume
+```
+
+If OOM happens again, lower `--batch_size` (for example `2`) and/or reduce
+`--max_new_tokens`.
+
 ## Output Files
 
 In `--output_dir`:
