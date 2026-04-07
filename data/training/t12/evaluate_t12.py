@@ -60,14 +60,30 @@ def execute_sql(
     timeout: int = 30,
 ) -> Tuple[bool, Any]:
     """Execute SQL on a SQLite database and return results."""
+    start_time = time.time()
     try:
         conn = sqlite3.connect(db_path, timeout=timeout)
         conn.text_factory = lambda b: b.decode(errors="ignore")
+
+        # sqlite3.connect(timeout=...) only controls lock wait time.
+        # Use a progress handler to enforce wall-clock query timeout.
+        deadline = start_time + timeout
+
+        def _progress_handler() -> int:
+            return 1 if time.time() > deadline else 0
+
+        # Call progress handler every N virtual machine opcodes.
+        conn.set_progress_handler(_progress_handler, 10_000)
+
         cursor = conn.execute(sql)
         results = cursor.fetchall()
+        conn.set_progress_handler(None, 0)
         conn.close()
         return True, results
     except Exception as e:
+        # Ensure timeout errors are explicit and consistent.
+        if "interrupted" in str(e).lower() and (time.time() - start_time) >= timeout:
+            return False, f"query_timeout_after_{timeout}s"
         return False, str(e)
 
 
