@@ -257,8 +257,8 @@ def main():
         low_cpu_mem_usage=True,
     )
     
-    # Load adapter if provided
-    if args.adapter_dir and os.path.isdir(args.adapter_dir):
+    # Load adapter if provided (supports local path or HF adapter repo ID)
+    if args.adapter_dir:
         print(f"Loading LoRA adapter from: {args.adapter_dir}")
         from peft import PeftModel
         model = PeftModel.from_pretrained(model, args.adapter_dir)
