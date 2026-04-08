@@ -48,6 +48,34 @@ python data/training/t12/error-correction/run_error_correction.py \
   --generation_batch_size 61
 ```
 
+## Run on `t12_sc_n7` Outputs with HF Adapter
+
+Use your deployed HF adapter repo ID directly:
+
+```bash
+cd /Users/arnav/programming/lm
+
+python data/training/t12/error-correction/run_error_correction.py \
+  --predictions runs/t12_sc_n7/predictions_sc_t12.jsonl \
+  --eval_results runs/t12_sc_n7/per_example_results_sc_t12.jsonl \
+  --prompts data/training/t12/bird_dev_t12.jsonl \
+  --db_dir data/bird_eval_datasets/dev_databases \
+  --output_dir runs/t12_sc_n7/error_correction_hf_adapter \
+  --model_id Qwen/Qwen3.5-2B \
+  --adapter_path Arnav3035/error-correction-qwen3-5-2b-3090 \
+  --max_repair_attempts 2 \
+  --generation_batch_size 61
+```
+
+For this script, only these `t12_sc_n7` inputs are required:
+- `runs/t12_sc_n7/predictions_sc_t12.jsonl`
+- `runs/t12_sc_n7/per_example_results_sc_t12.jsonl`
+
+These are useful artifacts but not direct inputs to `run_error_correction.py`:
+- `runs/t12_sc_n7/candidates_sc_t12.jsonl`
+- `runs/t12_sc_n7/evaluation_report_sc_t12.json`
+- `runs/t12_sc_n7/eval_summary_sc_t12.md`
+
 Use a workspace-relative adapter path (for example `runs/...`) or a full path like
 `/workspace/lora-train/runs/...`. Avoid `/runs/...` unless that directory actually exists
 at filesystem root.
@@ -122,7 +150,7 @@ Evaluation script writes:
 
 - Repair decoding is greedy: `do_sample=False`
 - Repair model is `Qwen/Qwen3.5-2B`
-- Optional adapter: `--adapter_path runs/error_correction_qwen3_5_2b_3090`
+- Optional adapter: `--adapter_path runs/error_correction_qwen3_5_2b_3090` or `--adapter_path Arnav3035/error-correction-qwen3-5-2b-3090`
 - `max_repair_attempts` is capped at `2`
 - GPU generation is batched with `--generation_batch_size`
 - `--min_repairability_score` is deprecated in V2 and ignored (all non-correct examples are attempted)

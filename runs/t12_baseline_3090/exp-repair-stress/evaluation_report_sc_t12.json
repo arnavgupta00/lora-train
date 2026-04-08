@@ -1,0 +1,106 @@
+{
+  "total_examples": 1534,
+  "execution_match": 106,
+  "execution_accuracy": 6.91,
+  "exact_match": 24,
+  "exact_match_pct": 1.56,
+  "execution_errors": 1251,
+  "execution_error_pct": 81.55,
+  "by_database": [
+    {
+      "db_id": "california_schools",
+      "total": 89,
+      "exec_match": 1,
+      "accuracy": 1.12
+    },
+    {
+      "db_id": "card_games",
+      "total": 191,
+      "exec_match": 13,
+      "accuracy": 6.81
+    },
+    {
+      "db_id": "codebase_community",
+      "total": 186,
+      "exec_match": 19,
+      "accuracy": 10.22
+    },
+    {
+      "db_id": "debit_card_specializing",
+      "total": 64,
+      "exec_match": 5,
+      "accuracy": 7.81
+    },
+    {
+      "db_id": "european_football_2",
+      "total": 129,
+      "exec_match": 14,
+      "accuracy": 10.85
+    },
+    {
+      "db_id": "financial",
+      "total": 106,
+      "exec_match": 6,
+      "accuracy": 5.66
+    },
+    {
+      "db_id": "formula_1",
+      "total": 174,
+      "exec_match": 9,
+      "accuracy": 5.17
+    },
+    {
+      "db_id": "student_club",
+      "total": 158,
+      "exec_match": 17,
+      "accuracy": 10.76
+    },
+    {
+      "db_id": "superhero",
+      "total": 129,
+      "exec_match": 11,
+      "accuracy": 8.53
+    },
+    {
+      "db_id": "thrombosis_prediction",
+      "total": 163,
+      "exec_match": 4,
+      "accuracy": 2.45
+    },
+    {
+      "db_id": "toxicology",
+      "total": 145,
+      "exec_match": 7,
+      "accuracy": 4.83
+    }
+  ],
+  "by_difficulty": [
+    {
+      "difficulty": "challenging",
+      "total": 145,
+      "exec_match": 18,
+      "accuracy": 12.41
+    },
+    {
+      "difficulty": "moderate",
+      "total": 464,
+      "exec_match": 49,
+      "accuracy": 10.56
+    },
+    {
+      "difficulty": "simple",
+      "total": 925,
+      "exec_match": 39,
+      "accuracy": 4.22
+    }
+  ],
+  "n_samples": 7,
+  "temperature": 0.3,
+  "top_p": 0.9,
+  "generation_time_min": 104.77,
+  "voting_stats": {
+    "voting_used": 283,
+    "fallback_used": 1251,
+    "avg_confidence": 0.7612
+  }
+}

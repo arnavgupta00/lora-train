@@ -1,0 +1,290 @@
+{
+  "predictions_file": "runs/t12_base_1.7b/predictions/predictions_t12.jsonl",
+  "timestamp": "2026-04-07T17:42:45",
+  "summary": {
+    "total_examples": 1534,
+    "execution_accuracy": 2.35,
+    "execution_correct": 36,
+    "exact_match_accuracy": 1.37,
+    "exact_match_count": 21,
+    "exec_fail_count": 1485,
+    "exec_fail_rate": 96.81,
+    "wrong_result_count": 11,
+    "wrong_result_rate": 0.72,
+    "gold_sql_errors": 2,
+    "tied_append_matches": 0
+  },
+  "per_difficulty": {
+    "simple": {
+      "total": 925,
+      "correct": 36,
+      "exec_failed": 878,
+      "wrong_result": 11,
+      "accuracy": 3.89
+    },
+    "moderate": {
+      "total": 464,
+      "correct": 0,
+      "exec_failed": 463,
+      "wrong_result": 0,
+      "accuracy": 0.0
+    },
+    "challenging": {
+      "total": 145,
+      "correct": 0,
+      "exec_failed": 144,
+      "wrong_result": 0,
+      "accuracy": 0.0
+    }
+  },
+  "per_database": [
+    {
+      "db_id": "california_schools",
+      "total": 89,
+      "correct": 0,
+      "exec_failed": 89,
+      "wrong_result": 0,
+      "accuracy": 0.0
+    },
+    {
+      "db_id": "card_games",
+      "total": 191,
+      "correct": 7,
+      "exec_failed": 182,
+      "wrong_result": 1,
+      "accuracy": 3.66
+    },
+    {
+      "db_id": "codebase_community",
+      "total": 186,
+      "correct": 11,
+      "exec_failed": 171,
+      "wrong_result": 3,
+      "accuracy": 5.91
+    },
+    {
+      "db_id": "debit_card_specializing",
+      "total": 64,
+      "correct": 0,
+      "exec_failed": 64,
+      "wrong_result": 0,
+      "accuracy": 0.0
+    },
+    {
+      "db_id": "european_football_2",
+      "total": 129,
+      "correct": 2,
+      "exec_failed": 126,
+      "wrong_result": 1,
+      "accuracy": 1.55
+    },
+    {
+      "db_id": "financial",
+      "total": 106,
+      "correct": 0,
+      "exec_failed": 106,
+      "wrong_result": 0,
+      "accuracy": 0.0
+    },
+    {
+      "db_id": "formula_1",
+      "total": 174,
+      "correct": 7,
+      "exec_failed": 166,
+      "wrong_result": 1,
+      "accuracy": 4.02
+    },
+    {
+      "db_id": "student_club",
+      "total": 158,
+      "correct": 4,
+      "exec_failed": 153,
+      "wrong_result": 1,
+      "accuracy": 2.53
+    },
+    {
+      "db_id": "superhero",
+      "total": 129,
+      "correct": 4,
+      "exec_failed": 121,
+      "wrong_result": 4,
+      "accuracy": 3.1
+    },
+    {
+      "db_id": "thrombosis_prediction",
+      "total": 163,
+      "correct": 0,
+      "exec_failed": 163,
+      "wrong_result": 0,
+      "accuracy": 0.0
+    },
+    {
+      "db_id": "toxicology",
+      "total": 145,
+      "correct": 1,
+      "exec_failed": 144,
+      "wrong_result": 0,
+      "accuracy": 0.69
+    }
+  ],
+  "error_categories": {
+    "syntax_error": 1462,
+    "other_error": 10,
+    "column_error": 9,
+    "empty_prediction": 4
+  },
+  "sample_exec_errors": [
+    {
+      "question_id": 0,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "<think> Okay, let's tackle this question. The user wants the highest eligible free rate for K-12 students in Alameda County. First, I need to figure out which tables to use. The relevant tables here are 'frpm' and 'schools'. The 'schools' table has a 'County' column, and the 'frpm' table has 'County",
+      "error": "near \"<\": syntax error",
+      "error_category": "syntax_error"
+    },
+    {
+      "question_id": 1,
+      "db_id": "california_schools",
+      "difficulty": "moderate",
+      "predicted_sql": "<think> Okay, let's tackle this problem. The user wants the lowest three eligible free rates for students aged 5-17 in continuation schools. First, I need to understand the schema. There are three tables: frpm, satscores, and schools. The frpm table has columns like `Free Meal Count (Ages 5-17)` and",
+      "error": "near \"<\": syntax error",
+      "error_category": "syntax_error"
+    },
+    {
+      "question_id": 2,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "<think> Okay, let's tackle this problem. The user wants the zip code of all charter schools in Fresno County Office of Education. First, I need to figure out which tables are involved. The schools table has the County and Zip columns, and the frpm table has the Charter School (Y/N) field. But the qu",
+      "error": "near \"<\": syntax error",
+      "error_category": "syntax_error"
+    },
+    {
+      "question_id": 3,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "<think> Okay, let's tackle this question. The user wants the unabbreviated mailing street address of the school with the highest FRPM count for K-12 students. First, I need to figure out which tables are involved. The FRPM count is in the frpm table, and the mailing address is in the schools table. ",
+      "error": "near \"<\": syntax error",
+      "error_category": "syntax_error"
+    },
+    {
+      "question_id": 4,
+      "db_id": "california_schools",
+      "difficulty": "moderate",
+      "predicted_sql": "<think> Okay, let's tackle this problem. The user wants the phone numbers of direct charter-funded schools that were opened after January 1, 2000. First, I need to figure out which tables are involved. The schools table has the Charter column, which indicates if a school is a charter. The OpenDate i",
+      "error": "near \"<\": syntax error",
+      "error_category": "syntax_error"
+    },
+    {
+      "question_id": 5,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "<think> Okay, let's tackle this question. The user wants to know how many schools have an average math SAT score greater than 400 and are exclusively virtual. First, I need to figure out which tables are involved. The schools table has the SAT scores through the satscores table. The schools table ha",
+      "error": "near \"<\": syntax error",
+      "error_category": "syntax_error"
+    },
+    {
+      "question_id": 6,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "<think> Okay, let's tackle this problem. The user wants to find schools where the SAT test takers are over 500 and are either magnet schools or offer a magnet program. First, I need to look at the tables involved. The schools table has the SAT data through the enroll12 column, which I assume is the ",
+      "error": "near \"<\": syntax error",
+      "error_category": "syntax_error"
+    },
+    {
+      "question_id": 7,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "<think> Okay, let's tackle this question. The user wants the phone number of the school with the highest number of test takers who have an SAT score over 1500. First, I need to figure out which tables are involved. The SAT scores are in the satscores table, and the schools table has the CDSCode and ",
+      "error": "near \"<\": syntax error",
+      "error_category": "syntax_error"
+    },
+    {
+      "question_id": 8,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "<think> Okay, let's tackle this question. The user wants the number of SAT test takers from schools that have the highest FRPM count for K-12 students. First, I need to figure out which tables are involved. The schools table has the CDSCode, which is a foreign key to the frpm table. The frpm table h",
+      "error": "near \"<\": syntax error",
+      "error_category": "syntax_error"
+    },
+    {
+      "question_id": 9,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "<think> Okay, let's tackle this question. The user wants to know how many schools are directly charter-funded among those with an average Math SAT score over 560. First, I need to figure out which tables are involved. The schools table has the SAT scores, and the frpm table has the charter informati",
+      "error": "near \"<\": syntax error",
+      "error_category": "syntax_error"
+    }
+  ],
+  "sample_wrong_results": [
+    {
+      "question_id": 373,
+      "db_id": "card_games",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT * FROM cards WHERE artist = 'Aaron Boyd'",
+      "gold_sql": "SELECT DISTINCT name FROM cards WHERE artist = 'Aaron Boyd'"
+    },
+    {
+      "question_id": 574,
+      "db_id": "codebase_community",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT Id FROM users WHERE WebsiteUrl = 'http://stackoverflow.com'",
+      "gold_sql": "SELECT DisplayName FROM users WHERE WebsiteUrl = 'http://stackoverflow.com'"
+    },
+    {
+      "question_id": 605,
+      "db_id": "codebase_community",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT COUNT(DISTINCT UserId) FROM badges WHERE Name = 'Announcer'",
+      "gold_sql": "SELECT COUNT(id) FROM badges WHERE Name = 'Announcer'"
+    },
+    {
+      "question_id": 631,
+      "db_id": "codebase_community",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT COUNT(*) FROM posts INNER JOIN users ON posts.OwnerUserId = users.Id WHERE users.DisplayName = 'Daniel Vassallo'",
+      "gold_sql": "SELECT COUNT(T1.Id) FROM users AS T1 INNER JOIN postHistory AS T2 ON T1.Id = T2.UserId WHERE T1.DisplayName = 'Daniel Vassallo'"
+    },
+    {
+      "question_id": 725,
+      "db_id": "superhero",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT COUNT(*)",
+      "gold_sql": "SELECT COUNT(T1.id) FROM superhero AS T1 INNER JOIN publisher AS T2 ON T1.publisher_id = T2.id WHERE T2.publisher_name = 'Marvel Comics'"
+    },
+    {
+      "question_id": 748,
+      "db_id": "superhero",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT colour.colour FROM superhero JOIN colour",
+      "gold_sql": "SELECT T2.colour FROM superhero AS T1 INNER JOIN colour AS T2 ON T1.eye_colour_id = T2.id WHERE T1.id = 75"
+    },
+    {
+      "question_id": 803,
+      "db_id": "superhero",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT id FROM superpower WHERE power_name = 'cryokinesis'",
+      "gold_sql": "SELECT id FROM superpower WHERE power_name = 'Cryokinesis'"
+    },
+    {
+      "question_id": 836,
+      "db_id": "superhero",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT COUNT(*) FROM superhero WHERE superhero_name LIKE 'John%'",
+      "gold_sql": "SELECT COUNT(id) FROM superhero WHERE full_name LIKE 'John%'"
+    },
+    {
+      "question_id": 964,
+      "db_id": "formula_1",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT code FROM drivers WHERE nationality = 'America'",
+      "gold_sql": "SELECT code FROM drivers WHERE Nationality = 'American'"
+    },
+    {
+      "question_id": 1082,
+      "db_id": "european_football_2",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT League.name FROM League JOIN Country ON League.country_id = Country.id",
+      "gold_sql": "SELECT t2.name FROM Country AS t1 INNER JOIN League AS t2 ON t1.id = t2.country_id WHERE t1.name = 'Germany'"
+    }
+  ]
+}

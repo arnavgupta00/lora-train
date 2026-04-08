@@ -1,0 +1,26 @@
+{
+  "base_model_id": "Qwen/Qwen3.5-2B",
+  "adapter_repo": "Arnav3035/garuda-sql-2b",
+  "prompts_file": "data/training/t12/bird_dev_t12.jsonl",
+  "db_dir": "data/bird_eval_datasets/dev_databases",
+  "t12_system_prompt_hash": "37082362804b17cd",
+  "generation": {
+    "n_samples": 7,
+    "do_sample": true,
+    "temperature": 0.3,
+    "top_p": 0.9,
+    "top_k": 50,
+    "max_new_tokens": 256,
+    "repetition_penalty": 1.0,
+    "num_beams": 1
+  },
+  "runtime": {
+    "batch_size": 7,
+    "vote_workers": 7,
+    "eval_workers": 7,
+    "sql_timeout": 30,
+    "seed": 42,
+    "device": "cuda"
+  },
+  "timestamp": "2026-04-07T17:32:36"
+}

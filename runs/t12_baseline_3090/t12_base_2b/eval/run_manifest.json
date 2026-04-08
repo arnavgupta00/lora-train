@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-04-07T17:43:17",
+  "predictions_file": "runs/t12_base_2b/predictions/predictions_t12.jsonl",
+  "t12_system_prompt_hash": "37082362804b17cd",
+  "git_commit": "5cb031f5dcf0",
+  "summary": {
+    "total_examples": 1534,
+    "execution_accuracy": 24.12,
+    "execution_correct": 370,
+    "exact_match_accuracy": 1.63,
+    "exact_match_count": 25,
+    "exec_fail_count": 552,
+    "exec_fail_rate": 35.98,
+    "wrong_result_count": 610,
+    "wrong_result_rate": 39.77,
+    "gold_sql_errors": 2,
+    "tied_append_matches": 2
+  },
+  "generation_config": {
+    "model_id": "Qwen/Qwen3.5-2B",
+    "adapter_dir": null,
+    "prompts_file": "data/training/t12/bird_dev_t12.jsonl",
+    "t12_system_prompt_hash": "37082362804b17cd",
+    "generation": {
+      "max_new_tokens": 256,
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_k": 50,
+      "do_sample": false,
+      "num_beams": 1,
+      "repetition_penalty": 1.0
+    },
+    "batch_size": 25,
+    "device": "cuda",
+    "timestamp": "2026-04-07T16:22:01"
+  }
+}

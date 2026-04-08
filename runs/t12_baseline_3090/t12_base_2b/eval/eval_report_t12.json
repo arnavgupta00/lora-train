@@ -1,0 +1,292 @@
+{
+  "predictions_file": "runs/t12_base_2b/predictions/predictions_t12.jsonl",
+  "timestamp": "2026-04-07T17:43:17",
+  "summary": {
+    "total_examples": 1534,
+    "execution_accuracy": 24.12,
+    "execution_correct": 370,
+    "exact_match_accuracy": 1.63,
+    "exact_match_count": 25,
+    "exec_fail_count": 552,
+    "exec_fail_rate": 35.98,
+    "wrong_result_count": 610,
+    "wrong_result_rate": 39.77,
+    "gold_sql_errors": 2,
+    "tied_append_matches": 2
+  },
+  "per_difficulty": {
+    "simple": {
+      "total": 925,
+      "correct": 292,
+      "exec_failed": 249,
+      "wrong_result": 384,
+      "accuracy": 31.57
+    },
+    "moderate": {
+      "total": 464,
+      "correct": 64,
+      "exec_failed": 224,
+      "wrong_result": 175,
+      "accuracy": 13.79
+    },
+    "challenging": {
+      "total": 145,
+      "correct": 14,
+      "exec_failed": 79,
+      "wrong_result": 51,
+      "accuracy": 9.66
+    }
+  },
+  "per_database": [
+    {
+      "db_id": "california_schools",
+      "total": 89,
+      "correct": 4,
+      "exec_failed": 55,
+      "wrong_result": 30,
+      "accuracy": 4.49
+    },
+    {
+      "db_id": "card_games",
+      "total": 191,
+      "correct": 53,
+      "exec_failed": 54,
+      "wrong_result": 83,
+      "accuracy": 27.75
+    },
+    {
+      "db_id": "codebase_community",
+      "total": 186,
+      "correct": 73,
+      "exec_failed": 37,
+      "wrong_result": 75,
+      "accuracy": 39.25
+    },
+    {
+      "db_id": "debit_card_specializing",
+      "total": 64,
+      "correct": 13,
+      "exec_failed": 23,
+      "wrong_result": 28,
+      "accuracy": 20.31
+    },
+    {
+      "db_id": "european_football_2",
+      "total": 129,
+      "correct": 37,
+      "exec_failed": 44,
+      "wrong_result": 48,
+      "accuracy": 28.68
+    },
+    {
+      "db_id": "financial",
+      "total": 106,
+      "correct": 10,
+      "exec_failed": 36,
+      "wrong_result": 60,
+      "accuracy": 9.43
+    },
+    {
+      "db_id": "formula_1",
+      "total": 174,
+      "correct": 30,
+      "exec_failed": 57,
+      "wrong_result": 87,
+      "accuracy": 17.24
+    },
+    {
+      "db_id": "student_club",
+      "total": 158,
+      "correct": 52,
+      "exec_failed": 51,
+      "wrong_result": 55,
+      "accuracy": 32.91
+    },
+    {
+      "db_id": "superhero",
+      "total": 129,
+      "correct": 41,
+      "exec_failed": 55,
+      "wrong_result": 33,
+      "accuracy": 31.78
+    },
+    {
+      "db_id": "thrombosis_prediction",
+      "total": 163,
+      "correct": 16,
+      "exec_failed": 96,
+      "wrong_result": 51,
+      "accuracy": 9.82
+    },
+    {
+      "db_id": "toxicology",
+      "total": 145,
+      "correct": 41,
+      "exec_failed": 44,
+      "wrong_result": 60,
+      "accuracy": 28.28
+    }
+  ],
+  "error_categories": {
+    "column_error": 384,
+    "syntax_error": 77,
+    "other_error": 47,
+    "ambiguous_column": 18,
+    "aggregate_error": 17,
+    "table_error": 9
+  },
+  "sample_exec_errors": [
+    {
+      "question_id": 0,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT MAX(Percent (%) Eligible Free (K-12)) AS HighestEligibleFreeRate FROM frpm WHERE County Name = 'Alameda County'",
+      "error": "near \"%\": syntax error",
+      "error_category": "syntax_error"
+    },
+    {
+      "question_id": 1,
+      "db_id": "california_schools",
+      "difficulty": "moderate",
+      "predicted_sql": "SELECT ROUND(FreeMealCount / Enrollment, 2) AS EligibleFreeRate FROM frpm WHERE SchoolType = 'Continuation School' AND FreeMealCount > 0 ORDER BY EligibleFreeRate ASC LIMIT 3",
+      "error": "no such column: FreeMealCount",
+      "error_category": "column_error"
+    },
+    {
+      "question_id": 2,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT s.Zip FROM schools s JOIN frpm f ON s.CDSCode = f.CDSCode WHERE f.Charter School (Y/N) = 1 AND s.County = 'Fresno'",
+      "error": "near \"School\": syntax error",
+      "error_category": "syntax_error"
+    },
+    {
+      "question_id": 3,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT s.Street AS UnabbreviatedMailingStreet FROM schools s JOIN frpm f ON s.CDSCode = f.CDSCode WHERE f.Enrollment (K-12) IS NOT NULL ORDER BY f.FRPM Count (K-12) DESC LIMIT 1",
+      "error": "near \"(\": syntax error",
+      "error_category": "syntax_error"
+    },
+    {
+      "question_id": 4,
+      "db_id": "california_schools",
+      "difficulty": "moderate",
+      "predicted_sql": "SELECT s.Phone FROM schools s JOIN frpm f ON s.CDSCode = f.CDSCode WHERE f.Charter School (Y/N) = 1 AND s.OpenDate > '2000-01-01'",
+      "error": "near \"School\": syntax error",
+      "error_category": "syntax_error"
+    },
+    {
+      "question_id": 6,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT DISTINCT s.CDSCode FROM satscores s JOIN schools sc ON s.cds = sc.CDSCode WHERE s.NumTstTakr > 500 AND sc.Magnet = 1",
+      "error": "no such column: s.CDSCode",
+      "error_category": "column_error"
+    },
+    {
+      "question_id": 8,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT COUNT(*) FROM satscores WHERE cds IN ( SELECT CDSCode FROM frpm GROUP BY CDSCode ORDER BY FRPM Count (K-12) DESC LIMIT 1 )",
+      "error": "near \"Count\": syntax error",
+      "error_category": "syntax_error"
+    },
+    {
+      "question_id": 9,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT COUNT(*) FROM satscores WHERE AvgScrMath > 560 AND cds IN ( SELECT CDSCode FROM frpm WHERE Charter = 1 )",
+      "error": "no such column: Charter",
+      "error_category": "column_error"
+    },
+    {
+      "question_id": 10,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT s.school_name, satscores.avg_scr_read, satscores.num_tst_takr, satscores.avg_scr_math, satscores.avg_scr_write, satscores.num_ge1500, s.school_name, s.school_name, satscores.avg_scr_read, satscores.num_tst_takr, satscores.avg_scr_math, satscores.avg_scr_write, satscores.avg_scr_read, satscore",
+      "error": "no such column: s.school_name",
+      "error_category": "column_error"
+    },
+    {
+      "question_id": 11,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT s.CDSCode FROM schools s JOIN frpm f ON s.CDSCode = f.CDSCode WHERE (f.Enrollment (K-12) + f.Enrollment (Ages 5-17)) > 500",
+      "error": "near \"(\": syntax error",
+      "error_category": "syntax_error"
+    }
+  ],
+  "sample_wrong_results": [
+    {
+      "question_id": 5,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT COUNT(*) FROM satscores WHERE sname = 'Virtual' AND AvgScrMath > 400",
+      "gold_sql": "SELECT COUNT(DISTINCT T2.School) FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Virtual = 'F' AND T1.AvgScrMath > 400"
+    },
+    {
+      "question_id": 12,
+      "db_id": "california_schools",
+      "difficulty": "moderate",
+      "predicted_sql": "SELECT MAX(satscores.AvgScrWrite) AS HighestEligibleFreeRate FROM satscores JOIN frpm ON satscores.cds = frpm.CDSCode WHERE satscores.AvgScrRead > 0.3 AND satscores.AvgScrWrite > 0.3 AND frpm.`Free Meal Count (Ages 5-17)` > 0 AND frpm.`Enrollment (Ages 5-17)` > 0",
+      "gold_sql": "SELECT MAX(CAST(T1.`Free Meal Count (Ages 5-17)` AS REAL) / T1.`Enrollment (Ages 5-17)`) FROM frpm AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE CAST(T2.NumGE1500 AS REAL) / T2.NumTstTakr > 0.3"
+    },
+    {
+      "question_id": 26,
+      "db_id": "california_schools",
+      "difficulty": "moderate",
+      "predicted_sql": "SELECT s.School AS SchoolName, s.Street || ', ' || s.City || ', ' || s.State || ' ' || s.Zip AS FullCommunicationAddress FROM schools s JOIN satscores sa ON s.CDSCode = sa.cds WHERE s.StatusType = 'High School' AND s.Charter = 1 AND s.CharterNum IS NOT NULL AND sa.Enroll12 >= 800 AND sa.AvgScrRead >",
+      "gold_sql": "SELECT T1.`School Name`, T2.Street, T2.City, T2.State, T2.Zip FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Monterey' AND T1.`Free Meal Count (Ages 5-17)` > 800 AND T1.`School Type` = 'High Schools (Public)'"
+    },
+    {
+      "question_id": 30,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT DISTINCT s.City FROM schools s JOIN satscores sa ON s.CDSCode = sa.cds WHERE sa.rtype = 'K-12' AND sa.enroll12 <= ( SELECT AVG(enroll12) FROM satscores sa2 WHERE sa2.rtype = 'K-12' AND sa2.cds = s.CDSCode ) ORDER BY enroll12 ASC LIMIT 5",
+      "gold_sql": "SELECT T2.City FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode GROUP BY T2.City ORDER BY SUM(T1.`Enrollment (K-12)`) ASC LIMIT 5"
+    },
+    {
+      "question_id": 34,
+      "db_id": "california_schools",
+      "difficulty": "moderate",
+      "predicted_sql": "SELECT `Free Meal Count (Ages 5-17)` / `Enrollment (Ages 5-17)` AS FreeRate FROM frpm WHERE `School Name` = 'Kacey Gibson' AND `District Type` = 'Ages 5-17' AND `School Type` = 'Ages 5-17'",
+      "gold_sql": "SELECT CAST(T2.`Free Meal Count (Ages 5-17)` AS REAL) / T2.`Enrollment (Ages 5-17)` FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.AdmFName1 = 'Kacey' AND T1.AdmLName1 = 'Gibson'"
+    },
+    {
+      "question_id": 38,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT s.WebSite FROM schools s JOIN satscores sa ON s.CDSCode = sa.cds WHERE s.County = 'Los Angeles County' AND sa.enroll12 BETWEEN 2000 AND 3000",
+      "gold_sql": "SELECT T2.Website FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.NumTstTakr BETWEEN 2000 AND 3000 AND T2.County = 'Los Angeles'"
+    },
+    {
+      "question_id": 40,
+      "db_id": "california_schools",
+      "difficulty": "moderate",
+      "predicted_sql": "SELECT s.Phone FROM schools s JOIN satscores sa ON s.CDSCode = sa.cds WHERE sa.rtype = 'AvgScrRead' AND s.District = 'Fresno Unified' ORDER BY sa.AvgScrRead ASC LIMIT 1",
+      "gold_sql": "SELECT T2.Phone FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.District = 'Fresno Unified' AND T1.AvgScrRead IS NOT NULL ORDER BY T1.AvgScrRead ASC LIMIT 1"
+    },
+    {
+      "question_id": 43,
+      "db_id": "california_schools",
+      "difficulty": "moderate",
+      "predicted_sql": "SELECT s.CDSCode, s.County, AVG(satscores.AvgScrMath) AS AvgMathScore FROM schools s JOIN satscores satscores ON s.CDSCode = satscores.cds WHERE s.CDSCode = ( SELECT s2.CDSCode FROM schools s2 JOIN satscores satscores2 ON s2.CDSCode = satscores2.cds GROUP BY s2.CDSCode ORDER BY AVG(satscores2.AvgScr",
+      "gold_sql": "SELECT T1.AvgScrMath, T2.County FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath IS NOT NULL ORDER BY T1.AvgScrMath + T1.AvgScrRead + T1.AvgScrWrite ASC LIMIT 1"
+    },
+    {
+      "question_id": 46,
+      "db_id": "california_schools",
+      "difficulty": "simple",
+      "predicted_sql": "SELECT s.CDSCode, s.State, COUNT(satscores.enroll12) AS TotalEnroll12 FROM schools s JOIN satscores satscores ON s.CDSCode = satscores.cds WHERE s.StatusType = 'State Special Schools' AND s.DOC = 31 AND s.GSserved = 'K-12' GROUP BY s.CDSCode, s.State ORDER BY TotalEnroll12 DESC LIMIT 1",
+      "gold_sql": "SELECT T2.School FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.DOC = 31 ORDER BY T1.`Enrollment (K-12)` DESC LIMIT 1"
+    },
+    {
+      "question_id": 48,
+      "db_id": "california_schools",
+      "difficulty": "moderate",
+      "predicted_sql": "SELECT CAST(SUM(CASE WHEN s.StatusType = 'Unified School District' THEN 1 ELSE 0 END) AS REAL) * 1.0 / SUM(CASE WHEN s.StatusType = 'Elementary School District' THEN 1 ELSE 0 END) FROM schools s WHERE s.County = 'Orange County'",
+      "gold_sql": "SELECT CAST(SUM(CASE WHEN DOC = 54 THEN 1 ELSE 0 END) AS REAL) / SUM(CASE WHEN DOC = 52 THEN 1 ELSE 0 END) FROM schools WHERE StatusType = 'Merged' AND County = 'Orange'"
+    }
+  ]
+}
